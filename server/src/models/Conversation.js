@@ -5,6 +5,7 @@ const conversationSchema = new mongoose.Schema({
   title: { type: String, required: true, trim: true, maxlength: 120 },
   sourceFilters: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Document' }],
   websiteSourceFilters: [{ type: mongoose.Schema.Types.ObjectId, ref: 'WebsiteSource' }],
+  noteFilters: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Note' }],
   archivedAt: { type: Date, default: null },
 }, { timestamps: true, versionKey: false });
 

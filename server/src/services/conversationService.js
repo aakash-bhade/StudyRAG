@@ -10,14 +10,14 @@ function validId(id) {
 }
 
 function serializeConversation(conversation) {
-  return { id: String(conversation._id), title: conversation.title, sourceFilters: (conversation.sourceFilters || []).map(String), websiteSourceFilters: (conversation.websiteSourceFilters || []).map(String), updatedAt: conversation.updatedAt, createdAt: conversation.createdAt };
+  return { id: String(conversation._id), title: conversation.title, sourceFilters: (conversation.sourceFilters || []).map(String), websiteSourceFilters: (conversation.websiteSourceFilters || []).map(String), noteFilters: (conversation.noteFilters || []).map(String), updatedAt: conversation.updatedAt, createdAt: conversation.createdAt };
 }
 
 function serializeMessage(message) {
   return {
     id: String(message._id), role: message.role, text: message.content,
     ...(message.role === 'assistant' ? { answer: message.answerMode === 'ollama' ? message.content : null, message: message.notice, answerMode: message.answerMode, retrievalMode: message.retrievalMode } : {}),
-    sources: (message.citations || []).map(citation => ({ sourceType: citation.sourceType, documentId: citation.documentId ? String(citation.documentId) : undefined, websiteSourceId: citation.websiteSourceId ? String(citation.websiteSourceId) : undefined, url: citation.url, documentName: citation.documentName, ordinal: citation.ordinal, page: citation.page, text: citation.excerpt })),
+    sources: (message.citations || []).map(citation => ({ sourceType: citation.sourceType, documentId: citation.documentId ? String(citation.documentId) : undefined, websiteSourceId: citation.websiteSourceId ? String(citation.websiteSourceId) : undefined, noteId: citation.noteId ? String(citation.noteId) : undefined, url: citation.url, documentName: citation.documentName, ordinal: citation.ordinal, page: citation.page, text: citation.excerpt })),
     createdAt: message.createdAt,
   };
 }
@@ -54,7 +54,7 @@ export async function deleteConversation(userId, id) {
   return { success: true };
 }
 
-export async function askInConversation(userId, { question, documentIds, websiteSourceIds, conversationId }) {
+export async function askInConversation(userId, { question, documentIds, websiteSourceIds, noteIds, conversationId }) {
   let conversation;
   if (conversationId) {
     validId(conversationId);
@@ -64,11 +64,13 @@ export async function askInConversation(userId, { question, documentIds, website
     else conversation.sourceFilters = documentIds;
     if (websiteSourceIds === undefined) websiteSourceIds = conversation.websiteSourceFilters.map(String);
     else conversation.websiteSourceFilters = websiteSourceIds;
+    if (noteIds === undefined) noteIds = (conversation.noteFilters || []).map(String);
+    else conversation.noteFilters = noteIds;
   } else {
-    conversation = new Conversation({ ownerId: userId, title: question.slice(0, 116).trim() + (question.length > 116 ? '…' : ''), sourceFilters: documentIds || [], websiteSourceFilters: websiteSourceIds || [] });
+    conversation = new Conversation({ ownerId: userId, title: question.slice(0, 116).trim() + (question.length > 116 ? '…' : ''), sourceFilters: documentIds || [], websiteSourceFilters: websiteSourceIds || [], noteFilters: noteIds || [] });
   }
 
-  const result = await answerFromDocuments(userId, { question, documentIds, websiteSourceIds });
+  const result = await answerFromDocuments(userId, { question, documentIds, websiteSourceIds, noteIds });
   const wasNew = conversation.isNew;
   await conversation.save();
   let created;
@@ -79,7 +81,7 @@ export async function askInConversation(userId, { question, documentIds, website
       ownerId: userId, conversationId: conversation._id, role: 'assistant',
       content: result.answer || result.message || 'No relevant material was found.',
       notice: result.message || undefined,
-      citations: result.sources.map(source => ({ ...(source.sourceType === 'website' ? { websiteSourceId: source.websiteSourceId, url: source.url } : { documentId: source.documentId }), sourceType: source.sourceType || 'document', documentName: source.documentName, ordinal: source.ordinal, page: source.page, excerpt: source.text })),
+      citations: result.sources.map(source => ({ ...(source.sourceType === 'website' ? { websiteSourceId: source.websiteSourceId, url: source.url } : source.sourceType === 'note' ? { noteId: source.noteId } : { documentId: source.documentId }), sourceType: source.sourceType || 'document', documentName: source.documentName, ordinal: source.ordinal, page: source.page, excerpt: source.text })),
       answerMode: result.answerMode,
       retrievalMode: result.retrievalMode,
     },

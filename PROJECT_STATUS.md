@@ -4,7 +4,9 @@ Last updated: 2026-11-03
 
 ## Current phase
 
-Phase 28 — Saved conversation management.
+Phase 29 — Notes-grounded study chat.
+
+Estimated completion: 90% of the planned feature implementation. Production readiness is lower while live-service verification, team sharing, and deployment remain outstanding.
 
 ## Completed
 
@@ -42,6 +44,7 @@ Phase 28 — Saved conversation management.
 - Added owner-scoped saved conversation renaming with validated titles and inline rename, save, and cancel controls in chat.
 - Added a two-step conversation delete control that removes its messages and clears the active chat when applicable.
 - Added one-click copying for generated study chat answers with transient copied feedback.
+- Extended grounded chat to search private notes alongside documents and webpages, preserve note filters in conversations, and cite note sections.
 
 ## In progress
 
@@ -56,12 +59,12 @@ Phase 28 — Saved conversation management.
 ## Verification and Git
 
 - Frontend and server dependencies installed with lockfiles; npm install audits reported zero vulnerabilities for both packages.
-- Current `client`: production build passes with source-grounded flashcards and mobile navigation.
-- Current `server`: Node syntax checks pass across all server JavaScript files.
+- Current `client`: production build passes with notes-grounded chat, answer copying, source-grounded flashcards, and mobile navigation.
+- Current `server`: Node syntax checks pass across all server JavaScript files, including note retrieval and citations.
 - `git diff --check` passes. Live API integration is pending because MongoDB is not configured.
 - Email verification and recovery have not been exercised against configured SMTP credentials.
 - Browser review and live API integration are pending. No MongoDB URI is configured, so auth and document flows have not been exercised against a database.
-- Current branch: `main`; answer-copy controls are in progress locally.
+- Current branch: `main`; note-grounded chat is ready for commit and push.
 
 ## Known constraints
 
