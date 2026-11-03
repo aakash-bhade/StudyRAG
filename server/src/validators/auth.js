@@ -14,6 +14,11 @@ export const loginSchema = z.object({
   password: z.string().min(1).max(128).refine(value => Buffer.byteLength(value, 'utf8') <= 72, 'Password must be 72 bytes or fewer.'),
 }).strict();
 
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1).max(128).refine(value => Buffer.byteLength(value, 'utf8') <= 72),
+  newPassword: passwordSchema,
+}).strict();
+
 export function validate(schema) {
   return (req, _res, next) => {
     const result = schema.safeParse(req.body);

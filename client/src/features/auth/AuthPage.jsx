@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, BookOpen, Eye, EyeOff, GraduationCap, ShieldCheck, Sparkles } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 
@@ -14,6 +14,7 @@ export default function AuthPage({ mode }) {
   const isSignup = mode === 'signup';
   const { login, register } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -47,6 +48,7 @@ export default function AuthPage({ mode }) {
         <h1 id="auth-heading">{isSignup ? 'Your ideas belong here.' : 'Good to see you again.'}</h1>
         <p>{isSignup ? 'Create your personal StudyRAG account to get started.' : 'Sign in to continue to your StudyRAG workspace.'}</p>
       </div>
+      {location.state?.message && <p className="auth-success" role="status">{location.state.message}</p>}
       <form className="auth-form" onSubmit={handleSubmit}>
         {isSignup && <>
           <label htmlFor="displayName">Your name</label>

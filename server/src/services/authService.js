@@ -56,6 +56,20 @@ export async function login(input, res) {
   return { accessToken: issueAccessToken(user), user: publicUser(user) };
 }
 
+export async function changePassword(userId, input) {
+  const user = await User.findOne({ _id: userId, status: 'active' }).select('+passwordHash');
+  if (!user || !(await bcrypt.compare(input.currentPassword, user.passwordHash))) {
+    throw httpError(400, 'CURRENT_PASSWORD_INCORRECT', 'Your current password is incorrect.');
+  }
+  if (await bcrypt.compare(input.newPassword, user.passwordHash)) {
+    throw httpError(400, 'PASSWORD_UNCHANGED', 'Choose a new password that is different from your current one.');
+  }
+  user.passwordHash = await bcrypt.hash(input.newPassword, 12);
+  await user.save();
+  await Session.updateMany({ userId: user._id, revokedAt: null }, { $set: { revokedAt: new Date() } });
+  return { success: true, sessionsRevoked: true };
+}
+
 export async function refreshSession(refreshToken, res) {
   if (!refreshToken) throw httpError(401, 'AUTH_REQUIRED', 'Please sign in to continue.');
   let payload;
