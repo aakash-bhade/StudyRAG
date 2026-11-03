@@ -15,7 +15,7 @@ Private documents and websites, cited study chat, notes and folders, quizzes, fl
 - [Free services evaluation](FREE_SERVICES.md)
 - [Architecture decisions](DECISIONS.md)
 
-GitHub Actions runs a client production build and server JavaScript syntax check for pushes and pull requests targeting `main`.
+GitHub Actions runs a client production build, server JavaScript syntax check, and server runtime import smoke check for pushes and pull requests targeting `main`.
 
 ## Intended stack
 
