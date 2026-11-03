@@ -49,7 +49,8 @@ async function request(route, { method = 'GET', token, json, form } = {}) {
     if (body?.result) body = body.result;
     else if (body?.error) body = { error: body.error };
   } else {
-    body = await response.json();
+    const raw = await response.text();
+    try { body = JSON.parse(raw); } catch { body = { error: { message: raw.slice(0, 300) || 'The API returned a non-JSON response.' } }; }
   }
   assert.ok(response.ok, `${method} ${route} failed (${response.status}): ${body.error?.message || 'unknown error'}`);
   return body;

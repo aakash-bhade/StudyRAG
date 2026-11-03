@@ -13,13 +13,23 @@ function AnswerText({ text }) {
   let paragraph = [];
   let list = [];
   let listType = null;
+  let paragraphCount = 0;
   const renderInline = (value) => value.split(/(\*\*[^*]+\*\*)/g).map((part, index) =>
     part.startsWith('**') && part.endsWith('**')
       ? <strong key={index}>{part.slice(2, -2)}</strong>
       : part
   );
   const flushParagraph = () => {
-    if (paragraph.length) blocks.push(<p key={`p-${blocks.length}`}>{renderInline(paragraph.join(' '))}</p>);
+    if (paragraph.length) {
+      const value = paragraph.join(' ');
+      const sentences = value.split(/(?<=[.!?])\s+(?=[A-Z0-9])/).filter(Boolean);
+      const pieces = paragraphCount === 0 && sentences.length > 1 ? [sentences.shift(), ...sentences] : [value];
+      pieces.forEach((piece, index) => {
+        if (paragraphCount === 0 && index === 0) blocks.push(<p key={`p-${blocks.length}`}>{renderInline(piece)}</p>);
+        else { listType = 'unordered'; list.push(renderInline(piece)); }
+      });
+      paragraphCount += pieces.length;
+    }
     paragraph = [];
   };
   const flushList = () => {

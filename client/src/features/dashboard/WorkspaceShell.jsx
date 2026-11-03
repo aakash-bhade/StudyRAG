@@ -1,4 +1,4 @@
-import { Bell, BookOpen, Bookmark, ClipboardCheck, ClipboardList, FileText, Globe2, GraduationCap, Layers2, LogOut, MessageCircle, Settings, Sparkles, UserRound } from 'lucide-react';
+import { Bell, BookOpen, Bookmark, ChevronDown, ClipboardCheck, ClipboardList, FileText, Globe2, GraduationCap, Layers2, LogOut, MessageCircle, Settings, Sparkles, UserRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
@@ -9,6 +9,12 @@ export default function WorkspaceShell({ active, children }) {
   const { user, logout } = useAuth();
   const [loggingOut, setLoggingOut] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
+  const [openGroups, setOpenGroups] = useState(() => ({
+    study: ['quizzes', 'flashcards'].includes(active),
+    materials: ['documents', 'sources', 'notes', 'saved'].includes(active),
+    planning: ['tasks', 'assignments', 'notifications'].includes(active),
+  }));
+  const toggleGroup = group => setOpenGroups(current => ({ ...current, [group]: !current[group] }));
 
   async function handleLogout() {
     if (loggingOut) return;
@@ -21,19 +27,15 @@ export default function WorkspaceShell({ active, children }) {
       <Link className="auth-brand dashboard-brand" to="/" aria-label="StudyRAG home"><span><GraduationCap size={26} /></span><b>Study<span>RAG</span></b></Link>
       <div className="sidebar-label">WORKSPACE</div>
       <Link className={`dash-nav ${active === 'overview' ? 'active' : ''}`} to="/app"><MessageCircle size={17} /> Overview</Link>
-      <div className="sidebar-label sidebar-up-next">YOUR LEARNING SPACE</div>
-      <Link className={`dash-nav ${active === 'documents' ? 'active' : ''}`} to="/app/documents"><FileText size={17} /> Documents</Link>
-      <Link className={`dash-nav ${active === 'sources' ? 'active' : ''}`} to="/app/sources"><Globe2 size={17} /> Websites</Link>
-      <Link className={`dash-nav ${active === 'notes' ? 'active' : ''}`} to="/app/notes"><BookOpen size={17} /> Notes</Link>
       <Link className={`dash-nav ${active === 'chat' ? 'active' : ''}`} to="/app/chat"><Sparkles size={17} /> Ask materials</Link>
-      <Link className={`dash-nav ${active === 'quizzes' ? 'active' : ''}`} to="/app/quizzes"><BookOpen size={17} /> Quizzes</Link>
-      <Link className={`dash-nav ${active === 'flashcards' ? 'active' : ''}`} to="/app/flashcards"><Layers2 size={17} /> Flashcards</Link>
-      <Link className={`dash-nav ${active === 'tasks' ? 'active' : ''}`} to="/app/tasks"><ClipboardList size={17} /> Tasks</Link>
-      <Link className={`dash-nav ${active === 'assignments' ? 'active' : ''}`} to="/app/assignments"><ClipboardCheck size={17} /> Assignments</Link>
-      <Link className={`dash-nav ${active === 'saved' ? 'active' : ''}`} to="/app/saved"><Bookmark size={17} /> Saved items</Link>
-      <Link className={`dash-nav ${active === 'notifications' ? 'active' : ''}`} to="/app/notifications"><Bell size={17} /> Notifications</Link>
-      <Link className={`dash-nav ${active === 'settings' ? 'active' : ''}`} to="/app/settings"><Settings size={17} /> Settings</Link>
-      <div className="sidebar-bottom"><div className="sidebar-user"><span className="user-avatar"><UserRound size={17} /></span><span><b>{user?.displayName}</b><small>{roleLabels[user?.role] || 'Member'}</small></span></div><button className="sign-out-button" onClick={handleLogout} disabled={loggingOut}><LogOut size={16} /> {loggingOut ? 'Signing out…' : 'Sign out'}</button></div>
+      <div className="sidebar-label sidebar-up-next">YOUR SPACE</div>
+      <button className={`sidebar-group-toggle ${openGroups.materials ? 'open' : ''}`} onClick={() => toggleGroup('materials')} aria-expanded={openGroups.materials}><FileText size={16} /><span>Materials</span><ChevronDown size={15} /></button>
+      {openGroups.materials && <div className="sidebar-group-items"><Link className={`dash-nav ${active === 'documents' ? 'active' : ''}`} to="/app/documents"><FileText size={16} /> Documents</Link><Link className={`dash-nav ${active === 'sources' ? 'active' : ''}`} to="/app/sources"><Globe2 size={16} /> Websites</Link><Link className={`dash-nav ${active === 'notes' ? 'active' : ''}`} to="/app/notes"><BookOpen size={16} /> Notes</Link><Link className={`dash-nav ${active === 'saved' ? 'active' : ''}`} to="/app/saved"><Bookmark size={16} /> Saved items</Link></div>}
+      <button className={`sidebar-group-toggle ${openGroups.study ? 'open' : ''}`} onClick={() => toggleGroup('study')} aria-expanded={openGroups.study}><Layers2 size={16} /><span>Study tools</span><ChevronDown size={15} /></button>
+      {openGroups.study && <div className="sidebar-group-items"><Link className={`dash-nav ${active === 'quizzes' ? 'active' : ''}`} to="/app/quizzes"><BookOpen size={16} /> Quizzes</Link><Link className={`dash-nav ${active === 'flashcards' ? 'active' : ''}`} to="/app/flashcards"><Layers2 size={16} /> Flashcards</Link></div>}
+      <button className={`sidebar-group-toggle ${openGroups.planning ? 'open' : ''}`} onClick={() => toggleGroup('planning')} aria-expanded={openGroups.planning}><ClipboardList size={16} /><span>Planning</span><ChevronDown size={15} /></button>
+      {openGroups.planning && <div className="sidebar-group-items"><Link className={`dash-nav ${active === 'tasks' ? 'active' : ''}`} to="/app/tasks"><ClipboardList size={16} /> Tasks</Link><Link className={`dash-nav ${active === 'assignments' ? 'active' : ''}`} to="/app/assignments"><ClipboardCheck size={16} /> Assignments</Link><Link className={`dash-nav ${active === 'notifications' ? 'active' : ''}`} to="/app/notifications"><Bell size={16} /> Notifications</Link></div>}
+      <div className="sidebar-bottom"><Link className={`dash-nav ${active === 'settings' ? 'active' : ''}`} to="/app/settings"><Settings size={16} /> Settings</Link><div className="sidebar-user"><span className="user-avatar"><UserRound size={17} /></span><span><b>{user?.displayName}</b><small>{roleLabels[user?.role] || 'Member'}</small></span></div><button className="sign-out-button" onClick={handleLogout} disabled={loggingOut}><LogOut size={16} /> {loggingOut ? 'Signing out…' : 'Sign out'}</button></div>
     </aside>
     <nav className="mobile-bottom-nav" aria-label="Mobile workspace navigation">
       <Link className={active === 'overview' ? 'active' : ''} to="/app"><MessageCircle size={18} /><span>Home</span></Link>
