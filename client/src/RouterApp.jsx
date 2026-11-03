@@ -10,6 +10,7 @@ import SourcesPage from './features/sources/SourcesPage.jsx';
 import QuizzesPage from './features/quizzes/QuizzesPage.jsx';
 import TasksPage from './features/tasks/TasksPage.jsx';
 import SettingsPage from './features/settings/SettingsPage.jsx';
+import AssignmentsPage from './features/assignments/AssignmentsPage.jsx';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -36,6 +37,7 @@ export default function RouterApp() {
     <Route path="/app/quizzes" element={<ProtectedRoute><QuizzesPage /></ProtectedRoute>} />
     <Route path="/app/tasks" element={<ProtectedRoute><TasksPage /></ProtectedRoute>} />
     <Route path="/app/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+    <Route path="/app/assignments" element={<ProtectedRoute><AssignmentsPage /></ProtectedRoute>} />
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>;
 }

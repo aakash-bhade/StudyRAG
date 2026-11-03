@@ -11,6 +11,7 @@ import noteRoutes from './routes/noteRoutes.js';
 import websiteSourceRoutes from './routes/websiteSourceRoutes.js';
 import quizRoutes from './routes/quizRoutes.js';
 import taskRoutes from './routes/taskRoutes.js';
+import assignmentRoutes from './routes/assignmentRoutes.js';
 import { errorHandler, notFound, requestId } from './middleware/errors.js';
 import { originGuard } from './middleware/originGuard.js';
 
@@ -35,5 +36,6 @@ app.use('/api/v1/notes', noteRoutes);
 app.use('/api/v1/sources', websiteSourceRoutes);
 app.use('/api/v1/quizzes', quizRoutes);
 app.use('/api/v1/tasks', taskRoutes);
+app.use('/api/v1/assignments', assignmentRoutes);
 app.use(notFound);
 app.use(errorHandler);

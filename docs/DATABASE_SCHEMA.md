@@ -16,6 +16,7 @@ All user-owned records carry `ownerId`; workspace data also carries `workspaceId
 | `quizzes` | ownerId, title, difficulty, sourceNames, questions with private answer key | Implemented with owner + createdAt index; list and get responses omit correct answer and explanation until an attempt is graded |
 | `quizAttempts` | ownerId, quizId, answers, score, total, completedAt | Implemented with owner + quiz + completion index; score is computed on the server |
 | `tasks` | ownerId, title, details, status, dueAt | Implemented with owner + status + due date and owner + updated indexes; personal task planner |
+| `assignments` | ownerId, title, instructions, status, response, dueAt, submittedAt | Implemented with owner + status + due date and owner + updated indexes; submitted state is internal to StudyRAG |
 | `conversations` | ownerId, workspaceId?, title, sourceFilters, archivedAt | Implemented with owner + updatedAt index; only the owner can list, read, or delete |
 | `messages` | ownerId, conversationId, role, content, citations, provider metadata | Implemented with owner + conversation + createdAt index; citations retain authorized document excerpts |
 | `notes` | ownerId, workspaceId?, folderId?, title, body, tags, deletedAt | Implemented with owner + updatedAt and owner + title indexes; private CRUD and owner-scoped title/body/tag search |

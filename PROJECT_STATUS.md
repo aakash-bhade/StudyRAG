@@ -4,7 +4,7 @@ Last updated: 2026-11-03
 
 ## Current phase
 
-Phase 12 — Account security settings.
+Phase 13 — Assignment tracker.
 
 ## Completed
 
@@ -25,6 +25,7 @@ Phase 12 — Account security settings.
 - Added owner-scoped source-grounded MCQ generation from documents/websites, private saved quizzes and attempts, server-side scoring, and a responsive quiz builder/review UI.
 - Added private task planning with due dates and to-do, in-progress, and done states; tasks have owner-scoped CRUD APIs and a responsive board UI.
 - Added account settings with profile details and authenticated password changes; current-password verification and global session revocation require a fresh sign-in after changing credentials.
+- Added a private assignment tracker for instructions, due dates, response drafts, and an internal StudyRAG submitted status; no external school or LMS submission is performed.
 
 ## In progress
 
@@ -35,16 +36,16 @@ Phase 12 — Account security settings.
 ## Pending
 
 - Email verification and email-based password recovery are not implemented yet (no email delivery service configured).
-- Assignment instructions/submissions, team features, email verification/password recovery, remaining hardening, and deployment verification remain pending.
+- Team features, email verification/password recovery, remaining hardening, and deployment verification remain pending.
 
 ## Verification and Git
 
 - Frontend and server dependencies installed with lockfiles; npm install audits reported zero vulnerabilities for both packages.
-- Current `client`: production build passes with private account settings UI.
+- Current `client`: production build passes with private assignment tracking.
 - Current `server`: Node syntax checks pass across all server JavaScript files.
 - `git diff --check` passes. Live API integration is pending because MongoDB is not configured.
 - Browser review and live API integration are pending. No MongoDB URI is configured, so auth and document flows have not been exercised against a database.
-- Current branch: `main`; personal task planner is complete locally and awaiting commit/push.
+- Current branch: `main`; assignment tracker is complete locally and awaiting commit/push.
 
 ## Known constraints
 
