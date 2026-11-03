@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { KeyRound, LoaderCircle, Save, ShieldCheck, UserRound } from 'lucide-react';
+import { Download, KeyRound, LoaderCircle, Save, ShieldCheck, UserRound } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import WorkspaceShell from '../dashboard/WorkspaceShell.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
@@ -14,6 +14,8 @@ export default function SettingsPage() {
   const [profileNotice, setProfileNotice] = useState('');
   const [profileName, setProfileName] = useState(user?.displayName || '');
   const [profileBusy, setProfileBusy] = useState(false);
+  const [exportBusy, setExportBusy] = useState(false);
+  const [exportError, setExportError] = useState('');
 
   async function saveProfile(event) {
     event.preventDefault();
@@ -29,6 +31,26 @@ export default function SettingsPage() {
       setProfileNotice('Your profile name has been updated.');
     } catch (e) { setProfileError(e.message); }
     finally { setProfileBusy(false); }
+  }
+
+  async function downloadExport() {
+    setExportBusy(true); setExportError('');
+    const submit = token => fetch('/api/v1/auth/export', { credentials: 'include', headers: { Authorization: `Bearer ${token}` } });
+    try {
+      let response = await submit(accessToken);
+      if (response.status === 401) response = await submit(await refreshAccessToken());
+      if (!response.ok) {
+        const result = await response.json().catch(() => ({}));
+        throw new Error(result.error?.message || 'Your data export could not be prepared.');
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `studyrag-data-export-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.append(link); link.click(); link.remove(); URL.revokeObjectURL(url);
+    } catch (e) { setExportError(e.message); }
+    finally { setExportBusy(false); }
   }
 
   async function changePassword(event) {
@@ -61,6 +83,11 @@ export default function SettingsPage() {
     <section className="settings-card"><header><span><KeyRound size={18} /></span><div><h2>Change password</h2><p>Changing your password signs out all active sessions.</p></div></header>
       {error && <p className="note-feedback error" role="alert">{error}</p>}{notice && <p className="note-feedback success" role="status">{notice}</p>}
       <form className="settings-password-form" onSubmit={changePassword}><label>Current password<input name="currentPassword" type="password" autoComplete="current-password" maxLength={128} required /></label><label>New password<input name="newPassword" type="password" autoComplete="new-password" minLength={10} maxLength={128} required /><small>At least 10 characters.</small></label><label>Confirm new password<input name="confirmPassword" type="password" autoComplete="new-password" minLength={10} maxLength={128} required /></label><button className="button button-primary" disabled={busy}>{busy ? <LoaderCircle className="spin" size={15} /> : <KeyRound size={15} />}{busy ? 'Updating…' : 'Update password'}</button></form>
+    </section>
+    <section className="settings-card"><header><span><Download size={18} /></span><div><h2>Export your data</h2><p>Download your StudyRAG records and extracted study text as a private JSON file.</p></div></header>
+      <p className="settings-export-detail">The export leaves out password credentials, sessions, original uploaded files, internal storage details, and derived embedding vectors.</p>
+      {exportError && <p className="note-feedback error" role="alert">{exportError}</p>}
+      <button className="button button-primary" onClick={downloadExport} disabled={exportBusy}>{exportBusy ? <LoaderCircle className="spin" size={15} /> : <Download size={15} />}{exportBusy ? 'Preparing export…' : 'Download my data'}</button>
     </section>
   </div></WorkspaceShell>;
 }

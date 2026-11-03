@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
-import { changePasswordAction, loginAction, logoutAction, meAction, refreshAction, registerAction, updateProfileAction } from '../controllers/authController.js';
+import { changePasswordAction, exportDataAction, loginAction, logoutAction, meAction, refreshAction, registerAction, updateProfileAction } from '../controllers/authController.js';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { changePasswordSchema, loginSchema, registerSchema, updateProfileSchema, validate } from '../validators/auth.js';
 
@@ -14,5 +14,6 @@ router.post('/logout', logoutAction);
 router.get('/me', requireAuth, meAction);
 router.patch('/password', requireAuth, authLimiter, validate(changePasswordSchema), changePasswordAction);
 router.patch('/profile', requireAuth, validate(updateProfileSchema), updateProfileAction);
+router.get('/export', requireAuth, exportDataAction);
 
 export default router;

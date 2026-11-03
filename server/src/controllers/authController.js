@@ -1,4 +1,5 @@
 import { changePassword, getRefreshCookieName, getPublicUser, login, logout, refreshSession, register, makeAccessToken, updateProfile } from '../services/authService.js';
+import { exportUserData } from '../services/exportService.js';
 const refreshCookie = req => req.cookies[getRefreshCookieName()];
 
 export async function registerAction(req, res, next) {
@@ -27,4 +28,14 @@ export async function changePasswordAction(req, res, next) {
 
 export async function updateProfileAction(req, res, next) {
   try { res.json(await updateProfile(req.user._id, req.body)); } catch (error) { next(error); }
+}
+
+export async function exportDataAction(req, res, next) {
+  try {
+    const data = await exportUserData(req.user._id);
+    const date = new Date().toISOString().slice(0, 10);
+    res.setHeader('Content-Disposition', `attachment; filename="studyrag-data-export-${date}.json"`);
+    res.setHeader('Cache-Control', 'private, no-store');
+    res.json(data);
+  } catch (error) { next(error); }
 }

@@ -4,7 +4,7 @@ StudyRAG is planned as a multi-source AI learning and productivity platform buil
 
 ## Project phase
 
-Private documents and websites, cited study chat, notes and folders, quizzes, assignments, tasks, saved passages, editable account profile, password security settings, and in-app deadline reminders are implemented. Chat supports keyword retrieval by default and optional hybrid semantic retrieval through a configured local Ollama embedding model. See [PROJECT_STATUS.md](PROJECT_STATUS.md) for current progress and limitations.
+Private documents and websites, cited study chat, notes and folders, quizzes, assignments, tasks, saved passages, editable account profile, private JSON data export, password security settings, and in-app deadline reminders are implemented. Chat supports keyword retrieval by default and optional hybrid semantic retrieval through a configured local Ollama embedding model. See [PROJECT_STATUS.md](PROJECT_STATUS.md) for current progress and limitations.
 
 ## Project documentation
 

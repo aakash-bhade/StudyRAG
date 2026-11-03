@@ -4,7 +4,7 @@ Last updated: 2026-11-03
 
 ## Current phase
 
-Phase 20 — Editable account profile.
+Phase 21 — Private account data export.
 
 ## Completed
 
@@ -32,6 +32,7 @@ Phase 20 — Editable account profile.
 - Added a private notifications center that reconciles reminders from overdue and next-7-day task/assignment due dates, removes stale reminders, and tracks read state.
 - Added private notes folders with create, rename, delete, note assignment, and folder filtering; deleting a folder unfiles its notes without removing their content.
 - Added authenticated profile display-name editing with server validation and immediate account-context updates across the workspace.
+- Added an authenticated JSON data export for the account profile and owner-scoped study records, including extracted document/webpage text; excludes passwords, sessions, original file binaries, internal storage identifiers, content hashes, and embedding vectors.
 
 ## In progress
 
@@ -47,11 +48,11 @@ Phase 20 — Editable account profile.
 ## Verification and Git
 
 - Frontend and server dependencies installed with lockfiles; npm install audits reported zero vulnerabilities for both packages.
-- Current `client`: production build passes with editable account profile.
+- Current `client`: production build passes with private data export.
 - Current `server`: Node syntax checks pass across all server JavaScript files.
 - `git diff --check` passes. Live API integration is pending because MongoDB is not configured.
 - Browser review and live API integration are pending. No MongoDB URI is configured, so auth and document flows have not been exercised against a database.
-- Current branch: `main`; editable account profile changes are in progress locally.
+- Current branch: `main`; private data export changes are in progress locally.
 
 ## Known constraints
 
