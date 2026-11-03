@@ -45,11 +45,12 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async credentials => acceptSession(await authApi.login(credentials)), [acceptSession]);
   const register = useCallback(async details => acceptSession(await authApi.register(details)), [acceptSession]);
+  const updateUser = useCallback(nextUser => setUser(nextUser), []);
   const logout = useCallback(async () => {
     try { await authApi.logout(); } finally { setUser(null); setAccessToken(null); }
   }, []);
 
-  const value = useMemo(() => ({ user, accessToken, loading, login, register, logout, refreshAccessToken }), [user, accessToken, loading, login, register, logout, refreshAccessToken]);
+  const value = useMemo(() => ({ user, accessToken, loading, login, register, logout, refreshAccessToken, updateUser }), [user, accessToken, loading, login, register, logout, refreshAccessToken, updateUser]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

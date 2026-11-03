@@ -5,7 +5,7 @@ Base path: `/api/v1`. JSON errors use a stable `{ error: { code, message, detail
 | Area | Planned endpoints |
 |---|---|
 | Health | `GET /health` |
-| Auth | `POST /auth/register`, `/auth/login`, `/auth/logout`, `/auth/refresh`; `GET /auth/me`; authenticated `PATCH /auth/password` verifies current password, updates the hash, and revokes all sessions. Email verification and email-based password recovery remain planned. |
+| Auth | `POST /auth/register`, `/auth/login`, `/auth/logout`, `/auth/refresh`; `GET /auth/me`; authenticated `PATCH /auth/profile` updates the display name; `PATCH /auth/password` verifies current password, updates the hash, and revokes all sessions. Email verification and email-based password recovery remain planned. |
 | Profile | `GET/PATCH /users/me`, `PATCH /users/me/password`, `DELETE /users/me` |
 | Workspaces | CRUD `/workspaces`; membership listing and invitation/removal under `/workspaces/:id/members` |
 | Documents | `GET/POST /documents`, `PATCH/DELETE /documents/:id`, `GET /documents/:id/download`, `POST /documents/:id/embeddings` (implemented; owner-scoped; PDF, DOCX, UTF-8 TXT; 10 MiB upload cap; embedding index requires Ollama) |

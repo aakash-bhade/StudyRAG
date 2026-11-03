@@ -70,6 +70,16 @@ export async function changePassword(userId, input) {
   return { success: true, sessionsRevoked: true };
 }
 
+export async function updateProfile(userId, input) {
+  const user = await User.findOneAndUpdate(
+    { _id: userId, status: 'active' },
+    { $set: { displayName: input.displayName } },
+    { new: true, runValidators: true, select: '_id displayName email role' },
+  );
+  if (!user) throw httpError(404, 'USER_NOT_FOUND', 'Your account could not be found.');
+  return { user: publicUser(user) };
+}
+
 export async function refreshSession(refreshToken, res) {
   if (!refreshToken) throw httpError(401, 'AUTH_REQUIRED', 'Please sign in to continue.');
   let payload;

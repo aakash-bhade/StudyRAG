@@ -1,4 +1,4 @@
-import { changePassword, getRefreshCookieName, getPublicUser, login, logout, refreshSession, register, makeAccessToken } from '../services/authService.js';
+import { changePassword, getRefreshCookieName, getPublicUser, login, logout, refreshSession, register, makeAccessToken, updateProfile } from '../services/authService.js';
 const refreshCookie = req => req.cookies[getRefreshCookieName()];
 
 export async function registerAction(req, res, next) {
@@ -23,4 +23,8 @@ export function meAction(req, res) {
 
 export async function changePasswordAction(req, res, next) {
   try { res.json(await changePassword(req.user._id, req.body)); } catch (error) { next(error); }
+}
+
+export async function updateProfileAction(req, res, next) {
+  try { res.json(await updateProfile(req.user._id, req.body)); } catch (error) { next(error); }
 }

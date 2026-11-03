@@ -19,6 +19,10 @@ export const changePasswordSchema = z.object({
   newPassword: passwordSchema,
 }).strict();
 
+export const updateProfileSchema = z.object({
+  displayName: z.string().trim().min(2).max(80),
+}).strict();
+
 export function validate(schema) {
   return (req, _res, next) => {
     const result = schema.safeParse(req.body);

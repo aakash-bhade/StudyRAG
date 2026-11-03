@@ -4,7 +4,7 @@ Last updated: 2026-11-03
 
 ## Current phase
 
-Phase 19 — Notes folders.
+Phase 20 — Editable account profile.
 
 ## Completed
 
@@ -31,6 +31,7 @@ Phase 19 — Notes folders.
 - Added optional Ollama semantic embeddings for documents and webpages, per-source embedding index actions, private stored vectors, and hybrid cosine/keyword chat ranking; keyword retrieval remains the fallback.
 - Added a private notifications center that reconciles reminders from overdue and next-7-day task/assignment due dates, removes stale reminders, and tracks read state.
 - Added private notes folders with create, rename, delete, note assignment, and folder filtering; deleting a folder unfiles its notes without removing their content.
+- Added authenticated profile display-name editing with server validation and immediate account-context updates across the workspace.
 
 ## In progress
 
@@ -46,11 +47,11 @@ Phase 19 — Notes folders.
 ## Verification and Git
 
 - Frontend and server dependencies installed with lockfiles; npm install audits reported zero vulnerabilities for both packages.
-- Current `client`: production build passes with notes folder management.
+- Current `client`: production build passes with editable account profile.
 - Current `server`: Node syntax checks pass across all server JavaScript files.
 - `git diff --check` passes. Live API integration is pending because MongoDB is not configured.
 - Browser review and live API integration are pending. No MongoDB URI is configured, so auth and document flows have not been exercised against a database.
-- Current branch: `main`; notes folders are complete locally and awaiting commit/push.
+- Current branch: `main`; editable account profile changes are in progress locally.
 
 ## Known constraints
 
