@@ -7,6 +7,7 @@ import DocumentsPage from './features/documents/DocumentsPage.jsx';
 import ChatPage from './features/chat/ChatPage.jsx';
 import NotesPage from './features/notes/NotesPage.jsx';
 import SourcesPage from './features/sources/SourcesPage.jsx';
+import QuizzesPage from './features/quizzes/QuizzesPage.jsx';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -30,6 +31,7 @@ export default function RouterApp() {
     <Route path="/app/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
     <Route path="/app/notes" element={<ProtectedRoute><NotesPage /></ProtectedRoute>} />
     <Route path="/app/sources" element={<ProtectedRoute><SourcesPage /></ProtectedRoute>} />
+    <Route path="/app/quizzes" element={<ProtectedRoute><QuizzesPage /></ProtectedRoute>} />
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>;
 }
