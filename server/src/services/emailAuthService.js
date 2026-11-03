@@ -50,7 +50,7 @@ export async function verifyEmailToken(token) {
   }, {
     $set: { emailVerifiedAt: new Date() },
     $unset: { emailVerificationTokenHash: 1, emailVerificationExpiresAt: 1, emailVerificationSentAt: 1 },
-  }, { new: true }).select('_id emailVerifiedAt');
+  }, { returnDocument: 'after' }).select('_id emailVerifiedAt');
   if (!user) throw httpError(400, 'EMAIL_TOKEN_INVALID', 'This verification link is invalid or expired. Request a new one and try again.');
   return { success: true };
 }
@@ -93,7 +93,7 @@ export async function resetPasswordWithToken(token, newPassword) {
   }, {
     $set: { passwordHash },
     $unset: { passwordResetTokenHash: 1, passwordResetExpiresAt: 1, passwordResetSentAt: 1 },
-  }, { new: true }).select('_id');
+  }, { returnDocument: 'after' }).select('_id');
   if (!updated) throw httpError(400, 'RESET_TOKEN_INVALID', 'This password reset link is invalid or expired. Request a new one and try again.');
   await Session.updateMany({ userId: updated._id, revokedAt: null }, { $set: { revokedAt: new Date() } });
   return { success: true };

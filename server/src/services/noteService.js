@@ -35,7 +35,7 @@ export async function createNote(userId, data) {
 export async function updateNote(userId, id, data) {
   validId(id);
   await validateFolder(userId, data.folderId);
-  const note = await Note.findOneAndUpdate({ _id: id, ownerId: userId, deletedAt: null }, data, { new: true, runValidators: true });
+  const note = await Note.findOneAndUpdate({ _id: id, ownerId: userId, deletedAt: null }, data, { returnDocument: 'after', runValidators: true });
   if (!note) throw httpError(404, 'NOTE_NOT_FOUND', 'Note not found.');
   return serialize(note);
 }

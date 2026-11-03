@@ -36,6 +36,8 @@ Requirements: Node.js 20.19+ and MongoDB Community locally, or a MongoDB Atlas c
 4. In another terminal, from `client/`, run `npm install` once and then `npm run dev`.
 5. Open the Vite URL (usually `http://localhost:5173`). The client forwards `/api` requests to the local Express API.
 
+With MongoDB, Ollama, `qwen2.5:3b`, and `embeddinggemma` running/configured, run `npm run check:integration` from `server/` to exercise registration, notes, file/web ingestion, semantic indexing, grounded chat, quizzes, flashcards, tasks, assignments, and reminders. The smoke flow creates a temporary account and removes its records and uploaded files afterward.
+
 Registration, login, and document metadata need a reachable MongoDB instance. Document binaries currently use private local disk storage for development; production needs durable private object storage. The API fails closed when the database is unavailable; it does not create a fake account or session.
 
 Email verification and password recovery use optional SMTP settings in `server/.env` (`SMTP_HOST`, `SMTP_PORT`, `SMTP_FROM`, and optionally `SMTP_USER`/`SMTP_PASS`). Configure all required SMTP values together to enable verification and reset links. Without SMTP configured, local registration remains available without email verification and email recovery reports that delivery is unavailable. Never commit SMTP credentials.

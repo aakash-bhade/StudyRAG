@@ -1,10 +1,10 @@
 # Project Status
 
-Last updated: 2026-11-03
+Last updated: 2026-11-04
 
 ## Current phase
 
-Phase 30 — Server runtime validation and flashcard route repair.
+Phase 32 — Local-service integration and workspace flow fixes.
 
 Estimated completion: 90% of the planned feature implementation. Production readiness is lower while live-service verification, team sharing, and deployment remain outstanding.
 
@@ -47,11 +47,14 @@ Estimated completion: 90% of the planned feature implementation. Production read
 - Extended grounded chat to search private notes alongside documents and webpages, preserve note filters in conversations, and cite note sections.
 - Fixed the flashcard API route's validator import, which passed syntax checks but prevented the Express app from loading at runtime.
 - Added a server runtime import smoke check to CI so missing ESM exports across registered routes are caught before merge.
+- Configured ignored local `server/.env` with fresh development JWT secrets and MongoDB/Ollama connection settings; installed MongoDB 8.0 and Ollama locally, then pulled the configured Qwen chat and embedding models.
+- Fixed client requests for document/webpage embedding and webpage refresh actions to send the JSON body required by the API origin guard.
+- Replaced deprecated Mongoose `new: true` update options with `returnDocument: 'after'` for the installed Mongoose 9 runtime.
+- Added a local integration smoke command covering registration, notes/folders, TXT upload and indexing, webpage add/refresh/index, cited hybrid chat, saved passages, quiz attempts, flashcards, tasks, assignments, and notification read state. It cleans up its synthetic account and files.
 
 ## In progress
 
-- Connect a local or Atlas MongoDB URI and exercise authentication, source ingestion, quiz generation, attempts, ownership, and grounded chat flows end to end.
-- Configure a local Ollama model and review generation quality against representative study material.
+- Review AI generation quality and browser experience against representative study materials.
 - Review auth, workspace, source, chat, notes, and quiz screens at desktop and mobile widths.
 
 ## Pending
@@ -62,11 +65,12 @@ Estimated completion: 90% of the planned feature implementation. Production read
 
 - Frontend and server dependencies installed with lockfiles; npm install audits reported zero vulnerabilities for both packages.
 - Current `client`: production build passes with notes-grounded chat, answer copying, source-grounded flashcards, and mobile navigation.
-- Current `server`: Node syntax checks and full Express app runtime import smoke check pass.
-- `git diff --check` passes. Live API integration is pending because MongoDB is not configured; the localhost HTTP smoke request was blocked by the execution sandbox's network policy.
+- Current `server`: Node syntax checks and full Express app runtime import smoke check pass; local MongoDB and Ollama health have been confirmed.
+- `npm run check:integration` passes against local MongoDB/Ollama: registration/profile, folders/notes, TXT upload/indexing, webpage add/refresh/indexing, cited hybrid chat, saved passage, quiz/attempt, flashcards, task updates, assignment submission, and notification read-state. The script removes its synthetic account and uploaded files after each run.
+- Client production build passes. `git diff --check` passes. Both npm dependency audits report zero vulnerabilities.
 - Email verification and recovery have not been exercised against configured SMTP credentials.
-- Browser review and live API integration are pending. No MongoDB URI is configured, so auth and document flows have not been exercised against a database.
-- Current branch: `main`; latest route repair and CI smoke check are pending commit and push.
+- Browser review and deployment verification are pending. SMTP email actions remain untested because SMTP credentials are not configured.
+- Current branch: `main`; latest integration fixes and smoke tooling are pending commit and push.
 
 ## Known constraints
 

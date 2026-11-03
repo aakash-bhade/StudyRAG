@@ -26,8 +26,11 @@ async function publicAddresses(hostname) {
   const version = isIP(hostname);
   if (version === 6) throw httpError(400, 'UNSAFE_URL', 'IPv6 website addresses are not supported.');
   const addresses = version === 4 ? [{ address: hostname, family: 4 }] : await lookup(hostname, { all: true, verbatim: true }).catch(() => []);
-  if (!addresses.length || addresses.some(item => item.family !== 4 || !publicIPv4(item.address))) throw httpError(400, 'UNSAFE_URL', 'This website address resolves to a private or unavailable network.');
-  return addresses;
+  // Pin one validated public IPv4 for the request. Dual-stack hosts commonly return
+  // IPv6 and IPv4 together; rejecting the whole DNS answer incorrectly blocks them.
+  const publicIpv4Addresses = addresses.filter(item => item.family === 4 && publicIPv4(item.address));
+  if (!publicIpv4Addresses.length) throw httpError(400, 'UNSAFE_URL', 'This website address resolves to a private or unavailable network.');
+  return publicIpv4Addresses;
 }
 
 function requestPage(url, address) {
@@ -35,7 +38,10 @@ function requestPage(url, address) {
     const transport = url.protocol === 'https:' ? https : http;
     const request = transport.request(url, {
       method: 'GET', timeout: 8_000, headers: { 'User-Agent': 'StudyRAG/1.0 (user-submitted study source)', Accept: 'text/html,application/xhtml+xml', 'Accept-Encoding': 'identity' },
-      lookup: (_hostname, _options, callback) => callback(null, address.address, 4),
+      lookup: (_hostname, options, callback) => {
+        if (options?.all) return callback(null, [{ address: address.address, family: 4 }]);
+        callback(null, address.address, 4);
+      },
     }, response => {
       const status = response.statusCode || 0;
       if ([301, 302, 303, 307, 308].includes(status)) { response.resume(); return resolve({ redirect: response.headers.location }); }
@@ -119,7 +125,7 @@ export async function refreshOwnedWebsiteSource(ownerId, id) {
   if (!mongoose.isValidObjectId(id)) throw httpError(400, 'INVALID_ID', 'The website source ID is invalid.');
   const lock = randomUUID();
   const availableLock = { $or: [{ refreshLock: null }, { refreshLockAt: { $lt: new Date(Date.now() - REFRESH_LOCK_MAX_AGE_MS) } }] };
-  const source = await WebsiteSource.findOneAndUpdate({ _id: id, ownerId, ...availableLock }, { $set: { refreshLock: lock, refreshLockAt: new Date() } }, { new: true }).select('+refreshLock');
+  const source = await WebsiteSource.findOneAndUpdate({ _id: id, ownerId, ...availableLock }, { $set: { refreshLock: lock, refreshLockAt: new Date() } }, { returnDocument: 'after' }).select('+refreshLock');
   if (!source) {
     if (await WebsiteSource.exists({ _id: id, ownerId })) throw httpError(409, 'SOURCE_REFRESHING', 'This webpage is already being refreshed.');
     throw httpError(404, 'SOURCE_NOT_FOUND', 'Website source not found.');
@@ -135,7 +141,7 @@ export async function refreshOwnedWebsiteSource(ownerId, id) {
     const updated = await WebsiteSource.findOneAndUpdate({ _id: id, ownerId, refreshLock: lock }, { $set: {
       url: fetched.url.toString().slice(0, 2048), title: parsed.title, canonicalHost: fetched.url.hostname,
       contentHash: createHash('sha256').update(fetched.body).digest('hex'), chunkCount: parsed.chunks.length, fetchedAt: new Date(),
-    }, $unset: { refreshLock: 1, refreshLockAt: 1 } }, { new: true, runValidators: true });
+    }, $unset: { refreshLock: 1, refreshLockAt: 1 } }, { returnDocument: 'after', runValidators: true });
     if (!updated) throw httpError(409, 'SOURCE_REFRESH_INTERRUPTED', 'The webpage refresh was interrupted. Please reload your sources and try again.');
     return serialize(updated);
   } catch (error) {

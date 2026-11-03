@@ -40,7 +40,7 @@ export async function renameConversation(userId, id, title) {
   const conversation = await Conversation.findOneAndUpdate(
     { _id: id, ownerId: userId, archivedAt: null },
     { $set: { title } },
-    { new: true, runValidators: true },
+    { returnDocument: 'after', runValidators: true },
   ).lean();
   if (!conversation) throw httpError(404, 'CONVERSATION_NOT_FOUND', 'Conversation not found.');
   return serializeConversation(conversation);

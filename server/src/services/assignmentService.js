@@ -17,7 +17,7 @@ export async function createAssignment(ownerId, data) {
 }
 export async function updateAssignment(ownerId, id, data) {
   validId(id);
-  const item = await Assignment.findOneAndUpdate({ _id: id, ownerId, status: { $ne: 'submitted' } }, data, { new: true, runValidators: true });
+  const item = await Assignment.findOneAndUpdate({ _id: id, ownerId, status: { $ne: 'submitted' } }, data, { returnDocument: 'after', runValidators: true });
   if (!item) {
     if (await Assignment.exists({ _id: id, ownerId })) throw httpError(409, 'ASSIGNMENT_SUBMITTED', 'Submitted assignments are locked.');
     throw httpError(404, 'ASSIGNMENT_NOT_FOUND', 'Assignment not found.');
@@ -26,7 +26,7 @@ export async function updateAssignment(ownerId, id, data) {
 }
 export async function submitAssignment(ownerId, id, response) {
   validId(id);
-  const item = await Assignment.findOneAndUpdate({ _id: id, ownerId }, { $set: { response, status: 'submitted', submittedAt: new Date() } }, { new: true, runValidators: true });
+  const item = await Assignment.findOneAndUpdate({ _id: id, ownerId }, { $set: { response, status: 'submitted', submittedAt: new Date() } }, { returnDocument: 'after', runValidators: true });
   if (!item) throw httpError(404, 'ASSIGNMENT_NOT_FOUND', 'Assignment not found.');
   return serialize(item);
 }

@@ -39,7 +39,7 @@ export async function saveItem(ownerId, data) {
   const item = await SavedItem.findOneAndUpdate(
     { ownerId, sourceType: data.sourceType, sourceId, ordinal: data.ordinal },
     { $setOnInsert: { ownerId, sourceType: data.sourceType, sourceId, ordinal: data.ordinal, ...snapshot } },
-    { new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true },
+    { returnDocument: 'after', upsert: true, runValidators: true, setDefaultsOnInsert: true },
   );
   return serialize(item);
 }

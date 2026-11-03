@@ -19,7 +19,7 @@ export async function createFolder(ownerId, data) {
 export async function updateFolder(ownerId, id, data) {
   validId(id);
   try {
-    const folder = await Folder.findOneAndUpdate({ _id: id, ownerId }, data, { new: true, runValidators: true });
+    const folder = await Folder.findOneAndUpdate({ _id: id, ownerId }, data, { returnDocument: 'after', runValidators: true });
     if (!folder) throw httpError(404, 'FOLDER_NOT_FOUND', 'Folder not found.');
     return serialize(folder);
   } catch (error) { if (error.code === 11000) throw httpError(409, 'FOLDER_EXISTS', 'A folder with that name already exists.'); throw error; }

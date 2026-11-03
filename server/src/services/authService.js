@@ -85,7 +85,7 @@ export async function updateProfile(userId, input) {
   const user = await User.findOneAndUpdate(
     { _id: userId, status: 'active' },
     { $set: { displayName: input.displayName } },
-    { new: true, runValidators: true, select: '_id displayName email role' },
+    { returnDocument: 'after', runValidators: true, select: '_id displayName email role' },
   );
   if (!user) throw httpError(404, 'USER_NOT_FOUND', 'Your account could not be found.');
   return { user: publicUser(user) };
@@ -106,7 +106,7 @@ export async function refreshSession(refreshToken, res) {
   const rotated = await Session.findOneAndUpdate(
     { _id: session._id, userId: payload.sub, revokedAt: null, refreshTokenHash: hashToken(refreshToken), expiresAt: { $gt: new Date() } },
     { $set: { refreshTokenHash: hashToken(nextToken), expiresAt: new Date(Date.now() + REFRESH_TTL_SECONDS * 1000) } },
-    { new: true },
+    { returnDocument: 'after' },
   );
   if (!rotated) throw httpError(401, 'AUTH_REQUIRED', 'Your session has expired. Please sign in again.');
   res.cookie(cookieName, nextToken, refreshCookieOptions());

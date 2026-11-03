@@ -23,7 +23,7 @@ async function syncSource(ownerId, sourceType, records, href) {
     try {
       await Notification.findOneAndUpdate(filter, { $set: {
         sourceType, sourceId: record._id, title: record.title, body: reminderText(dueAt), href, dueAt,
-      }, $setOnInsert: { ownerId, key, readAt: null } }, { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true });
+      }, $setOnInsert: { ownerId, key, readAt: null } }, { upsert: true, returnDocument: 'after', runValidators: true, setDefaultsOnInsert: true });
     } catch (error) {
       if (error.code !== 11000) throw error;
       await Notification.updateOne(filter, { $set: { title: record.title, body: reminderText(dueAt), dueAt } });
@@ -53,7 +53,7 @@ export async function listNotifications(ownerId) {
 
 export async function markNotificationRead(ownerId, id) {
   if (!mongoose.isValidObjectId(id)) throw httpError(400, 'INVALID_ID', 'The notification ID is invalid.');
-  const item = await Notification.findOneAndUpdate({ _id: id, ownerId }, { $set: { readAt: new Date() } }, { new: true });
+  const item = await Notification.findOneAndUpdate({ _id: id, ownerId }, { $set: { readAt: new Date() } }, { returnDocument: 'after' });
   if (!item) throw httpError(404, 'NOTIFICATION_NOT_FOUND', 'Notification not found.');
   return serialize(item);
 }

@@ -22,7 +22,7 @@ export async function createTask(ownerId, data) {
 
 export async function updateTask(ownerId, id, data) {
   validId(id);
-  const task = await Task.findOneAndUpdate({ _id: id, ownerId }, data, { new: true, runValidators: true });
+  const task = await Task.findOneAndUpdate({ _id: id, ownerId }, data, { returnDocument: 'after', runValidators: true });
   if (!task) throw httpError(404, 'TASK_NOT_FOUND', 'Task not found.');
   return serialize(task);
 }

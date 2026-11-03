@@ -11,7 +11,7 @@ async function request(path, { token, refreshAccessToken, method = 'GET', body }
 export const sourceApi = {
   list: auth => request('', auth),
   add: (url, auth) => request('', { ...auth, method: 'POST', body: { url } }),
-  refresh: (id, auth) => request(`/${id}/refresh`, { ...auth, method: 'POST' }),
-  indexEmbeddings: (id, auth) => request(`/${id}/embeddings`, { ...auth, method: 'POST' }),
+  refresh: (id, auth) => request(`/${id}/refresh`, { ...auth, method: 'POST', body: {} }),
+  indexEmbeddings: (id, auth) => request(`/${id}/embeddings`, { ...auth, method: 'POST', body: {} }),
   remove: (id, auth) => request(`/${id}`, { ...auth, method: 'DELETE' }),
 };
