@@ -576,6 +576,7 @@ h1, h2, h3, p { margin-top: 0; }
 .chat-recent-confirm { display: flex; align-items: center; gap: 4px; width: 100%; padding: 2px 4px; color: #a64040; font: 9px 'DM Sans',sans-serif; }
 .chat-recent-confirm span { flex: 1; }
 .chat-recent-confirm button { display: grid; place-items: center; padding: 4px; color: #a64040; }
+@media (hover: none) { .chat-recent-rename, .chat-recent-delete { opacity: 1; } }
 .chat-recent-list > span { padding: 5px 2px; color: #98a5b5; font-size: 8px; }
 .chat-source-panel > p { margin: 0 0 14px; color: #8998aa; font-size: 9px; line-height: 1.5; }
 .chat-source-list { display: grid; gap: 3px; max-height: 350px; overflow-y: auto; }
