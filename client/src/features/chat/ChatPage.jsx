@@ -13,8 +13,13 @@ function AnswerText({ text }) {
   let paragraph = [];
   let list = [];
   let listType = null;
+  const renderInline = (value) => value.split(/(\*\*[^*]+\*\*)/g).map((part, index) =>
+    part.startsWith('**') && part.endsWith('**')
+      ? <strong key={index}>{part.slice(2, -2)}</strong>
+      : part
+  );
   const flushParagraph = () => {
-    if (paragraph.length) blocks.push(<p key={`p-${blocks.length}`}>{paragraph.join('\n')}</p>);
+    if (paragraph.length) blocks.push(<p key={`p-${blocks.length}`}>{renderInline(paragraph.join(' '))}</p>);
     paragraph = [];
   };
   const flushList = () => {
@@ -25,14 +30,21 @@ function AnswerText({ text }) {
     listType = null;
   };
   for (const line of text.split('\n')) {
+    const heading = line.match(/^\s*#{1,3}\s+(.+)$/);
     const bullet = line.match(/^\s*[-*•]\s+(.+)$/);
     const numbered = line.match(/^\s*\d+[.)]\s+(.+)$/);
+    if (heading) {
+      flushParagraph();
+      flushList();
+      blocks.push(<h3 key={`h-${blocks.length}`}>{renderInline(heading[1])}</h3>);
+      continue;
+    }
     if (bullet || numbered) {
       flushParagraph();
       const nextType = numbered ? 'ordered' : 'unordered';
       if (listType && listType !== nextType) flushList();
       listType = nextType;
-      list.push((bullet || numbered)[1]);
+      list.push(renderInline((bullet || numbered)[1]));
     } else {
       flushList();
       if (line.trim()) paragraph.push(line.trim());
