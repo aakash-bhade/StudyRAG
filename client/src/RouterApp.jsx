@@ -14,6 +14,7 @@ import AssignmentsPage from './features/assignments/AssignmentsPage.jsx';
 import SavedItemsPage from './features/saved/SavedItemsPage.jsx';
 import NotificationsPage from './features/notifications/NotificationsPage.jsx';
 import EmailActionPage from './features/auth/EmailActionPage.jsx';
+import FlashcardsPage from './features/flashcards/FlashcardsPage.jsx';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -42,6 +43,7 @@ export default function RouterApp() {
     <Route path="/app/notes" element={<ProtectedRoute><NotesPage /></ProtectedRoute>} />
     <Route path="/app/sources" element={<ProtectedRoute><SourcesPage /></ProtectedRoute>} />
     <Route path="/app/quizzes" element={<ProtectedRoute><QuizzesPage /></ProtectedRoute>} />
+    <Route path="/app/flashcards" element={<ProtectedRoute><FlashcardsPage /></ProtectedRoute>} />
     <Route path="/app/tasks" element={<ProtectedRoute><TasksPage /></ProtectedRoute>} />
     <Route path="/app/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
     <Route path="/app/assignments" element={<ProtectedRoute><AssignmentsPage /></ProtectedRoute>} />

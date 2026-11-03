@@ -15,6 +15,7 @@ import assignmentRoutes from './routes/assignmentRoutes.js';
 import savedItemRoutes from './routes/savedItemRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import folderRoutes from './routes/folderRoutes.js';
+import flashcardRoutes from './routes/flashcardRoutes.js';
 import { errorHandler, notFound, requestId } from './middleware/errors.js';
 import { originGuard } from './middleware/originGuard.js';
 
@@ -37,6 +38,7 @@ app.use('/api/v1/documents', documentRoutes);
 app.use('/api/v1/chat', chatRoutes);
 app.use('/api/v1/notes', noteRoutes);
 app.use('/api/v1/folders', folderRoutes);
+app.use('/api/v1/flashcards', flashcardRoutes);
 app.use('/api/v1/sources', websiteSourceRoutes);
 app.use('/api/v1/quizzes', quizRoutes);
 app.use('/api/v1/tasks', taskRoutes);

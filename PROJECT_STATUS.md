@@ -4,7 +4,7 @@ Last updated: 2026-11-03
 
 ## Current phase
 
-Phase 25 — Continuous integration checks.
+Phase 26 — Source-grounded flashcards and mobile navigation.
 
 ## Completed
 
@@ -37,6 +37,8 @@ Phase 25 — Continuous integration checks.
 - Corrected the password-length hint so it appears on account creation only, not on sign-in.
 - Added optional SMTP email verification and password recovery using hashed, expiring one-time tokens; password resets revoke active sessions. Local auth preserves its existing behavior when SMTP is not configured.
 - Added a GitHub Actions workflow for the client production build and server JavaScript syntax checks on pushes and pull requests to `main`.
+- Added owner-scoped flashcard deck generation from private documents and websites, saved decks, flip-through review, and deck deletion; flashcard deck content is included in personal data exports.
+- Replaced the crowded small-screen sidebar with a compact mobile navigation bar and a More menu for the remaining workspace sections.
 
 ## In progress
 
@@ -51,12 +53,12 @@ Phase 25 — Continuous integration checks.
 ## Verification and Git
 
 - Frontend and server dependencies installed with lockfiles; npm install audits reported zero vulnerabilities for both packages.
-- Current `client`: production build passes with email verification and password recovery screens.
+- Current `client`: production build passes with source-grounded flashcards and mobile navigation.
 - Current `server`: Node syntax checks pass across all server JavaScript files.
 - `git diff --check` passes. Live API integration is pending because MongoDB is not configured.
 - Email verification and recovery have not been exercised against configured SMTP credentials.
 - Browser review and live API integration are pending. No MongoDB URI is configured, so auth and document flows have not been exercised against a database.
-- Current branch: `main`; CI workflow changes are in progress locally.
+- Current branch: `main`; flashcards and mobile navigation changes are in progress locally.
 
 ## Known constraints
 

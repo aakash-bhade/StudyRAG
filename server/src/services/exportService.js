@@ -3,6 +3,7 @@ import { Conversation } from '../models/Conversation.js';
 import { Document } from '../models/Document.js';
 import { DocumentChunk } from '../models/DocumentChunk.js';
 import { Folder } from '../models/Folder.js';
+import { FlashcardDeck } from '../models/FlashcardDeck.js';
 import { Message } from '../models/Message.js';
 import { Note } from '../models/Note.js';
 import { Notification } from '../models/Notification.js';
@@ -18,7 +19,7 @@ const byCreated = { createdAt: 1, _id: 1 };
 
 export async function exportUserData(userId) {
   const ownerId = userId;
-  const [user, documents, documentChunks, websiteSources, websiteChunks, conversations, messages, notes, folders, quizzes, quizAttempts, tasks, assignments, savedItems, notifications] = await Promise.all([
+  const [user, documents, documentChunks, websiteSources, websiteChunks, conversations, messages, notes, folders, quizzes, quizAttempts, flashcardDecks, tasks, assignments, savedItems, notifications] = await Promise.all([
     User.findOne({ _id: ownerId, status: 'active' }).select('_id email displayName role createdAt updatedAt').lean(),
     Document.find({ ownerId }).select('-storageKey -contentHash').sort(byCreated).lean(),
     DocumentChunk.find({ ownerId }).select('-embedding -embeddingModel').sort({ documentId: 1, ordinal: 1 }).lean(),
@@ -30,6 +31,7 @@ export async function exportUserData(userId) {
     Folder.find({ ownerId }).sort({ name: 1, _id: 1 }).lean(),
     Quiz.find({ ownerId }).sort(byCreated).lean(),
     QuizAttempt.find({ ownerId }).sort({ completedAt: 1, _id: 1 }).lean(),
+    FlashcardDeck.find({ ownerId }).sort(byCreated).lean(),
     Task.find({ ownerId }).sort(byCreated).lean(),
     Assignment.find({ ownerId }).sort(byCreated).lean(),
     SavedItem.find({ ownerId }).sort(byCreated).lean(),
@@ -40,7 +42,7 @@ export async function exportUserData(userId) {
     schemaVersion: 1,
     exportedAt: new Date().toISOString(),
     account: user ? { id: String(user._id), email: user.email, displayName: user.displayName, role: user.role, createdAt: user.createdAt, updatedAt: user.updatedAt } : null,
-    data: { documents, documentChunks, websiteSources, websiteChunks, conversations, messages, notes, folders, quizzes, quizAttempts, tasks, assignments, savedItems, notifications },
+    data: { documents, documentChunks, websiteSources, websiteChunks, conversations, messages, notes, folders, quizzes, quizAttempts, flashcardDecks, tasks, assignments, savedItems, notifications },
     excluded: ['password credentials and sessions', 'local document binary files', 'internal storage keys and content hashes', 'derived semantic embedding vectors'],
   };
 }

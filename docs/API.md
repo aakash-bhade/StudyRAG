@@ -14,6 +14,7 @@ Base path: `/api/v1`. JSON errors use a stable `{ error: { code, message, detail
 | Chat | `GET /chat/conversations`, `GET/DELETE /chat/conversations/:id`, `POST /chat/ask` (creates or appends to an optional `conversationId`) |
 | Saved items | `GET/POST /saved-items`, `DELETE /saved-items/:id` (implemented; source ownership and excerpt are verified against the cited chunk) |
 | Quizzes | `GET /quizzes`, `POST /quizzes/generate`, `GET /quizzes/:id`, `POST /quizzes/:id/attempts` (implemented; Ollama required for generation; owner-scoped server scoring) |
+| Flashcards | `GET /flashcards`, `POST /flashcards/generate`, `DELETE /flashcards/:id` (implemented; saved owner-scoped decks generated only from selected or owned source passages; Ollama required) |
 | Tasks | `GET/POST /tasks`, `PATCH/DELETE /tasks/:id` (implemented; private owner-scoped task planner) |
 | Assignments | `GET/POST /assignments`, `PATCH/DELETE /assignments/:id`, `POST /assignments/:id/submit` (implemented; private instructions and response drafts; submitted state is only recorded in StudyRAG) |
 | Notifications | `GET /notifications`, `PATCH /notifications/:id/read` (implemented; creates owner-scoped in-app reminders from incomplete tasks and unsubmitted assignments due within 7 days; refreshed on page open) |

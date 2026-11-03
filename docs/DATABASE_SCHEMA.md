@@ -15,6 +15,7 @@ All user-owned records carry `ownerId`; workspace data also carries `workspaceId
 | `websiteChunks` | ownerId, sourceId, ordinal, text, embedding?, embeddingModel? | Implemented with unique owner/source/ordinal index; refresh restores old chunks if re-indexing fails; vectors are private |
 | `quizzes` | ownerId, title, difficulty, sourceNames, questions with private answer key | Implemented with owner + createdAt index; list and get responses omit correct answer and explanation until an attempt is graded |
 | `quizAttempts` | ownerId, quizId, answers, score, total, completedAt | Implemented with owner + quiz + completion index; score is computed on the server |
+| `flashcardDecks` | ownerId, title, sourceNames, cards[{front, back}] | Implemented with owner + createdAt index; decks are generated from owner-authorized source passages and remain private |
 | `tasks` | ownerId, title, details, status, dueAt | Implemented with owner + status + due date and owner + updated indexes; personal task planner |
 | `assignments` | ownerId, title, instructions, status, response, dueAt, submittedAt | Implemented with owner + status + due date and owner + updated indexes; submitted state is internal to StudyRAG |
 | `conversations` | ownerId, workspaceId?, title, sourceFilters, archivedAt | Implemented with owner + updatedAt index; only the owner can list, read, or delete |
