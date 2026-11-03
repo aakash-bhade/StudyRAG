@@ -6,6 +6,7 @@ import { env } from './config/env.js';
 import { databaseState } from './config/database.js';
 import authRoutes from './routes/authRoutes.js';
 import documentRoutes from './routes/documentRoutes.js';
+import chatRoutes from './routes/chatRoutes.js';
 import { errorHandler, notFound, requestId } from './middleware/errors.js';
 import { originGuard } from './middleware/originGuard.js';
 
@@ -25,5 +26,6 @@ app.get('/api/v1/health', (_req, res) => {
 });
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/documents', documentRoutes);
+app.use('/api/v1/chat', chatRoutes);
 app.use(notFound);
 app.use(errorHandler);

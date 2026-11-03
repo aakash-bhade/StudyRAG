@@ -4,6 +4,7 @@ import LandingPage from './App.jsx';
 import AuthPage from './features/auth/AuthPage.jsx';
 import DashboardPage from './features/dashboard/DashboardPage.jsx';
 import DocumentsPage from './features/documents/DocumentsPage.jsx';
+import ChatPage from './features/chat/ChatPage.jsx';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -24,6 +25,7 @@ export default function RouterApp() {
     <Route path="/signup" element={<GuestRoute><AuthPage mode="signup" /></GuestRoute>} />
     <Route path="/app" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
     <Route path="/app/documents" element={<ProtectedRoute><DocumentsPage /></ProtectedRoute>} />
+    <Route path="/app/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>;
 }

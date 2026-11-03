@@ -11,6 +11,8 @@ const schema = z.object({
   COOKIE_SECURE: z.enum(['true', 'false']).default('false'),
   COOKIE_SAME_SITE: z.enum(['lax', 'strict', 'none']).default('lax'),
   DOCUMENT_STORAGE_DIR: z.string().optional(),
+  OLLAMA_BASE_URL: z.string().url().optional(),
+  OLLAMA_MODEL: z.preprocess(value => value === '' ? undefined : value, z.string().trim().min(1).optional()),
 });
 
 const parsed = schema.safeParse(process.env);
