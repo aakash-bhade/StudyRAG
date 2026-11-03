@@ -23,6 +23,19 @@ export const updateProfileSchema = z.object({
   displayName: z.string().trim().min(2).max(80),
 }).strict();
 
+export const emailActionRequestSchema = z.object({
+  email: z.string().trim().email().max(254).transform(value => value.toLowerCase()),
+}).strict();
+
+export const emailTokenSchema = z.object({
+  token: z.string().min(32).max(128),
+}).strict();
+
+export const passwordResetSchema = z.object({
+  token: z.string().min(32).max(128),
+  newPassword: passwordSchema,
+}).strict();
+
 export function validate(schema) {
   return (req, _res, next) => {
     const result = schema.safeParse(req.body);

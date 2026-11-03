@@ -5,6 +5,7 @@ import { env } from '../config/env.js';
 import { Session } from '../models/Session.js';
 import { User } from '../models/User.js';
 import { httpError } from '../middleware/errors.js';
+import { emailVerificationEnabled, sendVerificationForUser } from './emailAuthService.js';
 
 const ACCESS_TTL = '15m';
 const REFRESH_TTL_SECONDS = 60 * 60 * 24 * 7;
@@ -38,10 +39,14 @@ export async function register(input, res) {
   const passwordHash = await bcrypt.hash(input.password, 12);
   let user;
   try {
-    user = await User.create({ email: input.email, passwordHash, displayName: input.displayName, role: input.role });
+    user = await User.create({ email: input.email, passwordHash, displayName: input.displayName, role: input.role, emailVerifiedAt: emailVerificationEnabled() ? null : new Date() });
   } catch (error) {
     if (error.code === 11000) throw httpError(409, 'ACCOUNT_EXISTS', 'An account with that email already exists.');
     throw error;
+  }
+  if (emailVerificationEnabled()) {
+    try { await sendVerificationForUser(user); } catch (error) { console.error('[email] Initial verification message delivery failed:', error.name); }
+    return { verificationRequired: true, email: user.email };
   }
   await createSession(user, res);
   return { accessToken: issueAccessToken(user), user: publicUser(user) };
@@ -51,6 +56,9 @@ export async function login(input, res) {
   const user = await User.findOne({ email: input.email, status: 'active' }).select('+passwordHash');
   if (!user || !(await bcrypt.compare(input.password, user.passwordHash))) {
     throw httpError(401, 'INVALID_CREDENTIALS', 'Email or password is incorrect.');
+  }
+  if (emailVerificationEnabled() && !user.emailVerifiedAt) {
+    throw httpError(403, 'EMAIL_NOT_VERIFIED', 'Verify your email before signing in. You can request a new verification link.');
   }
   await createSession(user, res);
   return { accessToken: issueAccessToken(user), user: publicUser(user) };
@@ -64,8 +72,11 @@ export async function changePassword(userId, input) {
   if (await bcrypt.compare(input.newPassword, user.passwordHash)) {
     throw httpError(400, 'PASSWORD_UNCHANGED', 'Choose a new password that is different from your current one.');
   }
-  user.passwordHash = await bcrypt.hash(input.newPassword, 12);
-  await user.save();
+  const updated = await User.updateOne({ _id: user._id, passwordHash: user.passwordHash }, {
+    $set: { passwordHash: await bcrypt.hash(input.newPassword, 12) },
+    $unset: { passwordResetTokenHash: 1, passwordResetExpiresAt: 1, passwordResetSentAt: 1 },
+  });
+  if (!updated.modifiedCount) throw httpError(409, 'PASSWORD_CHANGED', 'Your password changed in another request. Sign in again.');
   await Session.updateMany({ userId: user._id, revokedAt: null }, { $set: { revokedAt: new Date() } });
   return { success: true, sessionsRevoked: true };
 }
@@ -86,9 +97,9 @@ export async function refreshSession(refreshToken, res) {
   try { payload = jwt.verify(refreshToken, env.JWT_REFRESH_SECRET, { algorithms: ['HS256'] }); }
   catch { throw httpError(401, 'AUTH_REQUIRED', 'Your session has expired. Please sign in again.'); }
 
-  const user = await User.findOne({ _id: payload.sub, status: 'active' }).select('_id email displayName role');
+  const user = await User.findOne({ _id: payload.sub, status: 'active' }).select('_id email displayName role emailVerifiedAt');
   const session = await Session.findOne({ _id: payload.sid, userId: payload.sub, revokedAt: null, expiresAt: { $gt: new Date() } }).select('+refreshTokenHash');
-  if (!user || !session || !equalHashes(session.refreshTokenHash, hashToken(refreshToken))) {
+  if (!user || (env.smtpConfigured && !user.emailVerifiedAt) || !session || !equalHashes(session.refreshTokenHash, hashToken(refreshToken))) {
     throw httpError(401, 'AUTH_REQUIRED', 'Your session has expired. Please sign in again.');
   }
   const nextToken = jwt.sign({ sid: String(session._id), jti: randomUUID() }, env.JWT_REFRESH_SECRET, { subject: String(user._id), expiresIn: REFRESH_TTL_SECONDS, algorithm: 'HS256' });

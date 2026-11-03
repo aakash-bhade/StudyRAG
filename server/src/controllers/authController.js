@@ -1,5 +1,6 @@
 import { changePassword, getRefreshCookieName, getPublicUser, login, logout, refreshSession, register, makeAccessToken, updateProfile } from '../services/authService.js';
 import { exportUserData } from '../services/exportService.js';
+import { requestEmailVerification, requestPasswordReset, resetPasswordWithToken, verifyEmailToken } from '../services/emailAuthService.js';
 const refreshCookie = req => req.cookies[getRefreshCookieName()];
 
 export async function registerAction(req, res, next) {
@@ -38,4 +39,20 @@ export async function exportDataAction(req, res, next) {
     res.setHeader('Cache-Control', 'private, no-store');
     res.json(data);
   } catch (error) { next(error); }
+}
+
+export async function requestVerificationAction(req, res, next) {
+  try { res.json(await requestEmailVerification(req.body.email)); } catch (error) { next(error); }
+}
+
+export async function verifyEmailAction(req, res, next) {
+  try { res.json(await verifyEmailToken(req.body.token)); } catch (error) { next(error); }
+}
+
+export async function requestPasswordResetAction(req, res, next) {
+  try { res.json(await requestPasswordReset(req.body.email)); } catch (error) { next(error); }
+}
+
+export async function resetPasswordAction(req, res, next) {
+  try { res.json(await resetPasswordWithToken(req.body.token, req.body.newPassword)); } catch (error) { next(error); }
 }

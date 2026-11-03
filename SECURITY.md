@@ -7,7 +7,8 @@ This document records the baseline controls planned for StudyRAG. A control is n
 - Hash passwords using a maintained password-hashing library and safe work factors.
 - Keep signing keys and provider credentials in environment variables; commit only `.env.example` with placeholders.
 - Use short-lived access credentials and hashed, rotating, revocable refresh tokens. The current refresh cookie is HTTP-only, SameSite-configurable, and Secure in production. Cookie-authenticated mutations must pass the exact configured Origin check; deployment must use HTTPS and a same-site app/API domain or set `COOKIE_SAME_SITE=none` with Secure cookies.
-- Rate-limit registration, login, password reset, and verification; avoid account-enumeration responses.
+- Rate-limit registration, login, password reset, and verification; avoid account-enumeration responses. Auth endpoints share a per-IP limiter; reset and verification requests use generic responses and a per-account one-minute send cooldown.
+- When SMTP is configured, verification and recovery use random one-time tokens stored only as SHA-256 hashes with 24-hour and one-hour expiries. Reset links are submitted only after an explicit user action and reset revokes all active sessions. Local development without SMTP skips verification; production must configure SMTP to enforce it.
 - Enforce role and membership from database state, never from user-submitted role fields.
 
 ## API and browser security

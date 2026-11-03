@@ -44,7 +44,11 @@ export function AuthProvider({ children }) {
   }, [accessToken, refreshAccessToken]);
 
   const login = useCallback(async credentials => acceptSession(await authApi.login(credentials)), [acceptSession]);
-  const register = useCallback(async details => acceptSession(await authApi.register(details)), [acceptSession]);
+  const register = useCallback(async details => {
+    const session = await authApi.register(details);
+    if (session.accessToken) acceptSession(session);
+    return session;
+  }, [acceptSession]);
   const updateUser = useCallback(nextUser => setUser(nextUser), []);
   const logout = useCallback(async () => {
     try { await authApi.logout(); } finally { setUser(null); setAccessToken(null); }

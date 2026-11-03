@@ -18,20 +18,29 @@ export default function AuthPage({ mode }) {
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [needsVerification, setNeedsVerification] = useState(false);
 
   async function handleSubmit(event) {
     event.preventDefault();
     if (busy) return;
     setError('');
+    setNeedsVerification(false);
     setBusy(true);
     const form = new FormData(event.currentTarget);
     const details = Object.fromEntries(form.entries());
     try {
-      if (isSignup) await register(details);
+      if (isSignup) {
+        const result = await register(details);
+        if (result.verificationRequired) {
+          navigate(`/verify-email/pending?email=${encodeURIComponent(result.email)}`, { replace: true });
+          return;
+        }
+      }
       else await login({ email: details.email, password: details.password });
       navigate('/app', { replace: true });
     } catch (requestError) {
       setError(requestError.message);
+      setNeedsVerification(requestError.code === 'EMAIL_NOT_VERIFIED');
     } finally {
       setBusy(false);
     }
@@ -63,6 +72,8 @@ export default function AuthPage({ mode }) {
         <div className="password-label"><label htmlFor="password">Password</label>{isSignup && <span>At least 10 characters</span>}</div>
         <div className="password-input"><input id="password" name="password" type={showPassword ? 'text' : 'password'} autoComplete={isSignup ? 'new-password' : 'current-password'} minLength={isSignup ? 10 : undefined} maxLength={128} placeholder={isSignup ? 'Create a strong password' : 'Enter your password'} required /><button type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword(!showPassword)}>{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></div>
         {error && <p className="form-error" role="alert">{error}</p>}
+        {needsVerification && <Link className="auth-inline-link" to="/verify-email/pending">Request a verification link</Link>}
+        {!isSignup && <Link className="auth-inline-link auth-forgot-link" to="/forgot-password">Forgot your password?</Link>}
         <button className="button button-primary auth-submit" type="submit" disabled={busy}>{busy ? 'Please wait…' : isSignup ? 'Create your account' : 'Sign in'}{!busy && <ArrowRight size={17} />}</button>
       </form>
       <div className="auth-note"><ShieldCheck size={15} /><span>Your password is protected. We never store it in plain text.</span></div>

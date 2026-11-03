@@ -5,7 +5,7 @@ Base path: `/api/v1`. JSON errors use a stable `{ error: { code, message, detail
 | Area | Planned endpoints |
 |---|---|
 | Health | `GET /health` |
-| Auth | `POST /auth/register`, `/auth/login`, `/auth/logout`, `/auth/refresh`; `GET /auth/me`; authenticated `PATCH /auth/profile` updates the display name; `GET /auth/export` downloads a private JSON export of account records and extracted source text; `PATCH /auth/password` verifies current password, updates the hash, and revokes all sessions. Export omits credentials, sessions, source binaries, internal storage keys, hashes, and embedding vectors. Email verification and email-based password recovery remain planned. |
+| Auth | `POST /auth/register`, `/auth/login`, `/auth/logout`, `/auth/refresh`; `GET /auth/me`; `PATCH /auth/profile` updates the display name; `GET /auth/export` downloads private JSON account records; `PATCH /auth/password` verifies current password and revokes sessions; `POST /auth/verification/resend` and `/auth/verification/confirm`; `POST /auth/password-reset/request` and `/auth/password-reset/confirm` (email actions require SMTP; one-time tokens are hashed and expire). |
 | Profile | `GET/PATCH /users/me`, `PATCH /users/me/password`, `DELETE /users/me` |
 | Workspaces | CRUD `/workspaces`; membership listing and invitation/removal under `/workspaces/:id/members` |
 | Documents | `GET/POST /documents`, `PATCH/DELETE /documents/:id`, `GET /documents/:id/download`, `POST /documents/:id/embeddings` (implemented; owner-scoped; PDF, DOCX, UTF-8 TXT; 10 MiB upload cap; embedding index requires Ollama) |

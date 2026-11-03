@@ -4,7 +4,7 @@ Last updated: 2026-11-03
 
 ## Current phase
 
-Phase 23 — Authentication form UX polish.
+Phase 24 — Email verification and password recovery.
 
 ## Completed
 
@@ -35,6 +35,7 @@ Phase 23 — Authentication form UX polish.
 - Added an authenticated JSON data export for the account profile and owner-scoped study records, including extracted document/webpage text; excludes passwords, sessions, original file binaries, internal storage identifiers, content hashes, and embedding vectors.
 - Replaced the generic post-login placeholder with owner-scoped live counts, upcoming task/assignment deadlines, and quick links; partial API failures are surfaced without hiding available sections.
 - Corrected the password-length hint so it appears on account creation only, not on sign-in.
+- Added optional SMTP email verification and password recovery using hashed, expiring one-time tokens; password resets revoke active sessions. Local auth preserves its existing behavior when SMTP is not configured.
 
 ## In progress
 
@@ -44,17 +45,17 @@ Phase 23 — Authentication form UX polish.
 
 ## Pending
 
-- Email verification and email-based password recovery are not implemented yet (no email delivery service configured).
-- Team features, email verification/password recovery, remaining hardening, and deployment verification remain pending.
+- Team features, remaining hardening, and deployment verification remain pending.
 
 ## Verification and Git
 
 - Frontend and server dependencies installed with lockfiles; npm install audits reported zero vulnerabilities for both packages.
-- Current `client`: production build passes with authentication form UX polish.
+- Current `client`: production build passes with email verification and password recovery screens.
 - Current `server`: Node syntax checks pass across all server JavaScript files.
 - `git diff --check` passes. Live API integration is pending because MongoDB is not configured.
+- Email verification and recovery have not been exercised against configured SMTP credentials.
 - Browser review and live API integration are pending. No MongoDB URI is configured, so auth and document flows have not been exercised against a database.
-- Current branch: `main`; authentication form UX polish is in progress locally.
+- Current branch: `main`; email verification and password recovery changes are in progress locally.
 
 ## Known constraints
 
