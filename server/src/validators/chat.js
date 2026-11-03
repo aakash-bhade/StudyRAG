@@ -6,3 +6,7 @@ export const questionSchema = z.object({
   websiteSourceIds: z.array(z.string().regex(/^[a-f\d]{24}$/i)).max(50).optional(),
   conversationId: z.string().regex(/^[a-f\d]{24}$/i).optional(),
 });
+
+export const renameConversationSchema = z.object({
+  title: z.string().trim().min(1, 'Conversation title cannot be empty.').max(120),
+}).strict();

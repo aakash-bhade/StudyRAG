@@ -11,7 +11,7 @@ Base path: `/api/v1`. JSON errors use a stable `{ error: { code, message, detail
 | Documents | `GET/POST /documents`, `PATCH/DELETE /documents/:id`, `GET /documents/:id/download`, `POST /documents/:id/embeddings` (implemented; owner-scoped; PDF, DOCX, UTF-8 TXT; 10 MiB upload cap; embedding index requires Ollama) |
 | Website sources | `GET/POST /sources`, `POST /sources/:id/refresh`, `POST /sources/:id/embeddings`, `DELETE /sources/:id` (implemented; public HTML only, 2 MiB cap, bounded redirects, owner-scoped chunks; refresh reuses safe-fetch checks and rolls back failed re-indexing) |
 | Notes/folders | `GET/POST /notes`, `PATCH/DELETE /notes/:id`; `GET/POST /folders`, `PATCH/DELETE /folders/:id` (implemented; folder deletion keeps notes and clears their folder assignment) |
-| Chat | `GET /chat/conversations`, `GET/DELETE /chat/conversations/:id`, `POST /chat/ask` (creates or appends to an optional `conversationId`) |
+| Chat | `GET /chat/conversations`, `GET/PATCH/DELETE /chat/conversations/:id`, `POST /chat/ask` (creates or appends to an optional `conversationId`; PATCH renames a saved conversation) |
 | Saved items | `GET/POST /saved-items`, `DELETE /saved-items/:id` (implemented; source ownership and excerpt are verified against the cited chunk) |
 | Quizzes | `GET /quizzes`, `POST /quizzes/generate`, `GET /quizzes/:id`, `POST /quizzes/:id/attempts` (implemented; Ollama required for generation; owner-scoped server scoring) |
 | Flashcards | `GET /flashcards`, `POST /flashcards/generate`, `DELETE /flashcards/:id` (implemented; saved owner-scoped decks generated only from selected or owned source passages; Ollama required) |

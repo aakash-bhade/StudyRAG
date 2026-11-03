@@ -563,8 +563,16 @@ h1, h2, h3, p { margin-top: 0; }
 .chat-new-button:hover { background: #e8f3ff; }
 .chat-source-panel h2.chat-recent-heading { margin-top: 19px; padding-top: 13px; border-top: 1px solid #e9eff5; }
 .chat-recent-list { display: grid; gap: 3px; max-height: 180px; overflow: auto; }
-.chat-recent-list button { overflow: hidden; padding: 7px 8px; border: 0; border-radius: 7px; color: #647991; background: transparent; font: 9px 'DM Sans',sans-serif; text-align: left; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
-.chat-recent-list button:hover, .chat-recent-list button.selected { color: #2674cf; background: #edf5ff; }
+.chat-recent-item { display: flex; align-items: center; gap: 2px; min-width: 0; border-radius: 7px; }
+.chat-recent-item:hover, .chat-recent-item.selected { background: #edf5ff; }
+.chat-recent-item button { overflow: hidden; padding: 7px 8px; border: 0; border-radius: 7px; color: #647991; background: transparent; font: 9px 'DM Sans',sans-serif; text-align: left; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+.chat-recent-item .chat-recent-open { flex: 1; min-width: 0; }
+.chat-recent-item.selected .chat-recent-open, .chat-recent-item:hover .chat-recent-open { color: #2674cf; }
+.chat-recent-rename { flex: 0 0 auto; opacity: 0; }
+.chat-recent-item:hover .chat-recent-rename, .chat-recent-rename:focus-visible { opacity: 1; }
+.chat-recent-item form { display: flex; gap: 3px; width: 100%; padding: 3px; }
+.chat-recent-item form input { flex: 1; min-width: 0; border: 1px solid #cbdcf1; border-radius: 5px; padding: 5px; color: #34445c; font: 10px 'DM Sans',sans-serif; }
+.chat-recent-item form button { display: grid; place-items: center; padding: 4px; }
 .chat-recent-list > span { padding: 5px 2px; color: #98a5b5; font-size: 8px; }
 .chat-source-panel > p { margin: 0 0 14px; color: #8998aa; font-size: 9px; line-height: 1.5; }
 .chat-source-list { display: grid; gap: 3px; max-height: 350px; overflow-y: auto; }

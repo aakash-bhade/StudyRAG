@@ -4,7 +4,7 @@ Last updated: 2026-11-03
 
 ## Current phase
 
-Phase 26 — Source-grounded flashcards and mobile navigation.
+Phase 27 — Saved conversation management.
 
 ## Completed
 
@@ -39,6 +39,7 @@ Phase 26 — Source-grounded flashcards and mobile navigation.
 - Added a GitHub Actions workflow for the client production build and server JavaScript syntax checks on pushes and pull requests to `main`.
 - Added owner-scoped flashcard deck generation from private documents and websites, saved decks, flip-through review, and deck deletion; flashcard deck content is included in personal data exports.
 - Replaced the crowded small-screen sidebar with a compact mobile navigation bar and a More menu for the remaining workspace sections.
+- Added owner-scoped saved conversation renaming with validated titles and inline rename, save, and cancel controls in chat.
 
 ## In progress
 
@@ -58,7 +59,7 @@ Phase 26 — Source-grounded flashcards and mobile navigation.
 - `git diff --check` passes. Live API integration is pending because MongoDB is not configured.
 - Email verification and recovery have not been exercised against configured SMTP credentials.
 - Browser review and live API integration are pending. No MongoDB URI is configured, so auth and document flows have not been exercised against a database.
-- Current branch: `main`; flashcards and mobile navigation changes are in progress locally.
+- Current branch: `main`; saved conversation management changes are in progress locally.
 
 ## Known constraints
 

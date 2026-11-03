@@ -21,10 +21,14 @@ export const chatApi = {
     const result = await request(`/conversations/${id}`, { token, refreshAccessToken });
     return result.item;
   },
+  async rename(id, title, auth) {
+    const result = await request(`/conversations/${id}`, auth, { method: 'PATCH', body: JSON.stringify({ title }) });
+    return result.item;
+  },
 };
 
-async function request(path, { token, refreshAccessToken }) {
-  const send = accessToken => fetch(`${BASE}${path}`, { credentials: 'include', headers: { Authorization: `Bearer ${accessToken}` } });
+async function request(path, { token, refreshAccessToken }, options = {}) {
+  const send = accessToken => fetch(`${BASE}${path}`, { credentials: 'include', ...options, headers: { Authorization: `Bearer ${accessToken}`, ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...options.headers } });
   let response = await send(token);
   if (response.status === 401) response = await send(await refreshAccessToken());
   const result = await response.json().catch(() => ({}));

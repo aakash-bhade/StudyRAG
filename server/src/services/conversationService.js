@@ -35,6 +35,17 @@ export async function getConversation(userId, id) {
   return { ...serializeConversation(conversation), messages: messages.map(serializeMessage) };
 }
 
+export async function renameConversation(userId, id, title) {
+  validId(id);
+  const conversation = await Conversation.findOneAndUpdate(
+    { _id: id, ownerId: userId, archivedAt: null },
+    { $set: { title } },
+    { new: true, runValidators: true },
+  ).lean();
+  if (!conversation) throw httpError(404, 'CONVERSATION_NOT_FOUND', 'Conversation not found.');
+  return serializeConversation(conversation);
+}
+
 export async function deleteConversation(userId, id) {
   validId(id);
   const conversation = await Conversation.findOneAndDelete({ _id: id, ownerId: userId });
