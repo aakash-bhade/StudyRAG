@@ -4,7 +4,7 @@ Last updated: 2026-11-03
 
 ## Current phase
 
-Phase 17 — Hybrid semantic retrieval.
+Phase 18 — In-app deadline reminders.
 
 ## Completed
 
@@ -29,6 +29,7 @@ Phase 17 — Hybrid semantic retrieval.
 - Added private saved study passages: cited chat snippets can be bookmarked, reviewed later, and removed; the save API verifies the source belongs to the user and the excerpt matches the cited chunk.
 - Added website source refresh/re-index from the source library, with SSRF-safe redirect/DNS checks, per-source refresh locking, rate limiting, and rollback to old chunks if indexing or metadata update fails.
 - Added optional Ollama semantic embeddings for documents and webpages, per-source embedding index actions, private stored vectors, and hybrid cosine/keyword chat ranking; keyword retrieval remains the fallback.
+- Added a private notifications center that reconciles reminders from overdue and next-7-day task/assignment due dates, removes stale reminders, and tracks read state.
 
 ## In progress
 
@@ -44,11 +45,11 @@ Phase 17 — Hybrid semantic retrieval.
 ## Verification and Git
 
 - Frontend and server dependencies installed with lockfiles; npm install audits reported zero vulnerabilities for both packages.
-- Current `client`: production build passes with semantic index controls.
+- Current `client`: production build passes with in-app deadline reminders.
 - Current `server`: Node syntax checks pass across all server JavaScript files.
 - `git diff --check` passes. Live API integration is pending because MongoDB is not configured.
 - Browser review and live API integration are pending. No MongoDB URI is configured, so auth and document flows have not been exercised against a database.
-- Current branch: `main`; hybrid semantic retrieval is complete locally and awaiting commit/push.
+- Current branch: `main`; in-app deadline reminders are complete locally and awaiting commit/push.
 
 ## Known constraints
 
@@ -56,5 +57,6 @@ Phase 17 — Hybrid semantic retrieval.
 - Local document disk storage is suitable for development only. Production needs a durable private object store and retention/backup policy; ephemeral free hosting may lose uploaded files.
 - AI functionality requires a configured provider or local Ollama runtime; no fabricated fallback responses are allowed.
 - Semantic search requires an installed Ollama embedding model configured with `OLLAMA_EMBEDDING_MODEL`; existing sources must be explicitly indexed, and chat falls back to keyword retrieval when embeddings are unavailable.
+- Deadline reminders refresh when the signed-in user opens Notifications; scheduled background, email, and push delivery are not implemented.
 - Website ingestion currently handles public HTML pages up to 2 MiB with a bounded redirect count and pinned public IPv4 DNS result. JavaScript-rendered pages, authentication-required pages, PDFs, and IPv6-only hosts are not supported; browser review and live fetching against the configured runtime remain pending.
 - Quiz creation requires a configured Ollama-compatible chat model; quiz generation and attempt persistence still need live database/provider verification.
