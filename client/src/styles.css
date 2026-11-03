@@ -792,11 +792,14 @@ h1, h2, h3, p { margin-top: 0; }
 @media (max-width: 560px) { .assignment-create-fields { grid-template-columns: 1fr; } .assignment-create-fields > textarea { grid-column: auto; } .assignment-card > footer { align-items: flex-start; flex-direction: column; } }
 @media (max-width: 560px) { .notification-card { flex-wrap: wrap; } .notification-read-button { margin-left: 45px; } }
 
-/* Keep authenticated workspace copy comfortable to read across features. */
-.dashboard-shell { font-size: 13px; }
-.dashboard-shell :is(p, span, small, label, button, a, time, input, textarea, select, summary, li, b, strong) {
-  font-size: max(12px, 1em) !important;
+/* Keep authenticated workspace copy readable despite compact legacy component styles. */
+.dashboard-shell { font-size: 15px; }
+.dashboard-shell :is(p, label, button, a, time, input, textarea, select, summary, li, b, strong) {
+  font-size: max(14px, 1em) !important;
 }
+.dashboard-shell :is(span, small) { font-size: max(13px, 1em) !important; }
+.dashboard-shell .mobile-bottom-nav :is(a, button, span, small) { font-size: 11px !important; }
+.dashboard-shell .mobile-more-menu :is(a, button, span, small) { font-size: 14px !important; }
 
 @media (max-width: 800px) {
   .dashboard-shell { grid-template-columns: 190px 1fr; }
