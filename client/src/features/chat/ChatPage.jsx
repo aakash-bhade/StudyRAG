@@ -233,7 +233,7 @@ export default function ChatPage() {
           </article>)}
         </div>
         {error && <p className="chat-error" role="alert">{error}</p>}
-        <form className="chat-composer" onSubmit={submit}><textarea aria-label="Ask a question" value={question} onChange={event => setQuestion(event.target.value)} placeholder="Ask something about your study materials…" maxLength={1200} rows={2} /><button type="submit" disabled={sending || question.trim().length < 3} aria-label="Send question"><Send size={17} /></button><small>Answers are grounded in the selected uploaded materials.</small></form>
+        <form className="chat-composer" onSubmit={submit}><textarea aria-label="Ask a question" value={question} onChange={event => setQuestion(event.target.value)} placeholder="Ask something about your study materials…" maxLength={1200} rows={2} /><button type="submit" disabled={sending || question.trim().length < 3} aria-label="Send question" title="Send question"><Send size={18} /></button><small><ShieldCheck size={13} /> Answers use your private study materials</small></form>
       </section>
       <aside className="chat-source-panel">
         <button className="chat-new-button" onClick={startNewConversation}><Plus size={14} /> New conversation</button>
