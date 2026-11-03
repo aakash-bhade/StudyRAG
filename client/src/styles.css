@@ -368,6 +368,33 @@ h1, h2, h3, p { margin-top: 0; }
 .document-actions button:hover, .rename-form button:hover { background: #f0f6fd; color: #327dc9; }
 .document-actions button.delete-action:hover { background: #fff1f0; color: #d45b54; }
 .rename-form { display: flex; align-items: center; gap: 3px; }
+.source-add-card { padding: 20px; border: 1px solid #e5edf6; border-radius: 15px; background: linear-gradient(120deg,#fff,#f7fbff); }
+.source-add-card h2 { margin: 0 0 6px; color: #344963; font: 700 14px 'Manrope',sans-serif; }
+.source-add-card > p { margin: 0 0 16px; color: #8795a8; font-size: 10px; line-height: 1.6; }
+.source-add-card form label { display: block; margin-bottom: 6px; color: #516782; font-size: 10px; font-weight: 700; }
+.source-add-card form > div { display: flex; gap: 9px; }
+.source-add-card input { min-width: 0; flex: 1; height: 40px; padding: 0 12px; border: 1px solid #e1e9f2; border-radius: 10px; outline: none; background: #fff; color: #405570; font: 10px 'DM Sans',sans-serif; }
+.source-add-card input:focus { border-color: #82b8f0; box-shadow: 0 0 0 3px rgba(44,132,224,.1); }
+.source-add-card button { min-width: 110px; height: 40px; display: flex; align-items: center; justify-content: center; gap: 6px; border: 0; border-radius: 10px; background: #1678e6; color: white; font-size: 10px; font-weight: 700; cursor: pointer; }
+.source-add-card button:disabled { opacity: .7; cursor: wait; }
+.source-feedback { margin: 12px 0; padding: 10px 12px; border-radius: 9px; font-size: 10px; line-height: 1.5; }
+.source-feedback.error { border: 1px solid #f1d6d4; background: #fff7f6; color: #a64e48; }
+.source-feedback.success { border: 1px solid #d7eee2; background: #f5fcf7; color: #47886b; }
+.source-list-heading { display: flex; align-items: center; justify-content: space-between; margin: 25px 0 10px; }
+.source-list-heading h2 { margin: 0; color: #293b55; font: 700 14px 'Manrope',sans-serif; }
+.source-list-heading span { color: #8b9bb0; font-size: 9px; }
+.website-source-list { overflow: hidden; border: 1px solid #e8eef5; border-radius: 14px; background: #fff; }
+.website-source-list article { min-height: 74px; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid #edf1f6; }
+.website-source-list article:last-child { border-bottom: 0; }
+.website-source-icon { width: 38px; height: 38px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 11px; background: #edf5ff; color: #4087dc; }
+.website-source-details { display: grid; min-width: 0; flex: 1; gap: 4px; }
+.website-source-details b { overflow: hidden; color: #354861; font: 700 11px 'Manrope',sans-serif; text-overflow: ellipsis; white-space: nowrap; }
+.website-source-details a { display: flex; align-items: center; gap: 4px; color: #4384c9; font-size: 9px; }
+.website-source-details small { color: #8a98aa; font-size: 8px; }
+.source-delete { width: 30px; height: 30px; display: grid; place-items: center; border: 0; border-radius: 8px; background: transparent; color: #8393a8; cursor: pointer; }
+.source-delete:hover { background: #fff1f0; color: #d45b54; }
+.source-delete:disabled { opacity: .6; cursor: wait; }
+.chat-citation-link { display: inline-block; padding: 0 10px 8px; color: #2776c9; font-size: 9px; }
 .rename-form input { flex: 1; min-width: 60px; height: 29px; padding: 0 8px; border: 1px solid #c9dbee; border-radius: 7px; outline: 0; color: #344a66; font: 10px 'DM Sans',sans-serif; }
 .rename-form input:focus { border-color: #6ca6e3; }
 .document-privacy-note { display: flex; align-items: center; gap: 6px; margin: 15px 2px 0; color: #93a0b2; font-size: 8px; }
@@ -489,6 +516,9 @@ h1, h2, h3, p { margin-top: 0; }
   .welcome-illustration { margin-right: 0; }
 }
 @media (max-width: 560px) {
+  .source-add-card { padding: 15px; }
+  .source-add-card form > div { align-items: stretch; flex-direction: column; }
+  .source-add-card button { width: 100%; }
   .auth-screen { padding: 71px 14px 60px; }
   .auth-back { top: 21px; left: 16px; font-size: 11px; }
   .auth-card { padding: 25px 21px 23px; border-radius: 20px; }

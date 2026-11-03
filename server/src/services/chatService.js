@@ -3,6 +3,8 @@ import { env } from '../config/env.js';
 import { httpError } from '../middleware/errors.js';
 import { Document } from '../models/Document.js';
 import { DocumentChunk } from '../models/DocumentChunk.js';
+import { WebsiteSource } from '../models/WebsiteSource.js';
+import { WebsiteChunk } from '../models/WebsiteChunk.js';
 
 const STOP_WORDS = new Set('a an and are as at be by can do for from how i in is it me my of on or the this to was what when where which who why with you your explain tell'.split(' '));
 
@@ -50,30 +52,46 @@ async function generateAnswer(question, sources) {
   }
 }
 
-export async function answerFromDocuments(userId, { question, documentIds }) {
+export async function answerFromDocuments(userId, { question, documentIds, websiteSourceIds }) {
+  const hasFilters = Boolean(documentIds?.length || websiteSourceIds?.length);
   const filter = { ownerId: userId };
-  if (documentIds?.length) {
-    const validIds = documentIds.filter(mongoose.isValidObjectId);
-    if (validIds.length !== documentIds.length) throw httpError(400, 'INVALID_DOCUMENT_ID', 'One or more document IDs are invalid.');
+  if (hasFilters) {
+    const validIds = (documentIds || []).filter(mongoose.isValidObjectId);
+    if (validIds.length !== (documentIds || []).length) throw httpError(400, 'INVALID_DOCUMENT_ID', 'One or more document IDs are invalid.');
     filter._id = { $in: validIds };
   }
   const documents = await Document.find(filter).select('_id displayName pageCount').lean();
   if (documentIds?.length && documents.length !== new Set(documentIds).size) throw httpError(404, 'DOCUMENT_NOT_FOUND', 'One or more selected documents were not found in your workspace.');
-  if (!documents.length) throw httpError(400, 'NO_DOCUMENTS', 'Upload a document before asking a question.');
-
   const byId = new Map(documents.map(document => [String(document._id), document]));
+  const websiteFilter = { ownerId: userId };
+  if (hasFilters) {
+    const validIds = (websiteSourceIds || []).filter(mongoose.isValidObjectId);
+    if (validIds.length !== (websiteSourceIds || []).length) throw httpError(400, 'INVALID_SOURCE_ID', 'One or more website source IDs are invalid.');
+    websiteFilter._id = { $in: validIds };
+  }
+  const websites = await WebsiteSource.find(websiteFilter).select('_id title url').lean();
+  if (websiteSourceIds?.length && websites.length !== new Set(websiteSourceIds).size) throw httpError(404, 'SOURCE_NOT_FOUND', 'One or more selected websites were not found in your workspace.');
+  const websiteById = new Map(websites.map(source => [String(source._id), source]));
+  if (!documents.length && !websites.length) throw httpError(400, 'NO_SOURCES', 'Add a document or website source before asking a question.');
   const queryTerms = terms(question);
   if (!queryTerms.length) throw httpError(400, 'QUESTION_NEEDS_KEYWORDS', 'Add a few specific words to your question so I can search your documents.');
-  const chunks = await DocumentChunk.find({ ownerId: userId, documentId: { $in: documents.map(document => document._id) } })
-    .select('documentId ordinal page text').limit(5000).lean();
-  const sources = chunks.map(chunk => ({
+  const [chunks, websiteChunks] = await Promise.all([
+    DocumentChunk.find({ ownerId: userId, documentId: { $in: documents.map(document => document._id) } }).select('documentId ordinal page text').limit(5000).lean(),
+    WebsiteChunk.find({ ownerId: userId, sourceId: { $in: websites.map(source => source._id) } }).select('sourceId ordinal text').limit(5000).lean(),
+  ]);
+  const sources = [...chunks.map(chunk => ({
+    sourceType: 'document',
     documentId: String(chunk.documentId),
     documentName: byId.get(String(chunk.documentId))?.displayName || 'Document',
     ordinal: chunk.ordinal,
     page: chunk.page,
     text: chunk.text,
     score: rankChunk(chunk.text, queryTerms),
-  })).filter(source => source.score > 0).sort((a, b) => b.score - a.score).slice(0, 5);
+  })), ...websiteChunks.map(chunk => ({
+    sourceType: 'website', websiteSourceId: String(chunk.sourceId), documentId: String(chunk.sourceId),
+    documentName: websiteById.get(String(chunk.sourceId))?.title || 'Website', url: websiteById.get(String(chunk.sourceId))?.url,
+    ordinal: chunk.ordinal, page: null, text: chunk.text, score: rankChunk(chunk.text, queryTerms),
+  }))].filter(source => source.score > 0).sort((a, b) => b.score - a.score).slice(0, 5);
 
   if (!sources.length) return { answer: null, answerMode: 'no-match', message: 'I could not find a relevant passage in the selected documents. Try different terms or upload the right material.', sources: [] };
   const answer = await generateAnswer(question, sources);

@@ -1,12 +1,12 @@
 const BASE = '/api/v1/chat';
 
 export const chatApi = {
-  async ask(question, documentIds, conversationId, { token, refreshAccessToken }) {
+  async ask(question, documentIds, conversationId, { token, refreshAccessToken }, websiteSourceIds = []) {
     const send = accessToken => fetch(`${BASE}/ask`, {
       method: 'POST',
       credentials: 'include',
       headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question, documentIds, ...(conversationId ? { conversationId } : {}) }),
+      body: JSON.stringify({ question, documentIds, websiteSourceIds, ...(conversationId ? { conversationId } : {}) }),
     });
     let response = await send(token);
     if (response.status === 401) response = await send(await refreshAccessToken());

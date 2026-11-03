@@ -1,7 +1,10 @@
 import mongoose from 'mongoose';
 
 const citationSchema = new mongoose.Schema({
-  documentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Document', required: true },
+  documentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Document', default: undefined },
+  websiteSourceId: { type: mongoose.Schema.Types.ObjectId, ref: 'WebsiteSource', default: undefined },
+  url: { type: String, maxlength: 2048, default: undefined },
+  sourceType: { type: String, enum: ['document', 'website'], required: true },
   documentName: { type: String, required: true, maxlength: 180 },
   ordinal: { type: Number, required: true, min: 0 },
   page: { type: Number, default: null, min: 1 },

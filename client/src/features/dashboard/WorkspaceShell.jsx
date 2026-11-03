@@ -1,4 +1,4 @@
-import { BookOpen, FileText, GraduationCap, LogOut, MessageCircle, Sparkles, UserRound } from 'lucide-react';
+import { BookOpen, FileText, Globe2, GraduationCap, LogOut, MessageCircle, Sparkles, UserRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
@@ -22,12 +22,13 @@ export default function WorkspaceShell({ active, children }) {
       <Link className={`dash-nav ${active === 'overview' ? 'active' : ''}`} to="/app"><MessageCircle size={17} /> Overview</Link>
       <div className="sidebar-label sidebar-up-next">YOUR LEARNING SPACE</div>
       <Link className={`dash-nav ${active === 'documents' ? 'active' : ''}`} to="/app/documents"><FileText size={17} /> Documents</Link>
+      <Link className={`dash-nav ${active === 'sources' ? 'active' : ''}`} to="/app/sources"><Globe2 size={17} /> Websites</Link>
       <Link className={`dash-nav ${active === 'notes' ? 'active' : ''}`} to="/app/notes"><BookOpen size={17} /> Notes</Link>
       <Link className={`dash-nav ${active === 'chat' ? 'active' : ''}`} to="/app/chat"><Sparkles size={17} /> Ask materials</Link>
       <div className="sidebar-bottom"><div className="sidebar-user"><span className="user-avatar"><UserRound size={17} /></span><span><b>{user?.displayName}</b><small>{roleLabels[user?.role] || 'Member'}</small></span></div><button className="sign-out-button" onClick={handleLogout} disabled={loggingOut}><LogOut size={16} /> {loggingOut ? 'Signing out…' : 'Sign out'}</button></div>
     </aside>
     <section className="dashboard-main">
-      <header className="dashboard-topbar"><span className="breadcrumb">My workspace <span>/</span> {active === 'documents' ? 'Documents' : active === 'chat' ? 'Ask materials' : active === 'notes' ? 'Notes' : 'Overview'}</span><span className="topbar-avatar">{user?.displayName?.slice(0, 1)?.toUpperCase() || 'S'}</span></header>
+      <header className="dashboard-topbar"><span className="breadcrumb">My workspace <span>/</span> {active === 'documents' ? 'Documents' : active === 'chat' ? 'Ask materials' : active === 'notes' ? 'Notes' : active === 'sources' ? 'Website sources' : 'Overview'}</span><span className="topbar-avatar">{user?.displayName?.slice(0, 1)?.toUpperCase() || 'S'}</span></header>
       <div className="dashboard-content">{children}</div>
     </section>
   </main>;

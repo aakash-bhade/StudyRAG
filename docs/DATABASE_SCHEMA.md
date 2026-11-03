@@ -11,7 +11,8 @@ All user-owned records carry `ownerId`; workspace data also carries `workspaceId
 | `folders` | ownerId, workspaceId?, name, parentId? | Owner/workspace + parent indexes |
 | `documents` | ownerId, displayName, originalName, private storageKey, mimeType, byteSize, ready status, pageCount, chunkCount, contentHash | Implemented with owner + createdAt and owner + displayName indexes; storage key and content hash excluded from default queries |
 | `documentChunks` | ownerId, documentId, ordinal, text, page | Implemented with unique document/ordinal and owner/document indexes; embedding metadata remains pending |
-| `websiteSources` | ownerId, workspaceId?, url, canonicalHost, status, fetchedAt, contentHash, error | Owner/workspace + status indexes; safe-fetch policy enforced before indexing |
+| `websiteSources` | ownerId, url, title, canonicalHost, ready status, fetchedAt, contentHash, chunkCount | Implemented with owner + createdAt index; safe-fetch policy runs before indexing |
+| `websiteChunks` | ownerId, sourceId, ordinal, text | Implemented with unique owner/source/ordinal index; only authorized source chunks enter retrieval |
 | `conversations` | ownerId, workspaceId?, title, sourceFilters, archivedAt | Implemented with owner + updatedAt index; only the owner can list, read, or delete |
 | `messages` | ownerId, conversationId, role, content, citations, provider metadata | Implemented with owner + conversation + createdAt index; citations retain authorized document excerpts |
 | `notes` | ownerId, workspaceId?, folderId?, title, body, tags, deletedAt | Implemented with owner + updatedAt and owner + title indexes; private CRUD and owner-scoped title/body/tag search |
