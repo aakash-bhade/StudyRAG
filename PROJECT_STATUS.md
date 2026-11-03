@@ -4,7 +4,7 @@ Last updated: 2026-11-03
 
 ## Current phase
 
-Phase 10 — Source-based quizzes.
+Phase 11 — Personal task planner.
 
 ## Completed
 
@@ -23,6 +23,7 @@ Phase 10 — Source-based quizzes.
 - Added private note create, edit, delete, and title/body/tag search flows with owner-scoped MongoDB records and a responsive workspace editor.
 - Added owner-scoped public webpage sources with bounded HTML fetching, redirect and DNS/IP checks, text extraction/chunking, source management UI, and cited retrieval in study chat.
 - Added owner-scoped source-grounded MCQ generation from documents/websites, private saved quizzes and attempts, server-side scoring, and a responsive quiz builder/review UI.
+- Added private task planning with due dates and to-do, in-progress, and done states; tasks have owner-scoped CRUD APIs and a responsive board UI.
 
 ## In progress
 
@@ -33,16 +34,16 @@ Phase 10 — Source-based quizzes.
 ## Pending
 
 - Email verification and password recovery are not implemented yet.
-- Assignments, team features, email verification/password recovery, remaining hardening, and deployment verification remain pending.
+- Assignment instructions/submissions, team features, email verification/password recovery, remaining hardening, and deployment verification remain pending.
 
 ## Verification and Git
 
 - Frontend and server dependencies installed with lockfiles; npm install audits reported zero vulnerabilities for both packages.
-- Current `client`: production build passes with private source-based quiz UI.
-- Current `server`: Node syntax and imports pass for quiz/source models and services, chat services, and Express app.
-- `git diff --check` passes.
+- Current `client`: production build passes with private task planner UI.
+- Current `server`: Node syntax checks pass across all server JavaScript files.
+- `git diff --check` passes. Live API integration is pending because MongoDB is not configured.
 - Browser review and live API integration are pending. No MongoDB URI is configured, so auth and document flows have not been exercised against a database.
-- Current branch: `main`; source-based quiz implementation is complete locally and awaiting commit/push.
+- Current branch: `main`; personal task planner is complete locally and awaiting commit/push.
 
 ## Known constraints
 
