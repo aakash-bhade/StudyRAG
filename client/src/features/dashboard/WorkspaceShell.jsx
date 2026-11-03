@@ -1,4 +1,4 @@
-import { BookOpen, ClipboardCheck, ClipboardList, FileText, Globe2, GraduationCap, LogOut, MessageCircle, Settings, Sparkles, UserRound } from 'lucide-react';
+import { BookOpen, Bookmark, ClipboardCheck, ClipboardList, FileText, Globe2, GraduationCap, LogOut, MessageCircle, Settings, Sparkles, UserRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
@@ -28,11 +28,12 @@ export default function WorkspaceShell({ active, children }) {
       <Link className={`dash-nav ${active === 'quizzes' ? 'active' : ''}`} to="/app/quizzes"><BookOpen size={17} /> Quizzes</Link>
       <Link className={`dash-nav ${active === 'tasks' ? 'active' : ''}`} to="/app/tasks"><ClipboardList size={17} /> Tasks</Link>
       <Link className={`dash-nav ${active === 'assignments' ? 'active' : ''}`} to="/app/assignments"><ClipboardCheck size={17} /> Assignments</Link>
+      <Link className={`dash-nav ${active === 'saved' ? 'active' : ''}`} to="/app/saved"><Bookmark size={17} /> Saved items</Link>
       <Link className={`dash-nav ${active === 'settings' ? 'active' : ''}`} to="/app/settings"><Settings size={17} /> Settings</Link>
       <div className="sidebar-bottom"><div className="sidebar-user"><span className="user-avatar"><UserRound size={17} /></span><span><b>{user?.displayName}</b><small>{roleLabels[user?.role] || 'Member'}</small></span></div><button className="sign-out-button" onClick={handleLogout} disabled={loggingOut}><LogOut size={16} /> {loggingOut ? 'Signing out…' : 'Sign out'}</button></div>
     </aside>
     <section className="dashboard-main">
-      <header className="dashboard-topbar"><span className="breadcrumb">My workspace <span>/</span> {active === 'documents' ? 'Documents' : active === 'chat' ? 'Ask materials' : active === 'notes' ? 'Notes' : active === 'sources' ? 'Website sources' : active === 'quizzes' ? 'Quizzes' : active === 'tasks' ? 'Tasks' : active === 'assignments' ? 'Assignments' : active === 'settings' ? 'Settings' : 'Overview'}</span><span className="topbar-avatar">{user?.displayName?.slice(0, 1)?.toUpperCase() || 'S'}</span></header>
+      <header className="dashboard-topbar"><span className="breadcrumb">My workspace <span>/</span> {active === 'documents' ? 'Documents' : active === 'chat' ? 'Ask materials' : active === 'notes' ? 'Notes' : active === 'sources' ? 'Website sources' : active === 'quizzes' ? 'Quizzes' : active === 'tasks' ? 'Tasks' : active === 'assignments' ? 'Assignments' : active === 'saved' ? 'Saved items' : active === 'settings' ? 'Settings' : 'Overview'}</span><span className="topbar-avatar">{user?.displayName?.slice(0, 1)?.toUpperCase() || 'S'}</span></header>
       <div className="dashboard-content">{children}</div>
     </section>
   </main>;

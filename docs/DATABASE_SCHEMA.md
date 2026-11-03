@@ -26,7 +26,7 @@ All user-owned records carry `ownerId`; workspace data also carries `workspaceId
 | `assignmentSubmissions` | ownerId, assignmentId, content, status, submittedAt | Assignment + owner; app status does not imply institutional submission |
 | `tasks` | ownerId, workspaceId?, title, status, dueAt, sourceRef | Owner/workspace + status + dueAt |
 | `notifications` | ownerId, type, payload, readAt | Owner + createdAt + readAt |
-| `savedItems` | ownerId, kind, sourceId, excerpt, citation | Owner + createdAt; source access checked when displaying details |
+| `savedItems` | ownerId, sourceType, sourceId, ordinal, sourceName, excerpt, citation snapshot | Implemented with owner + createdAt and unique owner/source/ordinal indexes; source ownership and excerpt are checked on save |
 | `activityLogs` | actorId, workspaceId?, action, targetType, targetId, createdAt | Actor/workspace + createdAt; exclude secrets and content bodies |
 
 ## Data lifecycle rules

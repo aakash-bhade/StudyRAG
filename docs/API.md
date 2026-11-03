@@ -12,7 +12,7 @@ Base path: `/api/v1`. JSON errors use a stable `{ error: { code, message, detail
 | Website sources | `GET/POST /sources`, `DELETE /sources/:id` (implemented; public HTML only, 2 MiB cap, bounded redirects, owner-scoped chunks; refresh pending) |
 | Notes/folders | CRUD `/notes`, `/folders`; `POST /notes/generate` only after generation is implemented |
 | Chat | `GET /chat/conversations`, `GET/DELETE /chat/conversations/:id`, `POST /chat/ask` (creates or appends to an optional `conversationId`) |
-| Saved items | `GET/POST /saved-items`, `DELETE /saved-items/:id` |
+| Saved items | `GET/POST /saved-items`, `DELETE /saved-items/:id` (implemented; source ownership and excerpt are verified against the cited chunk) |
 | Quizzes | `GET /quizzes`, `POST /quizzes/generate`, `GET /quizzes/:id`, `POST /quizzes/:id/attempts` (implemented; Ollama required for generation; owner-scoped server scoring) |
 | Tasks | `GET/POST /tasks`, `PATCH/DELETE /tasks/:id` (implemented; private owner-scoped task planner) |
 | Assignments | `GET/POST /assignments`, `PATCH/DELETE /assignments/:id`, `POST /assignments/:id/submit` (implemented; private instructions and response drafts; submitted state is only recorded in StudyRAG) |

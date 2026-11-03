@@ -4,7 +4,7 @@ Last updated: 2026-11-03
 
 ## Current phase
 
-Phase 13 — Assignment tracker.
+Phase 15 — Saved study passages.
 
 ## Completed
 
@@ -26,6 +26,7 @@ Phase 13 — Assignment tracker.
 - Added private task planning with due dates and to-do, in-progress, and done states; tasks have owner-scoped CRUD APIs and a responsive board UI.
 - Added account settings with profile details and authenticated password changes; current-password verification and global session revocation require a fresh sign-in after changing credentials.
 - Added a private assignment tracker for instructions, due dates, response drafts, and an internal StudyRAG submitted status; no external school or LMS submission is performed.
+- Added private saved study passages: cited chat snippets can be bookmarked, reviewed later, and removed; the save API verifies the source belongs to the user and the excerpt matches the cited chunk.
 
 ## In progress
 
@@ -41,11 +42,11 @@ Phase 13 — Assignment tracker.
 ## Verification and Git
 
 - Frontend and server dependencies installed with lockfiles; npm install audits reported zero vulnerabilities for both packages.
-- Current `client`: production build passes with private assignment tracking.
+- Current `client`: production build passes with private saved study passages UI.
 - Current `server`: Node syntax checks pass across all server JavaScript files.
 - `git diff --check` passes. Live API integration is pending because MongoDB is not configured.
 - Browser review and live API integration are pending. No MongoDB URI is configured, so auth and document flows have not been exercised against a database.
-- Current branch: `main`; assignment tracker is complete locally and awaiting commit/push.
+- Current branch: `main`; saved study passages are complete locally and awaiting commit/push.
 
 ## Known constraints
 

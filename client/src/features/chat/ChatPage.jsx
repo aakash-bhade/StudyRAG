@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Bot, FileText, Globe2, LoaderCircle, MessageCircle, Plus, Send, ShieldCheck, Sparkles } from 'lucide-react';
+import { Bookmark, BookmarkCheck, Bot, FileText, Globe2, LoaderCircle, MessageCircle, Plus, Send, ShieldCheck, Sparkles } from 'lucide-react';
 import WorkspaceShell from '../dashboard/WorkspaceShell.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { documentApi } from '../../services/documentApi.js';
 import { chatApi } from '../../services/chatApi.js';
 import { sourceApi } from '../../services/sourceApi.js';
+import { savedItemApi } from '../../services/savedItemApi.js';
 
 export default function ChatPage() {
   const { accessToken, refreshAccessToken } = useAuth();
@@ -20,14 +21,17 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
+  const [savedKeys, setSavedKeys] = useState(new Set());
+  const [savingKey, setSavingKey] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [documentResult, sourceResult, conversationResult] = await Promise.all([documentApi.list({ ...auth }), sourceApi.list(auth), chatApi.list(auth)]);
+      const [documentResult, sourceResult, conversationResult, savedResult] = await Promise.all([documentApi.list({ ...auth }), sourceApi.list(auth), chatApi.list(auth), savedItemApi.list(auth)]);
       setDocuments(documentResult.items);
       setWebsites(sourceResult.items);
       setConversations(conversationResult.items);
+      setSavedKeys(new Set(savedResult.map(item => `${item.sourceType}-${item.sourceId}-${item.ordinal}`)));
     } catch (loadError) { setError(loadError.message); }
     finally { setLoading(false); }
   }, [accessToken, refreshAccessToken]);
@@ -78,6 +82,15 @@ export default function ChatPage() {
     } finally { setSending(false); }
   }
 
+  async function savePassage(source) {
+    const sourceId = source.sourceType === 'website' ? source.websiteSourceId : source.documentId;
+    const key = `${source.sourceType}-${sourceId}-${source.ordinal}`;
+    setSavingKey(key); setError('');
+    try { await savedItemApi.save({ sourceType: source.sourceType, sourceId, ordinal: source.ordinal, excerpt: source.text }, auth); setSavedKeys(current => new Set([...current, key])); }
+    catch (saveError) { setError(saveError.message); }
+    finally { setSavingKey(''); }
+  }
+
   return <WorkspaceShell active="chat"><div className="chat-page">
     <div className="documents-heading chat-heading"><div><p className="eyebrow"><Sparkles size={13} /> GROUNDED STUDY CHAT</p><h1>Ask your materials</h1><p>Answers use passages from your private documents and include source references.</p></div><span className="documents-count"><ShieldCheck size={15} /> Private to you</span></div>
     <div className="chat-layout">
@@ -89,7 +102,7 @@ export default function ChatPage() {
             <div className="chat-message-body">{message.pending ? <p className="chat-loading"><LoaderCircle size={15} className="spin" /> Searching your materials…</p> : message.role === 'user' ? <p>{message.text}</p> : <>
               {message.answer && <p className="chat-answer">{message.answer}</p>}
               {message.message && <p className="chat-note">{message.message}</p>}
-              {!!message.sources?.length && <div className="chat-sources"><b>Sources</b>{message.sources.map((source, sourceIndex) => <details key={`${source.sourceType}-${source.documentId || source.websiteSourceId}-${source.ordinal}`}><summary>{source.sourceType === 'website' ? <Globe2 size={13} /> : <FileText size={13} />} [{sourceIndex + 1}] {source.documentName}{source.page ? ` · page ${source.page}` : ` · section ${source.ordinal + 1}`}</summary>{source.url && <a className="chat-citation-link" href={source.url} target="_blank" rel="noreferrer">Open webpage source ↗</a>}<p>{source.text}</p></details>)}</div>}
+              {!!message.sources?.length && <div className="chat-sources"><b>Sources</b>{message.sources.map((source, sourceIndex) => { const sourceId = source.sourceType === 'website' ? source.websiteSourceId : source.documentId; const saveKey = `${source.sourceType}-${sourceId}-${source.ordinal}`; const saved = savedKeys.has(saveKey); return <details key={saveKey}><summary>{source.sourceType === 'website' ? <Globe2 size={13} /> : <FileText size={13} />} [{sourceIndex + 1}] {source.documentName}{source.page ? ` · page ${source.page}` : ` · section ${source.ordinal + 1}`}</summary><div className="chat-citation-actions">{source.url && <a className="chat-citation-link" href={source.url} target="_blank" rel="noreferrer">Open webpage source ↗</a>}<button disabled={saved || savingKey === saveKey} onClick={() => savePassage(source)}>{saved ? <BookmarkCheck size={13} /> : savingKey === saveKey ? <LoaderCircle size={13} className="spin" /> : <Bookmark size={13} />}{saved ? 'Saved' : 'Save passage'}</button></div><p>{source.text}</p></details>; })}</div>}
             </>}</div>
           </article>)}
         </div>
