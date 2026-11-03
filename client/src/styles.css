@@ -584,10 +584,10 @@ h1, h2, h3, p { margin-top: 0; }
 .chat-composer small { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; padding: 8px 1px 0; border-top: 1px solid #edf2f7; color: #8798ad; font-size: 12px; }
 .chat-composer small svg { flex: 0 0 auto; color: #55a184; }
 .chat-error { margin: 0 20px 10px; color: #b1544d; font-size: 10px; }
-.chat-source-panel { padding: 18px 15px; border-left: 1px solid #e8eef5; background: #fbfdff; }
+.chat-source-panel { padding: 18px 15px; border-left: 1px solid #e8eef5; background: #f9fbfe; }
 .chat-source-panel h2 { display: flex; align-items: center; gap: 7px; margin: 0 0 8px; color: #344963; font: 700 15px 'Manrope',sans-serif; }
 .chat-source-panel h2 svg { color: #4686d0; }
-.chat-new-button { width: 100%; height: 34px; display: flex; align-items: center; justify-content: center; gap: 6px; margin: 0 0 19px; border: 1px solid #cfe2f9; border-radius: 9px; color: #2873c7; background: #f2f8ff; font-size: 9px; font-weight: 700; cursor: pointer; }
+.chat-new-button { width: 100%; height: 38px; display: flex; align-items: center; justify-content: center; gap: 6px; margin: 0 0 14px; border: 1px solid #cfe2f9; border-radius: 10px; color: #2873c7; background: #f2f8ff; font-size: 13px; font-weight: 700; cursor: pointer; transition: background .18s,border-color .18s; }
 .chat-new-button:hover { background: #e8f3ff; }
 .chat-source-panel h2.chat-recent-heading { margin-top: 19px; padding-top: 13px; border-top: 1px solid #e9eff5; }
 .chat-recent-list { display: grid; gap: 3px; max-height: 180px; overflow: auto; }
@@ -625,7 +625,7 @@ h1, h2, h3, p { margin-top: 0; }
 .chat-empty-links { display: flex; flex-wrap: wrap; gap: 7px; }
 .chat-empty-links a { display: inline-flex; align-items: center; min-height: 32px; padding: 0 10px; border: 1px solid #dce9f8; border-radius: 9px; color: #2776d2; background: #fff; font-size: 13px; font-weight: 700; }
 .chat-empty-links a:hover { border-color: #a7c9ef; background: #f2f8ff; }
-.chat-scope-note { display: flex; align-items: flex-start; gap: 6px; margin-top: 17px; padding-top: 12px; border-top: 1px solid #e9eff5; color: #8092a6; font-size: 8px; line-height: 1.5; }
+.chat-scope-note { display: flex; align-items: flex-start; gap: 6px; margin-top: 12px; padding-top: 10px; border-top: 1px solid #e9eff5; color: #8092a6; font-size: 12px; line-height: 1.5; }
 .chat-scope-note svg { flex: 0 0 auto; color: #5c9f83; }
 
 .notes-workspace { min-height: 570px; display: grid; grid-template-columns: 270px minmax(0,1fr); overflow: hidden; border: 1px solid #e6edf6; border-radius: 15px; background: white; box-shadow: 0 7px 25px rgba(40,75,120,.04); }
@@ -1120,7 +1120,7 @@ h1, h2, h3, p { margin-top: 0; }
   .mobile-more-signout { width: 100%; }
   .chat-layout { min-height: 0; display: flex; flex-direction: column; overflow: visible; }
   .chat-panel { order: 0; min-height: 0; flex: 1; }
-  .chat-source-panel { order: 1; max-height: none; border-top: 1px solid #e8eef5; border-bottom: 0; border-radius: 0 0 16px 16px; }
+  .chat-source-panel { order: 1; max-height: none; padding: 14px 14px 12px; border-top: 1px solid #e8eef5; border-bottom: 0; border-radius: 0 0 16px 16px; background: #fbfdff; }
   .chat-messages { min-height: 175px; max-height: 42vh; padding: 15px 14px; }
   .chat-welcome { max-width: none; margin: 10px auto 12px; padding: 18px 14px 16px; border-radius: 16px; }
   .chat-welcome > span { width: 40px; height: 40px; margin-bottom: 10px; border-radius: 14px; }
@@ -1130,9 +1130,17 @@ h1, h2, h3, p { margin-top: 0; }
   .chat-suggestions button { min-height: 36px; padding: 7px 10px; font-size: 12px; }
   .chat-composer { margin: 0 10px 12px; padding: 10px; }
   .chat-composer textarea { min-height: 48px; font-size: 15px; }
-  .chat-source-panel > p { margin-bottom: 9px; font-size: 13px; }
+  .chat-source-panel h2 { margin-bottom: 5px; font-size: 16px; }
+  .chat-source-panel h2.chat-recent-heading { margin-top: 13px; padding-top: 10px; }
+  .chat-new-button { height: 40px; margin-bottom: 12px; }
+  .chat-source-panel > p { margin-bottom: 7px; font-size: 13px; }
+  .chat-no-documents { padding: 7px 0 3px; }
+  .chat-no-documents > p { margin-bottom: 7px; }
+  .chat-empty-links { gap: 6px; }
+  .chat-empty-links a { min-height: 34px; padding: 0 10px; }
   .chat-source-list { max-height: 180px; }
   .chat-source-list label { padding: 9px 5px; }
   .chat-source-file b, .chat-source-file small { font-size: 13px; }
-  .chat-recent-list { max-height: 150px; }
+  .chat-recent-list { max-height: 120px; }
+  .chat-scope-note { margin-top: 9px; padding-top: 8px; font-size: 12px; }
 }
