@@ -8,7 +8,7 @@ All user-owned records carry `ownerId`; workspace data also carries `workspaceId
 | `sessions` | userId, refreshTokenHash, expiresAt, revokedAt, rotation metadata | User + expiry indexes; never store raw refresh token |
 | `workspaces` | name, type, createdBy, settings | Creator and type indexes |
 | `workspaceMembers` | workspaceId, userId, membershipRole, permissions, status | Unique workspace/user pair; membership checked on every shared-resource request |
-| `folders` | ownerId, workspaceId?, name, parentId? | Owner/workspace + parent indexes |
+| `folders` | ownerId, name | Implemented with unique owner/name index; private notes folders |
 | `documents` | ownerId, displayName, originalName, private storageKey, mimeType, byteSize, ready status, pageCount, chunkCount, contentHash | Implemented with owner + createdAt and owner + displayName indexes; storage key and content hash excluded from default queries |
 | `documentChunks` | ownerId, documentId, ordinal, text, page, embedding?, embeddingModel? | Implemented with unique document/ordinal and owner/document indexes; vectors are private and excluded from default queries |
 | `websiteSources` | ownerId, url, title, canonicalHost, ready status, fetchedAt, contentHash, chunkCount | Implemented with owner + createdAt index; safe-fetch policy runs on add and refresh; short-lived refresh lock serializes re-index and deletion |
@@ -19,7 +19,7 @@ All user-owned records carry `ownerId`; workspace data also carries `workspaceId
 | `assignments` | ownerId, title, instructions, status, response, dueAt, submittedAt | Implemented with owner + status + due date and owner + updated indexes; submitted state is internal to StudyRAG |
 | `conversations` | ownerId, workspaceId?, title, sourceFilters, archivedAt | Implemented with owner + updatedAt index; only the owner can list, read, or delete |
 | `messages` | ownerId, conversationId, role, content, citations, provider metadata | Implemented with owner + conversation + createdAt index; citations retain authorized document excerpts |
-| `notes` | ownerId, workspaceId?, folderId?, title, body, tags, deletedAt | Implemented with owner + updatedAt and owner + title indexes; private CRUD and owner-scoped title/body/tag search |
+| `notes` | ownerId, folderId?, title, body, tags, deletedAt | Implemented with owner + updatedAt and owner + title indexes; private CRUD, folder assignment, and owner-scoped title/body/tag search |
 | `quizzes` | ownerId, workspaceId?, title, origin, difficulty, questions | Owner/workspace + createdAt |
 | `quizAttempts` | ownerId, quizId, answers, score, completedAt | Owner + quiz + completedAt |
 | `assignments` | ownerId, workspaceId?, title, instructions, status, dueAt | Owner/workspace + status + dueAt |

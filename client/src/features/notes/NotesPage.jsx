@@ -1,16 +1,20 @@
 import { useCallback, useEffect, useState } from 'react';
-import { FileText, LoaderCircle, Plus, Save, Search, ShieldCheck, Trash2 } from 'lucide-react';
+import { FileText, Folder, FolderPlus, LoaderCircle, Pencil, Plus, Save, Search, ShieldCheck, Trash2 } from 'lucide-react';
 import WorkspaceShell from '../dashboard/WorkspaceShell.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { noteApi } from '../../services/noteApi.js';
+import { folderApi } from '../../services/folderApi.js';
 
-const emptyDraft = () => ({ id: null, title: '', body: '', tags: '' });
+const emptyDraft = (folderId = null) => ({ id: null, title: '', body: '', tags: '', folderId });
 
 export default function NotesPage() {
   const { accessToken, refreshAccessToken } = useAuth();
   const auth = { token: accessToken, refreshAccessToken };
   const [notes, setNotes] = useState([]);
-  const [draft, setDraft] = useState(emptyDraft);
+  const [folders, setFolders] = useState([]);
+  const [draft, setDraft] = useState(emptyDraft());
+  const [activeFolder, setActiveFolder] = useState('all');
+  const [newFolderName, setNewFolderName] = useState('');
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -27,17 +31,41 @@ export default function NotesPage() {
     finally { setLoading(false); }
   }, [accessToken, refreshAccessToken]);
 
+  const loadFolders = useCallback(async () => {
+    try { setFolders(await folderApi.list(auth)); } catch (loadError) { setError(loadError.message); }
+  }, [accessToken, refreshAccessToken]);
+
   useEffect(() => {
     const timer = window.setTimeout(() => loadNotes(query), query ? 200 : 0);
     return () => window.clearTimeout(timer);
   }, [query, loadNotes]);
+  useEffect(() => { loadFolders(); }, [loadFolders]);
 
-  function newNote() { setDraft(emptyDraft()); setError(''); setNotice(''); }
+  function newNote() { setDraft(emptyDraft(activeFolder !== 'all' && activeFolder !== 'unfiled' ? activeFolder : null)); setError(''); setNotice(''); }
+
+  async function createFolder(event) {
+    event.preventDefault(); if (!newFolderName.trim()) return;
+    try { const folder = await folderApi.create(newFolderName.trim(), auth); setFolders(items => [...items, folder].sort((a, b) => a.name.localeCompare(b.name))); setNewFolderName(''); setActiveFolder(folder.id); setDraft(current => current.id ? current : { ...current, folderId: folder.id }); setNotice(`Folder “${folder.name}” created.`); setError(''); }
+    catch (folderError) { setError(folderError.message); }
+  }
+
+  async function renameFolder(folder) {
+    const name = window.prompt('New folder name', folder.name);
+    if (!name?.trim() || name.trim().toLowerCase() === folder.name) return;
+    try { const updated = await folderApi.update(folder.id, name.trim(), auth); setFolders(items => items.map(item => item.id === updated.id ? updated : item).sort((a, b) => a.name.localeCompare(b.name))); setNotice('Folder renamed.'); setError(''); }
+    catch (folderError) { setError(folderError.message); }
+  }
+
+  async function deleteFolder(folder) {
+    if (!window.confirm(`Delete folder “${folder.name}”? Notes will stay in your workspace as unfiled.`)) return;
+    try { await folderApi.remove(folder.id, auth); setFolders(items => items.filter(item => item.id !== folder.id)); setNotes(items => items.map(note => note.folderId === folder.id ? { ...note, folderId: null } : note)); if (activeFolder === folder.id) setActiveFolder('all'); setDraft(current => current.folderId === folder.id ? { ...current, folderId: null } : current); setNotice('Folder deleted. Its notes are still saved as unfiled.'); setError(''); }
+    catch (folderError) { setError(folderError.message); }
+  }
 
   async function saveNote(event) {
     event.preventDefault();
     setSaving(true); setError(''); setNotice('');
-    const payload = { title: draft.title, body: draft.body, tags: draft.tags.split(',').map(tag => tag.trim()).filter(Boolean) };
+    const payload = { title: draft.title, body: draft.body, tags: draft.tags.split(',').map(tag => tag.trim()).filter(Boolean), folderId: draft.folderId || null };
     try {
       const note = draft.id ? await noteApi.update(draft.id, payload, auth) : await noteApi.create(payload, auth);
       setDraft({ ...note, tags: note.tags.join(', ') });
@@ -52,22 +80,28 @@ export default function NotesPage() {
     try {
       await noteApi.remove(draft.id, auth);
       setNotes(items => items.filter(note => note.id !== draft.id));
-      setDraft(emptyDraft());
+      setDraft(emptyDraft(activeFolder !== 'all' && activeFolder !== 'unfiled' ? activeFolder : null));
       setNotice('Note deleted.');
       setError('');
     } catch (deleteError) { setError(deleteError.message); }
   }
 
+  const visibleNotes = notes.filter(note => activeFolder === 'all' || (activeFolder === 'unfiled' ? !note.folderId : note.folderId === activeFolder));
+  const folderCounts = new Map(folders.map(folder => [folder.id, notes.filter(note => note.folderId === folder.id).length]));
+
   return <WorkspaceShell active="notes"><div className="notes-page">
     <div className="documents-heading"><div><p className="eyebrow"><FileText size={13} /> YOUR PRIVATE NOTES</p><h1>Notes</h1><p>Capture and organize what you learn alongside your study materials.</p></div><span className="documents-count"><ShieldCheck size={15} /> Private to you</span></div>
     <div className="notes-workspace">
-      <aside className="notes-list-panel"><div className="notes-list-heading"><h2>Your notes <span>{notes.length}</span></h2><button onClick={newNote} aria-label="Create a new note"><Plus size={16} /></button></div><label className="notes-search"><Search size={15} /><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search notes…" /></label>
-        {loading ? <div className="notes-list-state"><LoaderCircle size={15} className="spin" /> Loading notes…</div> : notes.length ? <div className="notes-list">{notes.map(note => <button key={note.id} className={`notes-list-item ${draft.id === note.id ? 'selected' : ''}`} onClick={() => { setDraft({ ...note, tags: note.tags.join(', ') }); setError(''); setNotice(''); }}><b>{note.title}</b><span>{note.body.slice(0, 82) || 'No content yet'}</span><small>{new Date(note.updatedAt).toLocaleDateString()}</small></button>)}</div> : <div className="notes-empty-list"><FileText size={21} /><p>{query ? 'No notes match your search.' : 'Your saved notes will appear here.'}</p><button onClick={newNote}>Create a note</button></div>}
+      <aside className="notes-list-panel"><div className="notes-list-heading"><h2>Your notes <span>{visibleNotes.length}</span></h2><button onClick={newNote} aria-label="Create a new note"><Plus size={16} /></button></div><label className="notes-search"><Search size={15} /><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search notes…" /></label>
+        <form className="folder-create-form" onSubmit={createFolder}><input value={newFolderName} onChange={event => setNewFolderName(event.target.value)} maxLength={48} placeholder="New folder name" aria-label="New folder name" /><button disabled={!newFolderName.trim()} aria-label="Create folder"><FolderPlus size={15} /></button></form>
+        <div className="notes-folder-list"><button className={activeFolder === 'all' ? 'selected' : ''} onClick={() => setActiveFolder('all')}><Folder size={14} /> All notes <span>{notes.length}</span></button><button className={activeFolder === 'unfiled' ? 'selected' : ''} onClick={() => setActiveFolder('unfiled')}><FileText size={14} /> Unfiled <span>{notes.filter(note => !note.folderId).length}</span></button>{folders.map(folder => <div className={`notes-folder-row ${activeFolder === folder.id ? 'selected' : ''}`} key={folder.id}><button className="notes-folder-select" onClick={() => setActiveFolder(folder.id)}><Folder size={14} /> {folder.name} <span>{folderCounts.get(folder.id) || 0}</span></button><button className="notes-folder-action" onClick={() => renameFolder(folder)} aria-label={`Rename ${folder.name}`}><Pencil size={12} /></button><button className="notes-folder-action delete" onClick={() => deleteFolder(folder)} aria-label={`Delete ${folder.name}`}><Trash2 size={12} /></button></div>)}</div>
+        {loading ? <div className="notes-list-state"><LoaderCircle size={15} className="spin" /> Loading notes…</div> : visibleNotes.length ? <div className="notes-list">{visibleNotes.map(note => <button key={note.id} className={`notes-list-item ${draft.id === note.id ? 'selected' : ''}`} onClick={() => { setDraft({ ...note, folderId: note.folderId || null, tags: note.tags.join(', ') }); setError(''); setNotice(''); }}><b>{note.title}</b><span>{note.body.slice(0, 82) || 'No content yet'}</span><small>{new Date(note.updatedAt).toLocaleDateString()}</small></button>)}</div> : <div className="notes-empty-list"><FileText size={21} /><p>{query ? 'No notes match your search.' : 'Your saved notes will appear here.'}</p><button onClick={newNote}>Create a note</button></div>}
       </aside>
       <form className="note-editor" onSubmit={saveNote}>
         {error && <p className="note-feedback error" role="alert">{error}</p>}{notice && <p className="note-feedback success" role="status">{notice}</p>}
         <div className="note-editor-toolbar"><span>{draft.id ? 'Edit note' : 'New note'}</span><div>{draft.id && <button type="button" className="note-delete-button" onClick={deleteNote} aria-label="Delete note"><Trash2 size={15} /></button>}<button type="submit" className="note-save-button" disabled={saving || !draft.title.trim() || !draft.body.trim()}>{saving ? <LoaderCircle size={14} className="spin" /> : <Save size={14} />}{saving ? 'Saving…' : 'Save note'}</button></div></div>
         <input className="note-title-input" value={draft.title} onChange={event => setDraft(current => ({ ...current, title: event.target.value }))} placeholder="Note title" maxLength={120} aria-label="Note title" />
+        <label className="note-folder-select">Folder<select value={draft.folderId || ''} onChange={event => setDraft(current => ({ ...current, folderId: event.target.value || null }))}><option value="">Unfiled</option>{folders.map(folder => <option key={folder.id} value={folder.id}>{folder.name}</option>)}</select></label>
         <input className="note-tags-input" value={draft.tags} onChange={event => setDraft(current => ({ ...current, tags: event.target.value }))} placeholder="Tags, separated by commas" aria-label="Note tags" />
         <textarea className="note-body-input" value={draft.body} onChange={event => setDraft(current => ({ ...current, body: event.target.value }))} placeholder="Write down a concept, question, or insight…" maxLength={10000} aria-label="Note content" />
         <div className="note-editor-footer"><ShieldCheck size={13} /> Saved privately to your account <span>{draft.body.length.toLocaleString()} / 10,000</span></div>

@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 
 const noteSchema = new mongoose.Schema({
   ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+  folderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Folder', default: null, index: true },
   title: { type: String, required: true, trim: true, maxlength: 120 },
   body: { type: String, required: true, maxlength: 10000 },
   tags: { type: [{ type: String, trim: true, lowercase: true, maxlength: 24 }], default: [] },

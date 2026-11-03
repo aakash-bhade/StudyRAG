@@ -4,7 +4,7 @@ Last updated: 2026-11-03
 
 ## Current phase
 
-Phase 18 — In-app deadline reminders.
+Phase 19 — Notes folders.
 
 ## Completed
 
@@ -30,6 +30,7 @@ Phase 18 — In-app deadline reminders.
 - Added website source refresh/re-index from the source library, with SSRF-safe redirect/DNS checks, per-source refresh locking, rate limiting, and rollback to old chunks if indexing or metadata update fails.
 - Added optional Ollama semantic embeddings for documents and webpages, per-source embedding index actions, private stored vectors, and hybrid cosine/keyword chat ranking; keyword retrieval remains the fallback.
 - Added a private notifications center that reconciles reminders from overdue and next-7-day task/assignment due dates, removes stale reminders, and tracks read state.
+- Added private notes folders with create, rename, delete, note assignment, and folder filtering; deleting a folder unfiles its notes without removing their content.
 
 ## In progress
 
@@ -45,11 +46,11 @@ Phase 18 — In-app deadline reminders.
 ## Verification and Git
 
 - Frontend and server dependencies installed with lockfiles; npm install audits reported zero vulnerabilities for both packages.
-- Current `client`: production build passes with in-app deadline reminders.
+- Current `client`: production build passes with notes folder management.
 - Current `server`: Node syntax checks pass across all server JavaScript files.
 - `git diff --check` passes. Live API integration is pending because MongoDB is not configured.
 - Browser review and live API integration are pending. No MongoDB URI is configured, so auth and document flows have not been exercised against a database.
-- Current branch: `main`; in-app deadline reminders are complete locally and awaiting commit/push.
+- Current branch: `main`; notes folders are complete locally and awaiting commit/push.
 
 ## Known constraints
 
