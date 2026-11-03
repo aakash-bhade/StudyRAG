@@ -581,7 +581,7 @@ h1, h2, h3, p { margin-top: 0; }
 .chat-composer small { grid-column: 1 / -1; padding-left: 2px; color: #98a5b5; font-size: 8px; }
 .chat-error { margin: 0 20px 10px; color: #b1544d; font-size: 10px; }
 .chat-source-panel { padding: 18px 15px; border-left: 1px solid #e8eef5; background: #fbfdff; }
-.chat-source-panel h2 { display: flex; align-items: center; gap: 7px; margin: 0 0 6px; color: #344963; font: 700 11px 'Manrope',sans-serif; }
+.chat-source-panel h2 { display: flex; align-items: center; gap: 7px; margin: 0 0 8px; color: #344963; font: 700 15px 'Manrope',sans-serif; }
 .chat-source-panel h2 svg { color: #4686d0; }
 .chat-new-button { width: 100%; height: 34px; display: flex; align-items: center; justify-content: center; gap: 6px; margin: 0 0 19px; border: 1px solid #cfe2f9; border-radius: 9px; color: #2873c7; background: #f2f8ff; font-size: 9px; font-weight: 700; cursor: pointer; }
 .chat-new-button:hover { background: #e8f3ff; }
@@ -616,8 +616,11 @@ h1, h2, h3, p { margin-top: 0; }
 .chat-source-file b { overflow: hidden; color: #4c607a; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
 .chat-source-file small { color: #94a1b0; font-size: 8px; }
 .chat-source-state { display: flex; align-items: center; gap: 7px; color: #8291a3; font-size: 9px; }
-.chat-no-documents { padding: 12px 0; color: #7e8ea2; font-size: 9px; line-height: 1.6; }
-.chat-no-documents a { color: #2776d2; font-weight: 700; }
+.chat-no-documents { padding: 12px 0; color: #7e8ea2; font-size: 13px; line-height: 1.6; }
+.chat-no-documents > p { margin: 0 0 9px; color: #70829a; font-size: 13px; }
+.chat-empty-links { display: flex; flex-wrap: wrap; gap: 7px; }
+.chat-empty-links a { display: inline-flex; align-items: center; min-height: 32px; padding: 0 10px; border: 1px solid #dce9f8; border-radius: 9px; color: #2776d2; background: #fff; font-size: 13px; font-weight: 700; }
+.chat-empty-links a:hover { border-color: #a7c9ef; background: #f2f8ff; }
 .chat-scope-note { display: flex; align-items: flex-start; gap: 6px; margin-top: 17px; padding-top: 12px; border-top: 1px solid #e9eff5; color: #8092a6; font-size: 8px; line-height: 1.5; }
 .chat-scope-note svg { flex: 0 0 auto; color: #5c9f83; }
 
@@ -832,7 +835,7 @@ h1, h2, h3, p { margin-top: 0; }
 @media (max-width: 800px) {
   .dashboard-shell { grid-template-columns: 190px 1fr; }
   .chat-layout { grid-template-columns: minmax(0,1fr); }
-  .chat-source-panel { order: -1; padding: 12px; border-left: 0; border-bottom: 1px solid #e8eef5; }
+  .chat-source-panel { order: 1; padding: 12px; border-left: 0; border-bottom: 0; border-top: 1px solid #e8eef5; }
   .chat-source-list { grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); max-height: 130px; }
   .quiz-builder-layout { grid-template-columns: minmax(0,1fr); }
   .flashcards-builder-layout { grid-template-columns: minmax(0,1fr); }
@@ -1111,4 +1114,19 @@ h1, h2, h3, p { margin-top: 0; }
   .mobile-more-menu > a:hover, .mobile-more-signout:hover { background: #f4f8fd; }
   .mobile-more-user { display: flex; align-items: center; gap: 9px; padding: 9px 8px 12px; margin-bottom: 4px; border-bottom: 1px solid #eef2f7; }
   .mobile-more-signout { width: 100%; }
+  .chat-layout { min-height: 0; display: flex; flex-direction: column; overflow: visible; }
+  .chat-panel { order: 0; min-height: 0; flex: 1; }
+  .chat-source-panel { order: 1; max-height: none; border-top: 1px solid #e8eef5; border-bottom: 0; border-radius: 0 0 16px 16px; }
+  .chat-messages { min-height: 175px; max-height: 42vh; padding: 15px 14px; }
+  .chat-welcome { margin: 14px auto 10px; }
+  .chat-welcome > span { width: 38px; height: 38px; margin-bottom: 9px; }
+  .chat-welcome h2 { font-size: 18px; }
+  .chat-welcome > p { margin-bottom: 10px; font-size: 14px; }
+  .chat-composer { margin: 0 10px 12px; padding: 10px; }
+  .chat-composer textarea { min-height: 48px; font-size: 15px; }
+  .chat-source-panel > p { margin-bottom: 9px; font-size: 13px; }
+  .chat-source-list { max-height: 180px; }
+  .chat-source-list label { padding: 9px 5px; }
+  .chat-source-file b, .chat-source-file small { font-size: 13px; }
+  .chat-recent-list { max-height: 150px; }
 }
