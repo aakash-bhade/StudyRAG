@@ -60,7 +60,7 @@ export default function AuthPage({ mode }) {
           <label htmlFor="role">How will you use StudyRAG?</label>
           <select id="role" name="role" defaultValue="student" required>{roles.map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select>
         </>}
-        <div className="password-label"><label htmlFor="password">Password</label>{!isSignup && <span>At least 10 characters for new accounts</span>}</div>
+        <div className="password-label"><label htmlFor="password">Password</label>{isSignup && <span>At least 10 characters</span>}</div>
         <div className="password-input"><input id="password" name="password" type={showPassword ? 'text' : 'password'} autoComplete={isSignup ? 'new-password' : 'current-password'} minLength={isSignup ? 10 : undefined} maxLength={128} placeholder={isSignup ? 'Create a strong password' : 'Enter your password'} required /><button type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword(!showPassword)}>{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></div>
         {error && <p className="form-error" role="alert">{error}</p>}
         <button className="button button-primary auth-submit" type="submit" disabled={busy}>{busy ? 'Please wait…' : isSignup ? 'Create your account' : 'Sign in'}{!busy && <ArrowRight size={17} />}</button>
