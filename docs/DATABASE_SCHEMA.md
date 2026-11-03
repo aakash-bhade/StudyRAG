@@ -11,8 +11,8 @@ All user-owned records carry `ownerId`; workspace data also carries `workspaceId
 | `folders` | ownerId, workspaceId?, name, parentId? | Owner/workspace + parent indexes |
 | `documents` | ownerId, displayName, originalName, private storageKey, mimeType, byteSize, ready status, pageCount, chunkCount, contentHash | Implemented with owner + createdAt and owner + displayName indexes; storage key and content hash excluded from default queries |
 | `documentChunks` | ownerId, documentId, ordinal, text, page | Implemented with unique document/ordinal and owner/document indexes; embedding metadata remains pending |
-| `websiteSources` | ownerId, url, title, canonicalHost, ready status, fetchedAt, contentHash, chunkCount | Implemented with owner + createdAt index; safe-fetch policy runs before indexing |
-| `websiteChunks` | ownerId, sourceId, ordinal, text | Implemented with unique owner/source/ordinal index; only authorized source chunks enter retrieval |
+| `websiteSources` | ownerId, url, title, canonicalHost, ready status, fetchedAt, contentHash, chunkCount | Implemented with owner + createdAt index; safe-fetch policy runs on add and refresh; short-lived refresh lock serializes re-index and deletion |
+| `websiteChunks` | ownerId, sourceId, ordinal, text | Implemented with unique owner/source/ordinal index; refresh restores old chunks if re-indexing fails |
 | `quizzes` | ownerId, title, difficulty, sourceNames, questions with private answer key | Implemented with owner + createdAt index; list and get responses omit correct answer and explanation until an attempt is graded |
 | `quizAttempts` | ownerId, quizId, answers, score, total, completedAt | Implemented with owner + quiz + completion index; score is computed on the server |
 | `tasks` | ownerId, title, details, status, dueAt | Implemented with owner + status + due date and owner + updated indexes; personal task planner |

@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { lookup } from 'node:dns/promises';
 import http from 'node:http';
 import https from 'node:https';
@@ -10,6 +10,7 @@ import { WebsiteSource } from '../models/WebsiteSource.js';
 
 const MAX_BYTES = 2 * 1024 * 1024;
 const MAX_TEXT = 1_000_000;
+const REFRESH_LOCK_MAX_AGE_MS = 2 * 60 * 1000;
 
 function publicIPv4(address) {
   const octets = address.split('.').map(Number);
@@ -103,8 +104,48 @@ export async function addOwnedWebsiteSource(ownerId, input) {
 
 export async function deleteOwnedWebsiteSource(ownerId, id) {
   if (!mongoose.isValidObjectId(id)) throw httpError(400, 'INVALID_ID', 'The website source ID is invalid.');
-  const source = await WebsiteSource.findOneAndDelete({ _id: id, ownerId });
-  if (!source) throw httpError(404, 'SOURCE_NOT_FOUND', 'Website source not found.');
+  const source = await WebsiteSource.findOneAndDelete({ _id: id, ownerId, $or: [{ refreshLock: null }, { refreshLockAt: { $lt: new Date(Date.now() - REFRESH_LOCK_MAX_AGE_MS) } }] });
+  if (!source) {
+    if (await WebsiteSource.exists({ _id: id, ownerId })) throw httpError(409, 'SOURCE_REFRESHING', 'Wait for the webpage refresh to finish before removing it.');
+    throw httpError(404, 'SOURCE_NOT_FOUND', 'Website source not found.');
+  }
   await WebsiteChunk.deleteMany({ ownerId, sourceId: source._id });
   return { success: true };
+}
+
+export async function refreshOwnedWebsiteSource(ownerId, id) {
+  if (!mongoose.isValidObjectId(id)) throw httpError(400, 'INVALID_ID', 'The website source ID is invalid.');
+  const lock = randomUUID();
+  const availableLock = { $or: [{ refreshLock: null }, { refreshLockAt: { $lt: new Date(Date.now() - REFRESH_LOCK_MAX_AGE_MS) } }] };
+  const source = await WebsiteSource.findOneAndUpdate({ _id: id, ownerId, ...availableLock }, { $set: { refreshLock: lock, refreshLockAt: new Date() } }, { new: true }).select('+refreshLock');
+  if (!source) {
+    if (await WebsiteSource.exists({ _id: id, ownerId })) throw httpError(409, 'SOURCE_REFRESHING', 'This webpage is already being refreshed.');
+    throw httpError(404, 'SOURCE_NOT_FOUND', 'Website source not found.');
+  }
+  let oldChunks;
+  try {
+    // Fetch and parse completely before touching the currently indexed passages.
+    const fetched = await fetchPublicPage(source.url);
+    const parsed = extractPage(fetched.body.toString('utf8'));
+    oldChunks = await WebsiteChunk.find({ ownerId, sourceId: source._id }).lean();
+    await WebsiteChunk.deleteMany({ ownerId, sourceId: source._id });
+    await WebsiteChunk.insertMany(parsed.chunks.map(chunk => ({ ...chunk, ownerId, sourceId: source._id })), { ordered: true });
+    const updated = await WebsiteSource.findOneAndUpdate({ _id: id, ownerId, refreshLock: lock }, { $set: {
+      url: fetched.url.toString().slice(0, 2048), title: parsed.title, canonicalHost: fetched.url.hostname,
+      contentHash: createHash('sha256').update(fetched.body).digest('hex'), chunkCount: parsed.chunks.length, fetchedAt: new Date(),
+    }, $unset: { refreshLock: 1, refreshLockAt: 1 } }, { new: true, runValidators: true });
+    if (!updated) throw httpError(409, 'SOURCE_REFRESH_INTERRUPTED', 'The webpage refresh was interrupted. Please reload your sources and try again.');
+    return serialize(updated);
+  } catch (error) {
+    try {
+      if (oldChunks) {
+        await WebsiteChunk.deleteMany({ ownerId, sourceId: source._id });
+        if (oldChunks.length) await WebsiteChunk.insertMany(oldChunks, { ordered: true });
+      }
+      await WebsiteSource.updateOne({ _id: id, ownerId, refreshLock: lock }, { $unset: { refreshLock: 1, refreshLockAt: 1 } });
+    } catch {
+      throw httpError(500, 'SOURCE_REFRESH_RECOVERY_FAILED', 'The source refresh could not be completed safely. Please contact support before using this source.');
+    }
+    throw error;
+  }
 }

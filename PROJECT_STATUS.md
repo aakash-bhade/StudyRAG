@@ -4,7 +4,7 @@ Last updated: 2026-11-03
 
 ## Current phase
 
-Phase 15 — Saved study passages.
+Phase 16 — Website source refresh.
 
 ## Completed
 
@@ -27,6 +27,7 @@ Phase 15 — Saved study passages.
 - Added account settings with profile details and authenticated password changes; current-password verification and global session revocation require a fresh sign-in after changing credentials.
 - Added a private assignment tracker for instructions, due dates, response drafts, and an internal StudyRAG submitted status; no external school or LMS submission is performed.
 - Added private saved study passages: cited chat snippets can be bookmarked, reviewed later, and removed; the save API verifies the source belongs to the user and the excerpt matches the cited chunk.
+- Added website source refresh/re-index from the source library, with SSRF-safe redirect/DNS checks, per-source refresh locking, rate limiting, and rollback to old chunks if indexing or metadata update fails.
 
 ## In progress
 
@@ -42,11 +43,11 @@ Phase 15 — Saved study passages.
 ## Verification and Git
 
 - Frontend and server dependencies installed with lockfiles; npm install audits reported zero vulnerabilities for both packages.
-- Current `client`: production build passes with private saved study passages UI.
+- Current `client`: production build passes with website refresh controls.
 - Current `server`: Node syntax checks pass across all server JavaScript files.
 - `git diff --check` passes. Live API integration is pending because MongoDB is not configured.
 - Browser review and live API integration are pending. No MongoDB URI is configured, so auth and document flows have not been exercised against a database.
-- Current branch: `main`; saved study passages are complete locally and awaiting commit/push.
+- Current branch: `main`; website source refresh is complete locally and awaiting commit/push.
 
 ## Known constraints
 

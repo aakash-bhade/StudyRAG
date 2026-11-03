@@ -9,7 +9,7 @@ Base path: `/api/v1`. JSON errors use a stable `{ error: { code, message, detail
 | Profile | `GET/PATCH /users/me`, `PATCH /users/me/password`, `DELETE /users/me` |
 | Workspaces | CRUD `/workspaces`; membership listing and invitation/removal under `/workspaces/:id/members` |
 | Documents | `GET/POST /documents`, `PATCH/DELETE /documents/:id`, `GET /documents/:id/download` (implemented; owner-scoped; PDF, DOCX, UTF-8 TXT; 10 MiB upload cap) |
-| Website sources | `GET/POST /sources`, `DELETE /sources/:id` (implemented; public HTML only, 2 MiB cap, bounded redirects, owner-scoped chunks; refresh pending) |
+| Website sources | `GET/POST /sources`, `POST /sources/:id/refresh`, `DELETE /sources/:id` (implemented; public HTML only, 2 MiB cap, bounded redirects, owner-scoped chunks; refresh reuses safe-fetch checks and rolls back failed re-indexing) |
 | Notes/folders | CRUD `/notes`, `/folders`; `POST /notes/generate` only after generation is implemented |
 | Chat | `GET /chat/conversations`, `GET/DELETE /chat/conversations/:id`, `POST /chat/ask` (creates or appends to an optional `conversationId`) |
 | Saved items | `GET/POST /saved-items`, `DELETE /saved-items/:id` (implemented; source ownership and excerpt are verified against the cited chunk) |

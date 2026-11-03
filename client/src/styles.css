@@ -391,6 +391,10 @@ h1, h2, h3, p { margin-top: 0; }
 .website-source-details b { overflow: hidden; color: #354861; font: 700 11px 'Manrope',sans-serif; text-overflow: ellipsis; white-space: nowrap; }
 .website-source-details a { display: flex; align-items: center; gap: 4px; color: #4384c9; font-size: 9px; }
 .website-source-details small { color: #8a98aa; font-size: 8px; }
+.website-source-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 3px; }
+.source-refresh { width: 30px; height: 30px; display: grid; place-items: center; border: 0; border-radius: 8px; background: transparent; color: #6685a8; cursor: pointer; }
+.source-refresh:hover { color: #1676ee; background: #eef6ff; }
+.source-refresh:disabled { opacity: .6; cursor: wait; }
 .source-delete { width: 30px; height: 30px; display: grid; place-items: center; border: 0; border-radius: 8px; background: transparent; color: #8393a8; cursor: pointer; }
 .source-delete:hover { background: #fff1f0; color: #d45b54; }
 .source-delete:disabled { opacity: .6; cursor: wait; }

@@ -9,6 +9,8 @@ const websiteSourceSchema = new mongoose.Schema({
   contentHash: { type: String, required: true, select: false },
   chunkCount: { type: Number, required: true, min: 1 },
   fetchedAt: { type: Date, required: true },
+  refreshLock: { type: String, default: null, select: false },
+  refreshLockAt: { type: Date, default: null, select: false },
 }, { timestamps: true, versionKey: false });
 
 websiteSourceSchema.index({ ownerId: 1, createdAt: -1 });

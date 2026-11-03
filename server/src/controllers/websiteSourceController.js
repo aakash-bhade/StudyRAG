@@ -1,4 +1,4 @@
-import { addOwnedWebsiteSource, deleteOwnedWebsiteSource, listOwnedWebsiteSources } from '../services/websiteSourceService.js';
+import { addOwnedWebsiteSource, deleteOwnedWebsiteSource, listOwnedWebsiteSources, refreshOwnedWebsiteSource } from '../services/websiteSourceService.js';
 
 export async function listWebsiteSourcesAction(req, res, next) {
   try { res.json(await listOwnedWebsiteSources(req.user._id)); } catch (error) { next(error); }
@@ -8,4 +8,7 @@ export async function addWebsiteSourceAction(req, res, next) {
 }
 export async function deleteWebsiteSourceAction(req, res, next) {
   try { res.json(await deleteOwnedWebsiteSource(req.user._id, req.params.id)); } catch (error) { next(error); }
+}
+export async function refreshWebsiteSourceAction(req, res, next) {
+  try { res.json({ item: await refreshOwnedWebsiteSource(req.user._id, req.params.id) }); } catch (error) { next(error); }
 }
