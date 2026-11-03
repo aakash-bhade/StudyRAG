@@ -25,6 +25,9 @@ export const chatApi = {
     const result = await request(`/conversations/${id}`, auth, { method: 'PATCH', body: JSON.stringify({ title }) });
     return result.item;
   },
+  async remove(id, auth) {
+    return request(`/conversations/${id}`, auth, { method: 'DELETE' });
+  },
 };
 
 async function request(path, { token, refreshAccessToken }, options = {}) {

@@ -4,7 +4,7 @@ Last updated: 2026-11-03
 
 ## Current phase
 
-Phase 27 — Saved conversation management.
+Phase 28 — Saved conversation management.
 
 ## Completed
 
@@ -40,6 +40,7 @@ Phase 27 — Saved conversation management.
 - Added owner-scoped flashcard deck generation from private documents and websites, saved decks, flip-through review, and deck deletion; flashcard deck content is included in personal data exports.
 - Replaced the crowded small-screen sidebar with a compact mobile navigation bar and a More menu for the remaining workspace sections.
 - Added owner-scoped saved conversation renaming with validated titles and inline rename, save, and cancel controls in chat.
+- Added a two-step conversation delete control that removes its messages and clears the active chat when applicable.
 
 ## In progress
 
@@ -59,7 +60,7 @@ Phase 27 — Saved conversation management.
 - `git diff --check` passes. Live API integration is pending because MongoDB is not configured.
 - Email verification and recovery have not been exercised against configured SMTP credentials.
 - Browser review and live API integration are pending. No MongoDB URI is configured, so auth and document flows have not been exercised against a database.
-- Current branch: `main`; saved conversation management changes are in progress locally.
+- Current branch: `main`; saved conversation deletion is in progress locally.
 
 ## Known constraints
 

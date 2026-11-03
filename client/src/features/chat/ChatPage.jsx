@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Bookmark, BookmarkCheck, Bot, Check, FileText, Globe2, LoaderCircle, MessageCircle, Pencil, Plus, Send, ShieldCheck, Sparkles, X } from 'lucide-react';
+import { Bookmark, BookmarkCheck, Bot, Check, FileText, Globe2, LoaderCircle, MessageCircle, Pencil, Plus, Send, ShieldCheck, Sparkles, Trash2, X } from 'lucide-react';
 import WorkspaceShell from '../dashboard/WorkspaceShell.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { documentApi } from '../../services/documentApi.js';
@@ -26,6 +26,8 @@ export default function ChatPage() {
   const [renamingId, setRenamingId] = useState(null);
   const [renameTitle, setRenameTitle] = useState('');
   const [renaming, setRenaming] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -84,6 +86,22 @@ export default function ChatPage() {
     finally { setRenaming(false); }
   }
 
+  async function deleteSavedConversation(id) {
+    if (!id || deleting) return;
+    setDeleting(true);
+    try {
+      await chatApi.remove(id, auth);
+      setConversations(items => items.filter(item => item.id !== id));
+      if (conversationId === id) {
+        setConversationId(null);
+        setMessages([]);
+      }
+      setConfirmDeleteId(null);
+      setError('');
+    } catch (deleteError) { setError(deleteError.message); }
+    finally { setDeleting(false); }
+  }
+
   async function submit(event) {
     event.preventDefault();
     const value = question.trim();
@@ -132,7 +150,7 @@ export default function ChatPage() {
         {error && <p className="chat-error" role="alert">{error}</p>}
         <form className="chat-composer" onSubmit={submit}><textarea aria-label="Ask a question" value={question} onChange={event => setQuestion(event.target.value)} placeholder="Ask something about your study materials…" maxLength={1200} rows={2} /><button type="submit" disabled={sending || question.trim().length < 3} aria-label="Send question"><Send size={17} /></button><small>Answers are grounded in the selected uploaded materials.</small></form>
       </section>
-      <aside className="chat-source-panel"><button className="chat-new-button" onClick={startNewConversation}><Plus size={14} /> New conversation</button><h2><FileText size={16} /> Search sources</h2><p>Select sources, or leave all unchecked to search everything.</p>{loading ? <div className="chat-source-state"><LoaderCircle size={15} className="spin" /> Loading sources…</div> : <><div className="chat-source-list">{documents.map(document => <label key={document.id}><input type="checkbox" checked={selected.includes(document.id)} onChange={() => toggleDocument(document.id)} /><span className="chat-source-file"><FileText size={15} /><span><b>{document.displayName}</b><small>{document.chunkCount} searchable sections</small></span></span></label>)}{websites.map(source => <label key={source.id}><input type="checkbox" checked={selectedWebsites.includes(source.id)} onChange={() => setSelectedWebsites(ids => ids.includes(source.id) ? ids.filter(value => value !== source.id) : [...ids, source.id])} /><span className="chat-source-file"><Globe2 size={15} /><span><b>{source.title}</b><small>{source.chunkCount} webpage sections</small></span></span></label>)}</div>{!documents.length && !websites.length && <div className="chat-no-documents"><p>Add a document or public webpage to start asking questions.</p><a href="/app/documents">Documents →</a><br /><a href="/app/sources">Website sources →</a></div>}</>}<h2 className="chat-recent-heading"><MessageCircle size={15} /> Recent conversations</h2><div className="chat-recent-list">{conversations.length ? conversations.map(conversation => <div className={`chat-recent-item ${conversation.id === conversationId ? 'selected' : ''}`} key={conversation.id}>{renamingId === conversation.id ? <form onSubmit={saveRename}><input autoFocus aria-label="Conversation title" value={renameTitle} maxLength={120} onChange={event => setRenameTitle(event.target.value)} /><button type="submit" disabled={renaming || !renameTitle.trim()} aria-label="Save conversation title"><Check size={13} /></button><button type="button" disabled={renaming} onClick={() => setRenamingId(null)} aria-label="Cancel rename"><X size={13} /></button></form> : <><button className="chat-recent-open" onClick={() => openConversation(conversation.id)} title={conversation.title}>{conversation.title}</button><button className="chat-recent-rename" onClick={() => beginRename(conversation)} aria-label={`Rename ${conversation.title}`} title="Rename"><Pencil size={12} /></button></>}</div>) : <span>No saved conversations yet.</span>}</div><div className="chat-scope-note"><ShieldCheck size={14} /> Only your own sources are searched.</div></aside>
+      <aside className="chat-source-panel"><button className="chat-new-button" onClick={startNewConversation}><Plus size={14} /> New conversation</button><h2><FileText size={16} /> Search sources</h2><p>Select sources, or leave all unchecked to search everything.</p>{loading ? <div className="chat-source-state"><LoaderCircle size={15} className="spin" /> Loading sources…</div> : <><div className="chat-source-list">{documents.map(document => <label key={document.id}><input type="checkbox" checked={selected.includes(document.id)} onChange={() => toggleDocument(document.id)} /><span className="chat-source-file"><FileText size={15} /><span><b>{document.displayName}</b><small>{document.chunkCount} searchable sections</small></span></span></label>)}{websites.map(source => <label key={source.id}><input type="checkbox" checked={selectedWebsites.includes(source.id)} onChange={() => setSelectedWebsites(ids => ids.includes(source.id) ? ids.filter(value => value !== source.id) : [...ids, source.id])} /><span className="chat-source-file"><Globe2 size={15} /><span><b>{source.title}</b><small>{source.chunkCount} webpage sections</small></span></span></label>)}</div>{!documents.length && !websites.length && <div className="chat-no-documents"><p>Add a document or public webpage to start asking questions.</p><a href="/app/documents">Documents →</a><br /><a href="/app/sources">Website sources →</a></div>}</>}<h2 className="chat-recent-heading"><MessageCircle size={15} /> Recent conversations</h2><div className="chat-recent-list">{conversations.length ? conversations.map(conversation => <div className={`chat-recent-item ${conversation.id === conversationId ? 'selected' : ''}`} key={conversation.id}>{renamingId === conversation.id ? <form onSubmit={saveRename}><input autoFocus aria-label="Conversation title" value={renameTitle} maxLength={120} onChange={event => setRenameTitle(event.target.value)} /><button type="submit" disabled={renaming || !renameTitle.trim()} aria-label="Save conversation title"><Check size={13} /></button><button type="button" disabled={renaming} onClick={() => setRenamingId(null)} aria-label="Cancel rename"><X size={13} /></button></form> : confirmDeleteId === conversation.id ? <div className="chat-recent-confirm"><span>Delete?</span><button disabled={deleting} onClick={() => deleteSavedConversation(conversation.id)} aria-label="Confirm delete conversation"><Check size={13} /></button><button disabled={deleting} onClick={() => setConfirmDeleteId(null)} aria-label="Cancel delete"><X size={13} /></button></div> : <><button className="chat-recent-open" onClick={() => openConversation(conversation.id)} title={conversation.title}>{conversation.title}</button><button className="chat-recent-rename" onClick={() => beginRename(conversation)} aria-label={`Rename ${conversation.title}`} title="Rename"><Pencil size={12} /></button><button className="chat-recent-delete" onClick={() => setConfirmDeleteId(conversation.id)} aria-label={`Delete ${conversation.title}`} title="Delete"><Trash2 size={12} /></button></>}</div>) : <span>No saved conversations yet.</span>}</div><div className="chat-scope-note"><ShieldCheck size={14} /> Only your own sources are searched.</div></aside>
     </div>
   </div></WorkspaceShell>;
 }
