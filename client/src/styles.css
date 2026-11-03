@@ -417,6 +417,13 @@ h1, h2, h3, p { margin-top: 0; }
 .chat-source-panel { padding: 18px 15px; border-left: 1px solid #e8eef5; background: #fbfdff; }
 .chat-source-panel h2 { display: flex; align-items: center; gap: 7px; margin: 0 0 6px; color: #344963; font: 700 11px 'Manrope',sans-serif; }
 .chat-source-panel h2 svg { color: #4686d0; }
+.chat-new-button { width: 100%; height: 34px; display: flex; align-items: center; justify-content: center; gap: 6px; margin: 0 0 19px; border: 1px solid #cfe2f9; border-radius: 9px; color: #2873c7; background: #f2f8ff; font-size: 9px; font-weight: 700; cursor: pointer; }
+.chat-new-button:hover { background: #e8f3ff; }
+.chat-source-panel h2.chat-recent-heading { margin-top: 19px; padding-top: 13px; border-top: 1px solid #e9eff5; }
+.chat-recent-list { display: grid; gap: 3px; max-height: 180px; overflow: auto; }
+.chat-recent-list button { overflow: hidden; padding: 7px 8px; border: 0; border-radius: 7px; color: #647991; background: transparent; font: 9px 'DM Sans',sans-serif; text-align: left; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+.chat-recent-list button:hover, .chat-recent-list button.selected { color: #2674cf; background: #edf5ff; }
+.chat-recent-list > span { padding: 5px 2px; color: #98a5b5; font-size: 8px; }
 .chat-source-panel > p { margin: 0 0 14px; color: #8998aa; font-size: 9px; line-height: 1.5; }
 .chat-source-list { display: grid; gap: 3px; max-height: 350px; overflow-y: auto; }
 .chat-source-list label { display: flex; align-items: flex-start; gap: 8px; padding: 8px 5px; border-bottom: 1px solid #edf1f6; cursor: pointer; }

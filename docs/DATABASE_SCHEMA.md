@@ -12,8 +12,8 @@ All user-owned records carry `ownerId`; workspace data also carries `workspaceId
 | `documents` | ownerId, displayName, originalName, private storageKey, mimeType, byteSize, ready status, pageCount, chunkCount, contentHash | Implemented with owner + createdAt and owner + displayName indexes; storage key and content hash excluded from default queries |
 | `documentChunks` | ownerId, documentId, ordinal, text, page | Implemented with unique document/ordinal and owner/document indexes; embedding metadata remains pending |
 | `websiteSources` | ownerId, workspaceId?, url, canonicalHost, status, fetchedAt, contentHash, error | Owner/workspace + status indexes; safe-fetch policy enforced before indexing |
-| `conversations` | ownerId, workspaceId?, title, sourceFilters, archivedAt | Owner/workspace + updatedAt indexes |
-| `messages` | ownerId, conversationId, role, content, citations, provider metadata | Conversation + createdAt; citation records refer to authorized sources |
+| `conversations` | ownerId, workspaceId?, title, sourceFilters, archivedAt | Implemented with owner + updatedAt index; only the owner can list, read, or delete |
+| `messages` | ownerId, conversationId, role, content, citations, provider metadata | Implemented with owner + conversation + createdAt index; citations retain authorized document excerpts |
 | `notes` | ownerId, workspaceId?, folderId?, title, body, tags, deletedAt | Owner/workspace + updatedAt; text search where appropriate |
 | `quizzes` | ownerId, workspaceId?, title, origin, difficulty, questions | Owner/workspace + createdAt |
 | `quizAttempts` | ownerId, quizId, answers, score, completedAt | Owner + quiz + completedAt |

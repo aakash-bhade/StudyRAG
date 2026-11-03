@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Bot, FileText, LoaderCircle, MessageCircle, Send, ShieldCheck, Sparkles } from 'lucide-react';
+import { Bot, FileText, LoaderCircle, MessageCircle, Plus, Send, ShieldCheck, Sparkles } from 'lucide-react';
 import WorkspaceShell from '../dashboard/WorkspaceShell.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { documentApi } from '../../services/documentApi.js';
@@ -11,6 +11,8 @@ export default function ChatPage() {
   const [documents, setDocuments] = useState([]);
   const [selected, setSelected] = useState([]);
   const [messages, setMessages] = useState([]);
+  const [conversations, setConversations] = useState([]);
+  const [conversationId, setConversationId] = useState(null);
   const [question, setQuestion] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -19,8 +21,9 @@ export default function ChatPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await documentApi.list({ ...auth });
-      setDocuments(result.items);
+      const [documentResult, conversationResult] = await Promise.all([documentApi.list({ ...auth }), chatApi.list(auth)]);
+      setDocuments(documentResult.items);
+      setConversations(conversationResult.items);
     } catch (loadError) { setError(loadError.message); }
     finally { setLoading(false); }
   }, [accessToken, refreshAccessToken]);
@@ -29,6 +32,24 @@ export default function ChatPage() {
 
   function toggleDocument(id) {
     setSelected(ids => ids.includes(id) ? ids.filter(value => value !== id) : [...ids, id]);
+  }
+
+  function startNewConversation() {
+    setConversationId(null);
+    setMessages([]);
+    setSelected([]);
+    setError('');
+  }
+
+  async function openConversation(id) {
+    if (id === conversationId) return;
+    setError('');
+    try {
+      const conversation = await chatApi.get(id, auth);
+      setConversationId(conversation.id);
+      setSelected(conversation.sourceFilters || []);
+      setMessages(conversation.messages);
+    } catch (loadError) { setError(loadError.message); }
   }
 
   async function submit(event) {
@@ -40,8 +61,10 @@ export default function ChatPage() {
     setMessages(items => [...items, { role: 'user', text: value }, { role: 'assistant', pending: true }]);
     setSending(true);
     try {
-      const result = await chatApi.ask(value, selected, auth);
-      setMessages(items => [...items.slice(0, -1), { role: 'assistant', ...result }]);
+      const result = await chatApi.ask(value, selected, conversationId, auth);
+      setConversationId(result.conversation.id);
+      setMessages(items => [...items.slice(0, -1), result.messages[1]]);
+      setConversations(items => [result.conversation, ...items.filter(item => item.id !== result.conversation.id)].slice(0, 30));
     } catch (requestError) {
       setMessages(items => items.slice(0, -1));
       setError(requestError.message);
@@ -67,7 +90,7 @@ export default function ChatPage() {
         {error && <p className="chat-error" role="alert">{error}</p>}
         <form className="chat-composer" onSubmit={submit}><textarea aria-label="Ask a question" value={question} onChange={event => setQuestion(event.target.value)} placeholder="Ask something about your study materials…" maxLength={1200} rows={2} /><button type="submit" disabled={sending || question.trim().length < 3} aria-label="Send question"><Send size={17} /></button><small>Answers are grounded in the selected uploaded materials.</small></form>
       </section>
-      <aside className="chat-source-panel"><h2><FileText size={16} /> Search sources</h2><p>Select documents, or leave all unchecked to search everything.</p>{loading ? <div className="chat-source-state"><LoaderCircle size={15} className="spin" /> Loading documents…</div> : documents.length ? <div className="chat-source-list">{documents.map(document => <label key={document.id}><input type="checkbox" checked={selected.includes(document.id)} onChange={() => toggleDocument(document.id)} /><span className="chat-source-file"><FileText size={15} /><span><b>{document.displayName}</b><small>{document.chunkCount} searchable sections</small></span></span></label>)}</div> : <div className="chat-no-documents"><p>Upload a PDF, DOCX, or TXT file to start asking questions.</p><a href="/app/documents">Go to documents →</a></div>}<div className="chat-scope-note"><ShieldCheck size={14} /> Only your own document content is searched.</div></aside>
+      <aside className="chat-source-panel"><button className="chat-new-button" onClick={startNewConversation}><Plus size={14} /> New conversation</button><h2><FileText size={16} /> Search sources</h2><p>Select documents, or leave all unchecked to search everything.</p>{loading ? <div className="chat-source-state"><LoaderCircle size={15} className="spin" /> Loading documents…</div> : documents.length ? <div className="chat-source-list">{documents.map(document => <label key={document.id}><input type="checkbox" checked={selected.includes(document.id)} onChange={() => toggleDocument(document.id)} /><span className="chat-source-file"><FileText size={15} /><span><b>{document.displayName}</b><small>{document.chunkCount} searchable sections</small></span></span></label>)}</div> : <div className="chat-no-documents"><p>Upload a PDF, DOCX, or TXT file to start asking questions.</p><a href="/app/documents">Go to documents →</a></div>}<h2 className="chat-recent-heading"><MessageCircle size={15} /> Recent conversations</h2><div className="chat-recent-list">{conversations.length ? conversations.map(conversation => <button key={conversation.id} className={conversation.id === conversationId ? 'selected' : ''} onClick={() => openConversation(conversation.id)} title={conversation.title}>{conversation.title}</button>) : <span>No saved conversations yet.</span>}</div><div className="chat-scope-note"><ShieldCheck size={14} /> Only your own document content is searched.</div></aside>
     </div>
   </div></WorkspaceShell>;
 }

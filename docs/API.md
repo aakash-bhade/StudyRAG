@@ -11,10 +11,10 @@ Base path: `/api/v1`. JSON errors use a stable `{ error: { code, message, detail
 | Documents | `GET/POST /documents`, `PATCH/DELETE /documents/:id`, `GET /documents/:id/download` (implemented; owner-scoped; PDF, DOCX, UTF-8 TXT; 10 MiB upload cap) |
 | Website sources | `GET/POST /sources`, `GET/DELETE /sources/:id`, `POST /sources/:id/refresh` |
 | Notes/folders | CRUD `/notes`, `/folders`; `POST /notes/generate` only after generation is implemented |
-| Chat | CRUD `/conversations`, `GET/POST /conversations/:id/messages`, `POST /chat/answer` |
+| Chat | `GET /chat/conversations`, `GET/DELETE /chat/conversations/:id`, `POST /chat/ask` (creates or appends to an optional `conversationId`) |
 | Saved items | `GET/POST /saved-items`, `DELETE /saved-items/:id` |
 | Quizzes | CRUD `/quizzes`, `POST /quizzes/generate`, `POST /quizzes/:id/attempts`, `GET /attempts/:id` |
 | Assignments/tasks | CRUD `/assignments`, `/tasks`; assignment guidance routes only when implemented |
 | Notifications | `GET /notifications`, `PATCH /notifications/:id` |
 
-Every private route requires authentication. Every record route checks owner or explicit workspace membership/permission before access. Teacher, employee, and business UI distinctions do not grant cross-user access by themselves. The current auth API exposes `/auth/me`. Document listing accepts `page`, `limit` (max 50), and `q`; upload uses multipart field `file`. Document text is extracted and stored as owner-scoped chunks; embeddings, RAG retrieval, and website sources remain pending.
+Every private route requires authentication. Every record route checks owner or explicit workspace membership/permission before access. Teacher, employee, and business UI distinctions do not grant cross-user access by themselves. The current auth API exposes `/auth/me`. Document listing accepts `page`, `limit` (max 50), and `q`; upload uses multipart field `file`. Document text is extracted and stored as owner-scoped chunks; chat retrieves passages using keyword ranking and can generate cited answers with optional Ollama. Website sources and embedding-based retrieval remain pending.

@@ -4,7 +4,7 @@ Last updated: 2026-11-03
 
 ## Current phase
 
-Phase 6 — Document-grounded chat MVP.
+Phase 7 — Persistent document-grounded chat.
 
 ## Completed
 
@@ -19,6 +19,7 @@ Phase 6 — Document-grounded chat MVP.
 - Added upload limits, document parser validation, private storage keys, document cleanup, and a shared workspace navigation shell.
 - Added authenticated document Q&A with owner-scoped chunk retrieval, lightweight keyword ranking, source excerpts, question rate limiting, and optional locally hosted Ollama answer generation with grounded prompts and explicit provider errors.
 - Added the responsive “Ask materials” chat screen, document selection, inline source references, and a no-provider retrieval-only state.
+- Added owner-scoped conversation and message records, recent conversation listing, reopen and delete APIs, persisted source filters and citations, and a recent-conversations panel in chat.
 
 ## In progress
 
@@ -29,7 +30,7 @@ Phase 6 — Document-grounded chat MVP.
 ## Pending
 
 - Email verification and password recovery are not implemented yet.
-- Persistent conversation history, website sources, notes, quizzes, assignments, team features, hardening, and deployment verification remain pending.
+- Website sources, notes, quizzes, assignments, team features, hardening, and deployment verification remain pending.
 
 ## Verification and Git
 
@@ -38,7 +39,7 @@ Phase 6 — Document-grounded chat MVP.
 - Previous `server`: Node syntax check passed for all JavaScript source files; PDF, DOCX, and ZIP parser modules loaded successfully.
 - `git diff --check` passes.
 - Browser review and live API integration are pending. No MongoDB URI is configured, so auth and document flows have not been exercised against a database.
-- Current branch: `main`; document-grounded chat changes are in progress and not yet pushed.
+- Current branch: `main`; persistent conversation changes are in progress and not yet pushed.
 
 ## Known constraints
 
