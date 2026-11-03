@@ -7,6 +7,7 @@ import { databaseState } from './config/database.js';
 import authRoutes from './routes/authRoutes.js';
 import documentRoutes from './routes/documentRoutes.js';
 import chatRoutes from './routes/chatRoutes.js';
+import noteRoutes from './routes/noteRoutes.js';
 import { errorHandler, notFound, requestId } from './middleware/errors.js';
 import { originGuard } from './middleware/originGuard.js';
 
@@ -16,7 +17,7 @@ app.set('trust proxy', env.NODE_ENV === 'production' ? 1 : false);
 app.use(requestId);
 app.use(helmet());
 app.use(cors({ origin: env.FRONTEND_ORIGIN, credentials: true, methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], allowedHeaders: ['Content-Type', 'Authorization'] }));
-app.use(express.json({ limit: '16kb', type: 'application/json' }));
+app.use(express.json({ limit: '48kb', type: 'application/json' }));
 app.use(cookieParser());
 app.use(originGuard);
 
@@ -27,5 +28,6 @@ app.get('/api/v1/health', (_req, res) => {
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/documents', documentRoutes);
 app.use('/api/v1/chat', chatRoutes);
+app.use('/api/v1/notes', noteRoutes);
 app.use(notFound);
 app.use(errorHandler);

@@ -5,6 +5,7 @@ import AuthPage from './features/auth/AuthPage.jsx';
 import DashboardPage from './features/dashboard/DashboardPage.jsx';
 import DocumentsPage from './features/documents/DocumentsPage.jsx';
 import ChatPage from './features/chat/ChatPage.jsx';
+import NotesPage from './features/notes/NotesPage.jsx';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -26,6 +27,7 @@ export default function RouterApp() {
     <Route path="/app" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
     <Route path="/app/documents" element={<ProtectedRoute><DocumentsPage /></ProtectedRoute>} />
     <Route path="/app/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
+    <Route path="/app/notes" element={<ProtectedRoute><NotesPage /></ProtectedRoute>} />
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>;
 }

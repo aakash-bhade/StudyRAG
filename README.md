@@ -4,7 +4,7 @@ StudyRAG is planned as a multi-source AI learning and productivity platform buil
 
 ## Project phase
 
-Authentication foundation and the first private document library are implemented. See [PROJECT_STATUS.md](PROJECT_STATUS.md) for current progress and limitations.
+Authentication, private documents, cited study chat with saved conversations, and personal notes are implemented. See [PROJECT_STATUS.md](PROJECT_STATUS.md) for current progress and limitations.
 
 ## Project documentation
 

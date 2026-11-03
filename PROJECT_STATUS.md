@@ -4,7 +4,7 @@ Last updated: 2026-11-03
 
 ## Current phase
 
-Phase 7 — Persistent document-grounded chat.
+Phase 8 — Private notes workspace.
 
 ## Completed
 
@@ -20,6 +20,7 @@ Phase 7 — Persistent document-grounded chat.
 - Added authenticated document Q&A with owner-scoped chunk retrieval, lightweight keyword ranking, source excerpts, question rate limiting, and optional locally hosted Ollama answer generation with grounded prompts and explicit provider errors.
 - Added the responsive “Ask materials” chat screen, document selection, inline source references, and a no-provider retrieval-only state.
 - Added owner-scoped conversation and message records, recent conversation listing, reopen and delete APIs, persisted source filters and citations, and a recent-conversations panel in chat.
+- Added private note create, edit, delete, and title/body/tag search flows with owner-scoped MongoDB records and a responsive workspace editor.
 
 ## In progress
 
@@ -30,7 +31,7 @@ Phase 7 — Persistent document-grounded chat.
 ## Pending
 
 - Email verification and password recovery are not implemented yet.
-- Website sources, notes, quizzes, assignments, team features, hardening, and deployment verification remain pending.
+- Website sources, quizzes, assignments, team features, hardening, and deployment verification remain pending.
 
 ## Verification and Git
 
@@ -39,7 +40,7 @@ Phase 7 — Persistent document-grounded chat.
 - Previous `server`: Node syntax check passed for all JavaScript source files; PDF, DOCX, and ZIP parser modules loaded successfully.
 - `git diff --check` passes.
 - Browser review and live API integration are pending. No MongoDB URI is configured, so auth and document flows have not been exercised against a database.
-- Current branch: `main`; persistent conversation changes are in progress and not yet pushed.
+- Current branch: `main`; notes workspace changes are in progress and not yet pushed.
 
 ## Known constraints
 

@@ -14,7 +14,7 @@ All user-owned records carry `ownerId`; workspace data also carries `workspaceId
 | `websiteSources` | ownerId, workspaceId?, url, canonicalHost, status, fetchedAt, contentHash, error | Owner/workspace + status indexes; safe-fetch policy enforced before indexing |
 | `conversations` | ownerId, workspaceId?, title, sourceFilters, archivedAt | Implemented with owner + updatedAt index; only the owner can list, read, or delete |
 | `messages` | ownerId, conversationId, role, content, citations, provider metadata | Implemented with owner + conversation + createdAt index; citations retain authorized document excerpts |
-| `notes` | ownerId, workspaceId?, folderId?, title, body, tags, deletedAt | Owner/workspace + updatedAt; text search where appropriate |
+| `notes` | ownerId, workspaceId?, folderId?, title, body, tags, deletedAt | Implemented with owner + updatedAt and owner + title indexes; private CRUD and owner-scoped title/body/tag search |
 | `quizzes` | ownerId, workspaceId?, title, origin, difficulty, questions | Owner/workspace + createdAt |
 | `quizAttempts` | ownerId, quizId, answers, score, completedAt | Owner + quiz + completedAt |
 | `assignments` | ownerId, workspaceId?, title, instructions, status, dueAt | Owner/workspace + status + dueAt |
