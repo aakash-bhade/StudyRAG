@@ -15,6 +15,8 @@ Private documents and websites, cited study chat, notes and folders, quizzes, as
 - [Free services evaluation](FREE_SERVICES.md)
 - [Architecture decisions](DECISIONS.md)
 
+GitHub Actions runs a client production build and server JavaScript syntax check for pushes and pull requests targeting `main`.
+
 ## Intended stack
 
 - Client: React, Vite, Tailwind CSS

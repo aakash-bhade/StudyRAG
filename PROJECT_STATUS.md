@@ -4,7 +4,7 @@ Last updated: 2026-11-03
 
 ## Current phase
 
-Phase 24 — Email verification and password recovery.
+Phase 25 — Continuous integration checks.
 
 ## Completed
 
@@ -36,6 +36,7 @@ Phase 24 — Email verification and password recovery.
 - Replaced the generic post-login placeholder with owner-scoped live counts, upcoming task/assignment deadlines, and quick links; partial API failures are surfaced without hiding available sections.
 - Corrected the password-length hint so it appears on account creation only, not on sign-in.
 - Added optional SMTP email verification and password recovery using hashed, expiring one-time tokens; password resets revoke active sessions. Local auth preserves its existing behavior when SMTP is not configured.
+- Added a GitHub Actions workflow for the client production build and server JavaScript syntax checks on pushes and pull requests to `main`.
 
 ## In progress
 
@@ -55,7 +56,7 @@ Phase 24 — Email verification and password recovery.
 - `git diff --check` passes. Live API integration is pending because MongoDB is not configured.
 - Email verification and recovery have not been exercised against configured SMTP credentials.
 - Browser review and live API integration are pending. No MongoDB URI is configured, so auth and document flows have not been exercised against a database.
-- Current branch: `main`; email verification and password recovery changes are in progress locally.
+- Current branch: `main`; CI workflow changes are in progress locally.
 
 ## Known constraints
 
