@@ -35,8 +35,9 @@ Phase 4 — Authentication and security foundation.
 - `git diff --check` passes.
 - Browser review is pending because the Windows computer-use helper could not confidently identify the current browser URL; local HTTP access was also blocked by the environment.
 - No `mongod` executable was detected and no `server/.env` is configured, so database-backed auth flows have not been exercised.
-- Current branch: `main`, tracking `origin/main`; initial commit is present.
-- No commits or pushes have been made for this milestone.
+- Current branch: `main`, one commit ahead of `origin/main`.
+- Local milestone commit: `92912bd feat: add StudyRAG auth and dashboard foundation`.
+- Not pushed; repository visibility is still unverified.
 
 ## Known constraints
 
