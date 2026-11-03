@@ -137,6 +137,14 @@ export async function getOwnedQuiz(ownerId, id) {
   return { item: publicQuiz(quiz) };
 }
 
+export async function deleteOwnedQuiz(ownerId, id) {
+  if (!mongoose.isValidObjectId(id)) throw httpError(400, 'INVALID_ID', 'The quiz ID is invalid.');
+  const result = await Quiz.deleteOne({ _id: id, ownerId });
+  if (!result.deletedCount) throw httpError(404, 'QUIZ_NOT_FOUND', 'Quiz not found.');
+  await QuizAttempt.deleteMany({ quizId: id, ownerId });
+  return { success: true };
+}
+
 export async function submitOwnedQuizAttempt(ownerId, id, answers) {
   if (!mongoose.isValidObjectId(id)) throw httpError(400, 'INVALID_ID', 'The quiz ID is invalid.');
   const quiz = await Quiz.findOne({ _id: id, ownerId });

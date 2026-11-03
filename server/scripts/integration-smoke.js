@@ -163,6 +163,8 @@ try {
     method: 'POST', token: account.accessToken, json: { answers: [0, 0, 0] },
   });
   assert.equal(attempt.item.total, 3);
+  await request(`/quizzes/${quiz.item.id}`, { method: 'DELETE', token: account.accessToken });
+  await expectStatus(`/quizzes/${quiz.item.id}`, { token: account.accessToken }, 404);
 
   const deck = await request('/flashcards/generate', {
     method: 'POST', token: account.accessToken,
@@ -200,7 +202,7 @@ try {
     document: `uploaded and indexed ${indexed.item.indexedChunkCount} chunks`,
     website: `added, refreshed, and indexed ${websiteIndex.item.indexedChunkCount} chunks`,
     chat: `${chat.item.answerMode}/${chat.item.retrievalMode} with ${chat.item.sources.length} citations`,
-    quiz: `generated ${quiz.item.questionCount}; attempt persisted`,
+    quiz: `generated ${quiz.item.questionCount}; attempt persisted; delete passed`,
     flashcards: `generated ${deck.item.cardCount}`, savedPassage: 'saved',
     task: 'created and updated', assignment: 'created and submitted', notifications: 'created and marked read',
   }, null, 2));

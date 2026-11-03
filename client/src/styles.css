@@ -803,13 +803,18 @@ h1, h2, h3, p { margin-top: 0; }
 .dashboard-content { font-size: 15px; }
 .dashboard-content :is(p, li) { line-height: 1.65; }
 .dashboard-content :is(input, textarea, select) { line-height: 1.5; }
-.dashboard-content h1 { font-size: 28px; line-height: 1.2; }
-.dashboard-content h2 { font-size: 20px; line-height: 1.3; }
-.dashboard-content h3 { font-size: 17px; line-height: 1.4; }
+.documents-heading h1, .welcome-banner h1 { font-size: 28px; line-height: 1.2; }
+.dashboard-section-heading h2, .documents-toolbar h2, .quiz-builder > h2, .quiz-saved-heading h2, .notes-list-heading h2, .task-create-card h2, .assignment-create-card h2, .settings-card > header h2 { font-size: 18px; line-height: 1.35; }
+.quiz-source-pickers h3, .task-column > header h2 { font-size: 16px; line-height: 1.4; }
 .dashboard-sidebar .dash-nav { font-size: 14px; }
 .dashboard-sidebar .sidebar-label { font-size: 11px; letter-spacing: .8px; white-space: nowrap; }
 .dashboard-sidebar .sidebar-user b { font-size: 13px; }
 .dashboard-sidebar .sidebar-user small { font-size: 12px; }
+.quiz-saved-row { display: flex; align-items: center; border-bottom: 1px solid #edf1f6; }
+.quiz-saved-row .quiz-saved-item { flex: 1; min-width: 0; border-bottom: 0; }
+.quiz-delete-button { width: 38px; height: 38px; flex: 0 0 auto; display: grid; place-items: center; margin-right: 9px; border: 0; border-radius: 10px; color: #8a9ab0; background: transparent; cursor: pointer; transition: color .18s, background .18s; }
+.quiz-delete-button:hover { color: #c64d58; background: #fff0f1; }
+.quiz-delete-button:disabled { opacity: .55; cursor: wait; }
 .dashboard-shell .mobile-bottom-nav :is(a, button, span, small) { font-size: 11px !important; }
 .dashboard-shell .mobile-more-menu :is(a, button, span, small) { font-size: 14px !important; }
 
@@ -866,9 +871,9 @@ h1, h2, h3, p { margin-top: 0; }
   .mobile-more-menu > a svg, .mobile-more-signout svg { color: #4f87c5; }
   .dashboard-topbar { height: 53px; padding: 0 16px; }
   .dashboard-content { padding: 19px 13px; }
-  .dashboard-content h1 { font-size: 25px; }
-  .dashboard-content h2 { font-size: 19px; }
-  .dashboard-content h3 { font-size: 16px; }
+  .documents-heading h1, .welcome-banner h1 { font-size: 25px; }
+  .dashboard-section-heading h2, .documents-toolbar h2, .quiz-builder > h2, .quiz-saved-heading h2, .notes-list-heading h2, .task-create-card h2, .assignment-create-card h2, .settings-card > header h2 { font-size: 17px; }
+  .quiz-source-pickers h3, .task-column > header h2 { font-size: 15px; }
   .welcome-banner { min-height: 148px; padding: 20px 17px; }
   .welcome-banner h1 { font-size: 22px; }
   .welcome-banner > div:first-child > p:last-child { max-width: 230px; font-size: 10px; line-height: 1.5; }

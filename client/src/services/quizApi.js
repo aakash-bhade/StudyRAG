@@ -13,5 +13,6 @@ export const quizApi = {
   list: auth => request('', auth),
   generate: (options, auth) => request('/generate', { ...auth, method: 'POST', body: options }),
   get: (id, auth) => request(`/${id}`, auth),
+  delete: (id, auth) => request(`/${id}`, { ...auth, method: 'DELETE' }),
   submit: (id, answers, auth) => request(`/${id}/attempts`, { ...auth, method: 'POST', body: { answers } }),
 };
