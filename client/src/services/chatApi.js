@@ -1,7 +1,7 @@
 const BASE = '/api/v1/chat';
 
 export const chatApi = {
-  async ask(question, documentIds, conversationId, { token, refreshAccessToken }, websiteSourceIds = [], noteIds = []) {
+  async ask(question, documentIds, conversationId, { token, refreshAccessToken }, websiteSourceIds = [], noteIds = [], onToken = () => {}) {
     const send = accessToken => fetch(`${BASE}/ask`, {
       method: 'POST',
       credentials: 'include',
@@ -10,8 +10,34 @@ export const chatApi = {
     });
     let response = await send(token);
     if (response.status === 401) response = await send(await refreshAccessToken());
-    const result = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(result.error?.message || 'Your question could not be answered.');
+    if (!response.ok) {
+      const result = await response.json().catch(() => ({}));
+      throw new Error(result.error?.message || 'Your question could not be answered.');
+    }
+    if (!response.body) throw new Error('The answer stream could not be opened. Please try again.');
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let result;
+    const readLine = line => {
+      if (!line.startsWith('data:')) return;
+      const event = JSON.parse(line.slice(5).trim());
+      if (event.token) onToken(event.token);
+      if (event.error) throw new Error(event.error.message || 'Your question could not be answered.');
+      if (event.result) result = event.result;
+    };
+    while (true) {
+      const { value, done } = await reader.read();
+      buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+      let newline;
+      while ((newline = buffer.indexOf('\n')) >= 0) {
+        readLine(buffer.slice(0, newline).replace(/\r$/, ''));
+        buffer = buffer.slice(newline + 1);
+      }
+      if (done) break;
+    }
+    if (buffer.trim()) readLine(buffer.replace(/\r$/, ''));
+    if (!result) throw new Error('The answer stream ended before the answer was saved. Please try again.');
     return result;
   },
   async list({ token, refreshAccessToken }) {

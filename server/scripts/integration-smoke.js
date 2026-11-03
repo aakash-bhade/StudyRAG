@@ -24,7 +24,33 @@ async function request(route, { method = 'GET', token, json, form } = {}) {
   }
   if (form) options.body = form;
   const response = await fetch(`${api}${route}`, options);
-  const body = await response.json();
+  let body;
+  if (response.headers.get('content-type')?.includes('text/event-stream')) {
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    const events = [];
+    let buffer = '';
+    const readLine = line => {
+      if (line.startsWith('data:')) events.push(JSON.parse(line.slice(5).trim()));
+    };
+    while (true) {
+      const { value, done } = await reader.read();
+      buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+      let newline;
+      while ((newline = buffer.indexOf('\n')) >= 0) {
+        readLine(buffer.slice(0, newline).replace(/\r$/, ''));
+        buffer = buffer.slice(newline + 1);
+      }
+      if (done) break;
+    }
+    if (buffer.trim()) readLine(buffer.replace(/\r$/, ''));
+    if (route === '/chat/ask') assert.ok(events.some(event => event.token), 'The chat response should stream answer tokens before completion.');
+    body = events.findLast(event => event.result || event.error);
+    if (body?.result) body = body.result;
+    else if (body?.error) body = { error: body.error };
+  } else {
+    body = await response.json();
+  }
   assert.ok(response.ok, `${method} ${route} failed (${response.status}): ${body.error?.message || 'unknown error'}`);
   return body;
 }

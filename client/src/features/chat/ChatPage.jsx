@@ -8,6 +8,42 @@ import { sourceApi } from '../../services/sourceApi.js';
 import { savedItemApi } from '../../services/savedItemApi.js';
 import { noteApi } from '../../services/noteApi.js';
 
+function AnswerText({ text }) {
+  const blocks = [];
+  let paragraph = [];
+  let list = [];
+  let listType = null;
+  const flushParagraph = () => {
+    if (paragraph.length) blocks.push(<p key={`p-${blocks.length}`}>{paragraph.join('\n')}</p>);
+    paragraph = [];
+  };
+  const flushList = () => {
+    if (!list.length) return;
+    const List = listType === 'ordered' ? 'ol' : 'ul';
+    blocks.push(<List key={`l-${blocks.length}`}>{list.map((item, index) => <li key={index}>{item}</li>)}</List>);
+    list = [];
+    listType = null;
+  };
+  for (const line of text.split('\n')) {
+    const bullet = line.match(/^\s*[-*•]\s+(.+)$/);
+    const numbered = line.match(/^\s*\d+[.)]\s+(.+)$/);
+    if (bullet || numbered) {
+      flushParagraph();
+      const nextType = numbered ? 'ordered' : 'unordered';
+      if (listType && listType !== nextType) flushList();
+      listType = nextType;
+      list.push((bullet || numbered)[1]);
+    } else {
+      flushList();
+      if (line.trim()) paragraph.push(line.trim());
+      else flushParagraph();
+    }
+  }
+  flushList();
+  flushParagraph();
+  return <div className="chat-answer">{blocks}</div>;
+}
+
 export default function ChatPage() {
   const { accessToken, refreshAccessToken } = useAuth();
   const auth = { token: accessToken, refreshAccessToken };
@@ -132,7 +168,13 @@ export default function ChatPage() {
     setMessages(items => [...items, { role: 'user', text: value }, { role: 'assistant', pending: true }]);
     setSending(true);
     try {
-      const result = await chatApi.ask(value, selected, conversationId, auth, selectedWebsites, selectedNotes);
+      const result = await chatApi.ask(value, selected, conversationId, auth, selectedWebsites, selectedNotes, token => {
+        setMessages(items => {
+          const last = items.at(-1);
+          if (!last?.pending && !last?.streaming) return items;
+          return [...items.slice(0, -1), { ...last, pending: false, streaming: true, answer: `${last.answer || ''}${token}` }];
+        });
+      });
       setConversationId(result.conversation.id);
       setMessages(items => [...items.slice(0, -1), result.messages[1]]);
       setConversations(items => [result.conversation, ...items.filter(item => item.id !== result.conversation.id)].slice(0, 30));
@@ -161,7 +203,7 @@ export default function ChatPage() {
           {messages.map((message, index) => <article className={`chat-message ${message.role}`} key={index}>
             <span className="chat-message-icon">{message.role === 'user' ? <MessageCircle size={16} /> : <Bot size={16} />}</span>
             <div className="chat-message-body">{message.pending ? <p className="chat-loading"><LoaderCircle size={15} className="spin" /> Searching your materials…</p> : message.role === 'user' ? <p>{message.text}</p> : <>
-              {message.answer && <div className="chat-answer-row"><p className="chat-answer">{message.answer}</p><button className="chat-copy-answer" onClick={() => copyAnswer(message, index)} aria-label="Copy answer" title="Copy answer">{copiedMessage === (message.id || String(index)) ? <CheckCheck size={14} /> : <Copy size={14} />}</button></div>}
+              {message.answer && <div className="chat-answer-row"><div className="chat-answer-wrap"><AnswerText text={message.answer} />{message.streaming && <span className="chat-streaming-label">Writing answer…</span>}</div><button className="chat-copy-answer" onClick={() => copyAnswer(message, index)} aria-label="Copy answer" title="Copy answer">{copiedMessage === (message.id || String(index)) ? <CheckCheck size={14} /> : <Copy size={14} />}</button></div>}
               {message.message && <p className="chat-note">{message.message}</p>}
               {message.retrievalMode && <span className="chat-retrieval-mode">{message.retrievalMode === 'hybrid' ? 'Semantic + keyword search' : 'Keyword search'}</span>}
               {!!message.sources?.length && <div className="chat-sources"><b>Sources</b>{message.sources.map((source, sourceIndex) => { const sourceId = source.sourceType === 'website' ? source.websiteSourceId : source.sourceType === 'note' ? source.noteId : source.documentId; const saveKey = `${source.sourceType}-${sourceId}-${source.ordinal}`; const saved = savedKeys.has(saveKey); return <details key={saveKey}><summary>{source.sourceType === 'website' ? <Globe2 size={13} /> : source.sourceType === 'note' ? <NotebookPen size={13} /> : <FileText size={13} />} [{sourceIndex + 1}] {source.documentName}{source.sourceType === 'note' ? ' · note' : source.page ? ` · page ${source.page}` : ` · section ${source.ordinal + 1}`}</summary><div className="chat-citation-actions">{source.url && <a className="chat-citation-link" href={source.url} target="_blank" rel="noreferrer">Open webpage source ↗</a>}{source.sourceType !== 'note' && <button disabled={saved || savingKey === saveKey} onClick={() => savePassage(source)}>{saved ? <BookmarkCheck size={13} /> : savingKey === saveKey ? <LoaderCircle size={13} className="spin" /> : <Bookmark size={13} />}{saved ? 'Saved' : 'Save passage'}</button>}</div><p>{source.text}</p></details>; })}</div>}

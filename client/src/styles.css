@@ -541,6 +541,13 @@ h1, h2, h3, p { margin-top: 0; }
 .chat-message-body { min-width: 0; padding-top: 5px; color: #40536d; font-size: 11px; line-height: 1.7; }
 .chat-message-body > p { margin: 0; white-space: pre-wrap; }
 .chat-answer { color: #273951; }
+.chat-answer-wrap { flex: 1; min-width: 0; }
+.chat-answer p { margin: 0 0 9px; white-space: pre-wrap; }
+.chat-answer p:last-child { margin-bottom: 0; }
+.chat-answer ul, .chat-answer ol { margin: 0 0 9px; padding-left: 23px; }
+.chat-answer li { margin: 0 0 5px; padding-left: 2px; }
+.chat-answer li:last-child { margin-bottom: 0; }
+.chat-streaming-label { display: inline-block; margin-top: 8px; color: #8a9bb0; font-size: 10px; }
 .chat-note { margin-bottom: 9px !important; padding: 9px 11px; border: 1px solid #e3edf8; border-radius: 9px; background: #f7faff; color: #5f7591; font-size: 10px; }
 .chat-sources { display: grid; gap: 7px; margin-top: 13px; }
 .chat-sources > b { color: #647991; font-size: 9px; text-transform: uppercase; letter-spacing: .5px; }
@@ -780,8 +787,17 @@ h1, h2, h3, p { margin-top: 0; }
 @media (max-width: 560px) { .assignment-create-fields { grid-template-columns: 1fr; } .assignment-create-fields > textarea { grid-column: auto; } .assignment-card > footer { align-items: flex-start; flex-direction: column; } }
 @media (max-width: 560px) { .notification-card { flex-wrap: wrap; } .notification-read-button { margin-left: 45px; } }
 
+/* Keep authenticated workspace copy comfortable to read across features. */
+.dashboard-shell { font-size: 13px; }
+.dashboard-shell :is(p, span, small, label, button, a, time, input, textarea, select, summary, li, b, strong) {
+  font-size: max(12px, 1em) !important;
+}
+
 @media (max-width: 800px) {
   .dashboard-shell { grid-template-columns: 190px 1fr; }
+  .chat-layout { grid-template-columns: minmax(0,1fr); }
+  .chat-source-panel { order: -1; padding: 12px; border-left: 0; border-bottom: 1px solid #e8eef5; }
+  .chat-source-list { grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); max-height: 130px; }
   .quiz-builder-layout { grid-template-columns: minmax(0,1fr); }
   .flashcards-builder-layout { grid-template-columns: minmax(0,1fr); }
   .dashboard-sidebar { padding-left: 10px; padding-right: 10px; }

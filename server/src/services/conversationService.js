@@ -54,7 +54,7 @@ export async function deleteConversation(userId, id) {
   return { success: true };
 }
 
-export async function askInConversation(userId, { question, documentIds, websiteSourceIds, noteIds, conversationId }) {
+export async function askInConversation(userId, { question, documentIds, websiteSourceIds, noteIds, conversationId }, options = {}) {
   let conversation;
   if (conversationId) {
     validId(conversationId);
@@ -70,7 +70,7 @@ export async function askInConversation(userId, { question, documentIds, website
     conversation = new Conversation({ ownerId: userId, title: question.slice(0, 116).trim() + (question.length > 116 ? '…' : ''), sourceFilters: documentIds || [], websiteSourceFilters: websiteSourceIds || [], noteFilters: noteIds || [] });
   }
 
-  const result = await answerFromDocuments(userId, { question, documentIds, websiteSourceIds, noteIds });
+  const result = await answerFromDocuments(userId, { question, documentIds, websiteSourceIds, noteIds }, options);
   const wasNew = conversation.isNew;
   await conversation.save();
   let created;
