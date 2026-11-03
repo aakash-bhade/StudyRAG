@@ -1,8 +1,10 @@
 import { app } from './app.js';
 import { connectDatabase } from './config/database.js';
 import { env } from './config/env.js';
+import { ensureDocumentStorage } from './config/storage.js';
 
 try {
+  await ensureDocumentStorage();
   await connectDatabase();
   const server = app.listen(env.PORT, '0.0.0.0', () => console.log(`StudyRAG API listening on port ${env.PORT}`));
   const shutdown = signal => {

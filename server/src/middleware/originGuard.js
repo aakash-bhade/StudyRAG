@@ -9,7 +9,8 @@ export function originGuard(req, _res, next) {
   if (origin && origin !== env.FRONTEND_ORIGIN) {
     return next(httpError(403, 'ORIGIN_NOT_ALLOWED', 'This request origin is not allowed.'));
   }
-  if (req.is('application/json') !== 'application/json' && req.method !== 'DELETE') {
+  const isDocumentUpload = req.method === 'POST' && req.path === '/api/v1/documents' && req.is('multipart/form-data') === 'multipart/form-data';
+  if (req.is('application/json') !== 'application/json' && req.method !== 'DELETE' && !isDocumentUpload) {
     return next(httpError(415, 'UNSUPPORTED_MEDIA_TYPE', 'Send mutations using JSON.'));
   }
   next();

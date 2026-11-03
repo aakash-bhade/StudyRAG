@@ -10,6 +10,7 @@ const schema = z.object({
   FRONTEND_ORIGIN: z.string().url().default('http://localhost:5173'),
   COOKIE_SECURE: z.enum(['true', 'false']).default('false'),
   COOKIE_SAME_SITE: z.enum(['lax', 'strict', 'none']).default('lax'),
+  DOCUMENT_STORAGE_DIR: z.string().optional(),
 });
 
 const parsed = schema.safeParse(process.env);

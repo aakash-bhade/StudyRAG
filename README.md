@@ -4,7 +4,7 @@ StudyRAG is planned as a multi-source AI learning and productivity platform buil
 
 ## Project phase
 
-Currently implementing the authentication and dashboard foundation. See [PROJECT_STATUS.md](PROJECT_STATUS.md) for current progress and limitations.
+Authentication foundation and the first private document library are implemented. See [PROJECT_STATUS.md](PROJECT_STATUS.md) for current progress and limitations.
 
 ## Project documentation
 
@@ -34,4 +34,4 @@ Requirements: Node.js 20.19+ and MongoDB Community locally, or a MongoDB Atlas c
 4. In another terminal, from `client/`, run `npm install` once and then `npm run dev`.
 5. Open the Vite URL (usually `http://localhost:5173`). The client forwards `/api` requests to the local Express API.
 
-Registration and login need a reachable MongoDB instance. The API fails closed when the database is unavailable; it does not create a fake account or session.
+Registration, login, and document metadata need a reachable MongoDB instance. Document binaries currently use private local disk storage for development; production needs durable private object storage. The API fails closed when the database is unavailable; it does not create a fake account or session.

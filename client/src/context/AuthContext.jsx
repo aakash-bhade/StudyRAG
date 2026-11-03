@@ -13,6 +13,18 @@ export function AuthProvider({ children }) {
     setAccessToken(nextToken);
   }, []);
 
+  const refreshAccessToken = useCallback(async () => {
+    try {
+      const session = await authApi.refresh();
+      acceptSession(session);
+      return session.accessToken;
+    } catch (error) {
+      setUser(null);
+      setAccessToken(null);
+      throw error;
+    }
+  }, [acceptSession]);
+
   useEffect(() => {
     let active = true;
     authApi.refresh().then(session => {
@@ -25,13 +37,19 @@ export function AuthProvider({ children }) {
     return () => { active = false; };
   }, [acceptSession]);
 
+  useEffect(() => {
+    if (!accessToken) return undefined;
+    const timer = window.setTimeout(() => { refreshAccessToken().catch(() => {}); }, 12 * 60 * 1000);
+    return () => window.clearTimeout(timer);
+  }, [accessToken, refreshAccessToken]);
+
   const login = useCallback(async credentials => acceptSession(await authApi.login(credentials)), [acceptSession]);
   const register = useCallback(async details => acceptSession(await authApi.register(details)), [acceptSession]);
   const logout = useCallback(async () => {
     try { await authApi.logout(); } finally { setUser(null); setAccessToken(null); }
   }, []);
 
-  const value = useMemo(() => ({ user, accessToken, loading, login, register, logout }), [user, accessToken, loading, login, register, logout]);
+  const value = useMemo(() => ({ user, accessToken, loading, login, register, logout, refreshAccessToken }), [user, accessToken, loading, login, register, logout, refreshAccessToken]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

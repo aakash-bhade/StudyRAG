@@ -8,7 +8,7 @@ Base path: `/api/v1`. JSON errors use a stable `{ error: { code, message, detail
 | Auth | `POST /auth/register`, `/auth/login`, `/auth/logout`, `/auth/refresh`; `GET /auth/me`. Password reset and email verification remain planned. |
 | Profile | `GET/PATCH /users/me`, `PATCH /users/me/password`, `DELETE /users/me` |
 | Workspaces | CRUD `/workspaces`; membership listing and invitation/removal under `/workspaces/:id/members` |
-| Documents | `GET/POST /documents`, `GET/PATCH/DELETE /documents/:id`, `POST /documents/:id/reprocess`, guarded download/preview endpoint |
+| Documents | `GET/POST /documents`, `PATCH/DELETE /documents/:id`, `GET /documents/:id/download` (implemented; owner-scoped; PDF, DOCX, UTF-8 TXT; 10 MiB upload cap) |
 | Website sources | `GET/POST /sources`, `GET/DELETE /sources/:id`, `POST /sources/:id/refresh` |
 | Notes/folders | CRUD `/notes`, `/folders`; `POST /notes/generate` only after generation is implemented |
 | Chat | CRUD `/conversations`, `GET/POST /conversations/:id/messages`, `POST /chat/answer` |
@@ -17,4 +17,4 @@ Base path: `/api/v1`. JSON errors use a stable `{ error: { code, message, detail
 | Assignments/tasks | CRUD `/assignments`, `/tasks`; assignment guidance routes only when implemented |
 | Notifications | `GET /notifications`, `PATCH /notifications/:id` |
 
-Every private route requires authentication. Every record route checks owner or explicit workspace membership/permission before access. Teacher, employee, and business UI distinctions do not grant cross-user access by themselves. The current auth foundation exposes only `/auth/me`; resource/workspace policies remain to be implemented before those endpoints are added.
+Every private route requires authentication. Every record route checks owner or explicit workspace membership/permission before access. Teacher, employee, and business UI distinctions do not grant cross-user access by themselves. The current auth API exposes `/auth/me`. Document listing accepts `page`, `limit` (max 50), and `q`; upload uses multipart field `file`. Document text is extracted and stored as owner-scoped chunks; embeddings, RAG retrieval, and website sources remain pending.

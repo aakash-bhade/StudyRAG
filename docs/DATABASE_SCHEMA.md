@@ -9,8 +9,8 @@ All user-owned records carry `ownerId`; workspace data also carries `workspaceId
 | `workspaces` | name, type, createdBy, settings | Creator and type indexes |
 | `workspaceMembers` | workspaceId, userId, membershipRole, permissions, status | Unique workspace/user pair; membership checked on every shared-resource request |
 | `folders` | ownerId, workspaceId?, name, parentId? | Owner/workspace + parent indexes |
-| `documents` | ownerId, workspaceId?, folderId?, originalName, storageKey, mimeType, byteSize, status, error | Owner/workspace + status + createdAt indexes; storage key is private |
-| `documentChunks` | ownerId, workspaceId?, sourceType, sourceId, ordinal, text, page, embedding/provider metadata | Source/ordinal and access-scope indexes; vector field only when supported/configured |
+| `documents` | ownerId, displayName, originalName, private storageKey, mimeType, byteSize, ready status, pageCount, chunkCount, contentHash | Implemented with owner + createdAt and owner + displayName indexes; storage key and content hash excluded from default queries |
+| `documentChunks` | ownerId, documentId, ordinal, text, page | Implemented with unique document/ordinal and owner/document indexes; embedding metadata remains pending |
 | `websiteSources` | ownerId, workspaceId?, url, canonicalHost, status, fetchedAt, contentHash, error | Owner/workspace + status indexes; safe-fetch policy enforced before indexing |
 | `conversations` | ownerId, workspaceId?, title, sourceFilters, archivedAt | Owner/workspace + updatedAt indexes |
 | `messages` | ownerId, conversationId, role, content, citations, provider metadata | Conversation + createdAt; citation records refer to authorized sources |
