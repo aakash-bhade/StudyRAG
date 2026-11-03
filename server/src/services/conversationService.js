@@ -16,7 +16,7 @@ function serializeConversation(conversation) {
 function serializeMessage(message) {
   return {
     id: String(message._id), role: message.role, text: message.content,
-    ...(message.role === 'assistant' ? { answer: message.answerMode === 'ollama' ? message.content : null, message: message.notice, answerMode: message.answerMode } : {}),
+    ...(message.role === 'assistant' ? { answer: message.answerMode === 'ollama' ? message.content : null, message: message.notice, answerMode: message.answerMode, retrievalMode: message.retrievalMode } : {}),
     sources: (message.citations || []).map(citation => ({ sourceType: citation.sourceType, documentId: citation.documentId ? String(citation.documentId) : undefined, websiteSourceId: citation.websiteSourceId ? String(citation.websiteSourceId) : undefined, url: citation.url, documentName: citation.documentName, ordinal: citation.ordinal, page: citation.page, text: citation.excerpt })),
     createdAt: message.createdAt,
   };
@@ -70,6 +70,7 @@ export async function askInConversation(userId, { question, documentIds, website
       notice: result.message || undefined,
       citations: result.sources.map(source => ({ ...(source.sourceType === 'website' ? { websiteSourceId: source.websiteSourceId, url: source.url } : { documentId: source.documentId }), sourceType: source.sourceType || 'document', documentName: source.documentName, ordinal: source.ordinal, page: source.page, excerpt: source.text })),
       answerMode: result.answerMode,
+      retrievalMode: result.retrievalMode,
     },
     ], { ordered: true });
   } catch (error) {

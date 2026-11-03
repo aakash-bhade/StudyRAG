@@ -649,6 +649,7 @@ h1, h2, h3, p { margin-top: 0; }
 .chat-citation-actions .chat-citation-link { margin: 0; }
 .chat-citation-actions button { display: inline-flex; align-items: center; gap: 5px; padding: 5px 8px; border: 1px solid #dce9f8; border-radius: 7px; color: #3976b7; background: #f7fbff; font: 700 9px 'DM Sans',sans-serif; cursor: pointer; }
 .chat-citation-actions button:disabled { color: #6c9a80; background: #f2fbf5; cursor: default; }
+.chat-retrieval-mode { display: inline-block; margin: 3px 0 7px; padding: 4px 7px; border-radius: 20px; color: #6480a0; background: #eef5fc; font-size: 8px; font-weight: 700; }
 .saved-page { max-width: 960px; margin: 0 auto; }
 .saved-items-list { display: grid; gap: 11px; margin-top: 17px; }
 .saved-item-card { padding: 15px 17px; border: 1px solid #e7edf5; border-radius: 13px; background: white; box-shadow: 0 8px 24px #233b5708; }

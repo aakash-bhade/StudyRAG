@@ -4,7 +4,7 @@ StudyRAG is planned as a multi-source AI learning and productivity platform buil
 
 ## Project phase
 
-Authentication, private documents, cited study chat with saved conversations, and personal notes are implemented. See [PROJECT_STATUS.md](PROJECT_STATUS.md) for current progress and limitations.
+Private documents and websites, cited study chat, notes, quizzes, assignments, tasks, saved passages, and account security settings are implemented. Chat supports keyword retrieval by default and optional hybrid semantic retrieval through a configured local Ollama embedding model. See [PROJECT_STATUS.md](PROJECT_STATUS.md) for current progress and limitations.
 
 ## Project documentation
 
@@ -36,4 +36,4 @@ Requirements: Node.js 20.19+ and MongoDB Community locally, or a MongoDB Atlas c
 
 Registration, login, and document metadata need a reachable MongoDB instance. Document binaries currently use private local disk storage for development; production needs durable private object storage. The API fails closed when the database is unavailable; it does not create a fake account or session.
 
-To generate answers from uploaded sources, run [Ollama](https://ollama.com/) locally, pull a model (for example `ollama pull qwen2.5:3b`), then set `OLLAMA_BASE_URL=http://127.0.0.1:11434` and `OLLAMA_MODEL=qwen2.5:3b` in `server/.env`. Restart the API after changing environment settings. The chat searches only the signed-in user's document chunks, shows retrieved passages, and reports a setup message instead of inventing an answer when Ollama is not configured. Recent conversations and citations are saved in MongoDB and remain private to the owner.
+To generate answers from uploaded sources, run [Ollama](https://ollama.com/) locally, pull a chat model (for example `ollama pull qwen2.5:3b`), then set `OLLAMA_BASE_URL=http://127.0.0.1:11434` and `OLLAMA_MODEL=qwen2.5:3b` in `server/.env`. For semantic retrieval, also run `ollama pull embeddinggemma`, set `OLLAMA_EMBEDDING_MODEL=embeddinggemma`, restart the API, and use the sparkle action in Documents or Website sources to build private passage vectors. Chat combines keyword scores with cosine similarity; without indexed vectors it continues to use keyword retrieval. Ollama's documented `/api/embed` route supports batched strings and cosine similarity ([Ollama embeddings docs](https://docs.ollama.com/capabilities/embeddings)). Recent conversations and citations are saved in MongoDB and remain private to the owner.

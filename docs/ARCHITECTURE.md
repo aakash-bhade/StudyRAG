@@ -43,7 +43,7 @@ docs/                    Architecture and operational documentation
 3. Normalize text and split it into bounded, overlapping chunks.
 4. Create embeddings through a configured adapter; record processing failures instead of marking a source ready.
 5. At query time, derive the authenticated user and workspace from the session, never from caller-supplied ownership fields.
-6. Retrieve only chunks belonging to accessible, active sources. Use a local cosine-similarity fallback initially; keep the retrieval interface compatible with later MongoDB vector search evaluation.
+6. Retrieve only chunks belonging to accessible, active sources. Use owner-filtered keyword retrieval by default and combine lexical scores with local cosine similarity when the owner has indexed passages using the configured Ollama embedding model; evaluate MongoDB vector search separately before production.
 7. Pass retrieved text as untrusted reference material to the configured LLM. Require citations to retrieved source IDs and page metadata.
 8. Return a clear unavailable/quota response if embedding or generation is not configured. Never invent a grounded answer.
 

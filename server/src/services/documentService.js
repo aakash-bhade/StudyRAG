@@ -5,8 +5,10 @@ import mongoose from 'mongoose';
 import { documentFilePath, ensureDocumentStorage, removeStoredDocument } from '../config/storage.js';
 import { Document } from '../models/Document.js';
 import { DocumentChunk } from '../models/DocumentChunk.js';
+import { env } from '../config/env.js';
 import { httpError } from '../middleware/errors.js';
 import { documentMimeType, parseDocument, splitDocumentName } from './documentParser.js';
+import { embedTexts } from './embeddingService.js';
 
 function safeId(id) {
   if (!mongoose.isValidObjectId(id)) throw httpError(400, 'INVALID_ID', 'The document ID is invalid.');
@@ -60,6 +62,17 @@ export async function uploadOwnedDocument(userId, file) {
     await removeStoredDocument(storageKey);
     throw error;
   }
+}
+
+export async function indexOwnedDocumentEmbeddings(userId, id) {
+  const document = await getOwnedDocument(userId, id);
+  const chunks = await DocumentChunk.find({ ownerId: userId, documentId: document._id }).select('_id text').limit(2000).lean();
+  if (!chunks.length) throw httpError(422, 'DOCUMENT_HAS_NO_CHUNKS', 'This document has no searchable passages to index.');
+  const embeddings = await embedTexts(chunks.map(chunk => chunk.text));
+  const operations = chunks.map((chunk, index) => ({ updateOne: { filter: { _id: chunk._id, ownerId: userId }, update: { $set: { embedding: embeddings[index], embeddingModel: env.OLLAMA_EMBEDDING_MODEL } } } }));
+  const result = await DocumentChunk.bulkWrite(operations, { ordered: true });
+  if (result.matchedCount !== chunks.length) throw httpError(409, 'DOCUMENT_CHANGED', 'The document changed while its semantic index was being built. Please try again.');
+  return { id: String(document._id), indexedChunkCount: chunks.length, embeddingModel: env.OLLAMA_EMBEDDING_MODEL };
 }
 
 export async function listOwnedDocuments(userId, { page, limit, q }) {

@@ -6,6 +6,8 @@ const documentChunkSchema = new mongoose.Schema({
   ordinal: { type: Number, required: true, min: 0 },
   text: { type: String, required: true, maxlength: 1600 },
   page: { type: Number, default: null, min: 1 },
+  embedding: { type: [Number], default: undefined, select: false },
+  embeddingModel: { type: String, maxlength: 120, default: undefined, select: false },
 }, { timestamps: true, versionKey: false });
 
 documentChunkSchema.index({ ownerId: 1, documentId: 1, ordinal: 1 }, { unique: true });

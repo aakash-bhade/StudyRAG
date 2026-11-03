@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Download, FileText, FileUp, FileWarning, LoaderCircle, Pencil, Search, ShieldCheck, Trash2, UploadCloud, X } from 'lucide-react';
+import { Download, FileText, FileUp, FileWarning, LoaderCircle, Pencil, Search, ShieldCheck, Sparkles, Trash2, UploadCloud, X } from 'lucide-react';
 import WorkspaceShell from '../dashboard/WorkspaceShell.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { documentApi } from '../../services/documentApi.js';
@@ -14,6 +14,7 @@ export default function DocumentsPage() {
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [indexingId, setIndexingId] = useState('');
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
@@ -99,13 +100,20 @@ export default function DocumentsPage() {
     } catch (deleteError) { setError(deleteError.message); }
   }
 
+  async function indexEmbeddings(document) {
+    setIndexingId(document.id); setError(''); setNotice('');
+    try { const result = await documentApi.indexEmbeddings(document.id, authOptions); setNotice(`${result.item.indexedChunkCount} passages indexed for semantic search using ${result.item.embeddingModel}.`); }
+    catch (indexError) { setError(indexError.message); }
+    finally { setIndexingId(''); }
+  }
+
   function closePreview() {
     if (preview?.url) URL.revokeObjectURL(preview.url);
     setPreview(null);
   }
 
   return <WorkspaceShell active="documents">
-    <div className="documents-heading"><div><p className="eyebrow"><FileText size={14} /> YOUR KNOWLEDGE LIBRARY</p><h1>My documents</h1><p>Upload PDFs, Word documents, or text files to keep them organized in your private workspace.</p></div><span className="documents-count"><FileText size={15} /> {documents.length} {documents.length === 1 ? 'document' : 'documents'}</span></div>
+    <div className="documents-heading"><div><p className="eyebrow"><FileText size={14} /> YOUR KNOWLEDGE LIBRARY</p><h1>My documents</h1><p>Upload PDFs, Word documents, or text files. Use the sparkle action to add meaning-based semantic search.</p></div><span className="documents-count"><FileText size={15} /> {documents.length} {documents.length === 1 ? 'document' : 'documents'}</span></div>
 
     <div className={`upload-zone ${dragging ? 'is-dragging' : ''}`} onDragOver={event => { event.preventDefault(); setDragging(true); }} onDragLeave={event => { if (!event.currentTarget.contains(event.relatedTarget)) setDragging(false); }} onDrop={event => { event.preventDefault(); setDragging(false); uploadFile(event.dataTransfer.files?.[0]); }}>
       <input ref={inputRef} className="visually-hidden" type="file" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" onChange={event => uploadFile(event.target.files?.[0])} />
@@ -123,7 +131,7 @@ export default function DocumentsPage() {
       <span className={`document-type-icon ${document.mimeType === 'application/pdf' ? 'pdf' : document.mimeType === 'text/plain' ? 'txt' : 'docx'}`}><FileText size={20} /></span>
       <div className="document-main">{renamingId === document.id ? <form className="rename-form" onSubmit={event => { event.preventDefault(); saveRename(document); }}><input autoFocus maxLength={180} value={renameValue} onChange={event => setRenameValue(event.target.value)} aria-label="New document name" /><button type="submit" aria-label="Save name"><ShieldCheck size={16} /></button><button type="button" aria-label="Cancel rename" onClick={() => setRenamingId(null)}><X size={16} /></button></form> : <><h3 title={document.displayName}>{document.displayName}</h3><p>{document.mimeType === 'application/pdf' ? 'PDF' : document.mimeType === 'text/plain' ? 'TXT' : 'DOCX'} <span>·</span> {formatBytes(document.byteSize)}{document.pageCount ? <> <span>·</span> {document.pageCount} pages</> : null} <span>·</span> {new Date(document.createdAt).toLocaleDateString()}</p></>}</div>
       <span className="ready-label"><i /> Ready</span>
-      <div className="document-actions">{document.mimeType !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' && <button onClick={() => downloadDocument(document, true)} title="Preview document" aria-label={`Preview ${document.displayName}`}><FileText size={16} /></button>}<button onClick={() => downloadDocument(document)} title="Download document" aria-label={`Download ${document.displayName}`}><Download size={16} /></button>{renamingId !== document.id && <button onClick={() => { setRenamingId(document.id); setRenameValue(document.displayName); }} title="Rename document" aria-label={`Rename ${document.displayName}`}><Pencil size={16} /></button>}<button className="delete-action" onClick={() => deleteDocument(document)} title="Delete document" aria-label={`Delete ${document.displayName}`}><Trash2 size={16} /></button></div>
+      <div className="document-actions">{document.mimeType !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' && <button onClick={() => downloadDocument(document, true)} title="Preview document" aria-label={`Preview ${document.displayName}`}><FileText size={16} /></button>}<button onClick={() => downloadDocument(document)} title="Download document" aria-label={`Download ${document.displayName}`}><Download size={16} /></button><button onClick={() => indexEmbeddings(document)} disabled={Boolean(indexingId)} title="Build semantic search index" aria-label={`Build semantic search index for ${document.displayName}`}>{indexingId === document.id ? <LoaderCircle className="spin" size={16} /> : <Sparkles size={16} />}</button>{renamingId !== document.id && <button onClick={() => { setRenamingId(document.id); setRenameValue(document.displayName); }} title="Rename document" aria-label={`Rename ${document.displayName}`}><Pencil size={16} /></button>}<button className="delete-action" onClick={() => deleteDocument(document)} title="Delete document" aria-label={`Delete ${document.displayName}`}><Trash2 size={16} /></button></div>
     </article>)}</div>}
     <p className="document-privacy-note"><ShieldCheck size={15} /> Documents are downloaded through an authenticated, owner-checked endpoint.</p>
     {preview && <div className="document-preview-backdrop" onMouseDown={event => event.target === event.currentTarget && closePreview()}><section className="document-preview-dialog" role="dialog" aria-modal="true" aria-label={`Preview ${preview.name}`}><header><span><FileText size={16} /> {preview.name}</span><button onClick={closePreview} aria-label="Close preview"><X size={19} /></button></header><iframe title={`Preview of ${preview.name}`} src={preview.url} /></section></div>}

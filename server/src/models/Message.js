@@ -19,6 +19,7 @@ const messageSchema = new mongoose.Schema({
   notice: { type: String, maxlength: 1200, default: undefined },
   citations: { type: [citationSchema], default: [] },
   answerMode: { type: String, enum: ['ollama', 'retrieval-only', 'no-match'], default: undefined },
+  retrievalMode: { type: String, enum: ['keyword', 'hybrid'], default: undefined },
 }, { timestamps: { createdAt: true, updatedAt: false }, versionKey: false });
 
 messageSchema.index({ ownerId: 1, conversationId: 1, createdAt: 1 });

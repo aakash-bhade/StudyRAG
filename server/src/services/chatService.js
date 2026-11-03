@@ -5,6 +5,7 @@ import { Document } from '../models/Document.js';
 import { DocumentChunk } from '../models/DocumentChunk.js';
 import { WebsiteSource } from '../models/WebsiteSource.js';
 import { WebsiteChunk } from '../models/WebsiteChunk.js';
+import { embedTexts } from './embeddingService.js';
 
 const STOP_WORDS = new Set('a an and are as at be by can do for from how i in is it me my of on or the this to was what when where which who why with you your explain tell'.split(' '));
 
@@ -19,6 +20,13 @@ function rankChunk(text, queryTerms) {
   const score = queryTerms.reduce((sum, term) => sum + (counts.get(term) ? 1 + Math.log(counts.get(term)) : 0), 0);
   const coverage = queryTerms.length ? queryTerms.filter(term => counts.has(term)).length / queryTerms.length : 0;
   return score * (0.5 + coverage);
+}
+
+function cosine(left, right) {
+  if (!Array.isArray(left) || left.length !== right.length) return null;
+  let dot = 0; let leftNorm = 0; let rightNorm = 0;
+  for (let i = 0; i < left.length; i += 1) { dot += left[i] * right[i]; leftNorm += left[i] ** 2; rightNorm += right[i] ** 2; }
+  return leftNorm && rightNorm ? dot / Math.sqrt(leftNorm * rightNorm) : null;
 }
 
 async function generateAnswer(question, sources) {
@@ -74,30 +82,45 @@ export async function answerFromDocuments(userId, { question, documentIds, websi
   const websiteById = new Map(websites.map(source => [String(source._id), source]));
   if (!documents.length && !websites.length) throw httpError(400, 'NO_SOURCES', 'Add a document or website source before asking a question.');
   const queryTerms = terms(question);
-  if (!queryTerms.length) throw httpError(400, 'QUESTION_NEEDS_KEYWORDS', 'Add a few specific words to your question so I can search your documents.');
+  let queryEmbedding = null;
+  if (env.OLLAMA_BASE_URL && env.OLLAMA_EMBEDDING_MODEL) {
+    try { [queryEmbedding] = await embedTexts([question]); }
+    catch (error) { console.warn('Semantic query unavailable; using keyword retrieval:', error.code || error.message); }
+  }
+  if (!queryTerms.length && !queryEmbedding) throw httpError(400, 'QUESTION_NEEDS_KEYWORDS', 'Semantic search is not configured. Add a few specific English keywords or configure an Ollama embedding model.');
   const [chunks, websiteChunks] = await Promise.all([
-    DocumentChunk.find({ ownerId: userId, documentId: { $in: documents.map(document => document._id) } }).select('documentId ordinal page text').limit(5000).lean(),
-    WebsiteChunk.find({ ownerId: userId, sourceId: { $in: websites.map(source => source._id) } }).select('sourceId ordinal text').limit(5000).lean(),
+    DocumentChunk.find({ ownerId: userId, documentId: { $in: documents.map(document => document._id) } }).select('documentId ordinal page text +embedding +embeddingModel').limit(1500).lean(),
+    WebsiteChunk.find({ ownerId: userId, sourceId: { $in: websites.map(source => source._id) } }).select('sourceId ordinal text +embedding +embeddingModel').limit(1500).lean(),
   ]);
-  const sources = [...chunks.map(chunk => ({
-    sourceType: 'document',
-    documentId: String(chunk.documentId),
-    documentName: byId.get(String(chunk.documentId))?.displayName || 'Document',
-    ordinal: chunk.ordinal,
-    page: chunk.page,
-    text: chunk.text,
-    score: rankChunk(chunk.text, queryTerms),
+  const candidates = [...chunks.map(chunk => ({
+    sourceType: 'document', documentId: String(chunk.documentId),
+    documentName: byId.get(String(chunk.documentId))?.displayName || 'Document', ordinal: chunk.ordinal, page: chunk.page, text: chunk.text,
+    lexicalScore: queryTerms.length ? rankChunk(chunk.text, queryTerms) : 0,
+    similarity: queryEmbedding && chunk.embeddingModel === env.OLLAMA_EMBEDDING_MODEL ? cosine(chunk.embedding, queryEmbedding) : null,
   })), ...websiteChunks.map(chunk => ({
     sourceType: 'website', websiteSourceId: String(chunk.sourceId), documentId: String(chunk.sourceId),
     documentName: websiteById.get(String(chunk.sourceId))?.title || 'Website', url: websiteById.get(String(chunk.sourceId))?.url,
-    ordinal: chunk.ordinal, page: null, text: chunk.text, score: rankChunk(chunk.text, queryTerms),
-  }))].filter(source => source.score > 0).sort((a, b) => b.score - a.score).slice(0, 5);
+    ordinal: chunk.ordinal, page: null, text: chunk.text,
+    lexicalScore: queryTerms.length ? rankChunk(chunk.text, queryTerms) : 0,
+    similarity: queryEmbedding && chunk.embeddingModel === env.OLLAMA_EMBEDDING_MODEL ? cosine(chunk.embedding, queryEmbedding) : null,
+  }))];
+  const lexicalMax = Math.max(0, ...candidates.map(source => source.lexicalScore));
+  const vectorScores = candidates.map(source => source.similarity).filter(Number.isFinite);
+  const vectorMin = vectorScores.length ? Math.min(...vectorScores) : 0;
+  const vectorMax = vectorScores.length ? Math.max(...vectorScores) : 0;
+  const retrievalMode = vectorScores.length ? 'hybrid' : 'keyword';
+  const sources = candidates.map(source => {
+    const lexicalScore = lexicalMax ? source.lexicalScore / lexicalMax : 0;
+    const semanticScore = Number.isFinite(source.similarity) && vectorMax > vectorMin ? (source.similarity - vectorMin) / (vectorMax - vectorMin) : 0;
+    return { ...source, score: retrievalMode === 'hybrid' ? (Number.isFinite(source.similarity) ? 0.65 * semanticScore + 0.35 * lexicalScore : 0.35 * lexicalScore) : source.lexicalScore };
+  }).filter(source => source.score > 0).sort((a, b) => b.score - a.score).slice(0, 5);
 
-  if (!sources.length) return { answer: null, answerMode: 'no-match', message: 'I could not find a relevant passage in the selected documents. Try different terms or upload the right material.', sources: [] };
+  if (!sources.length) return { answer: null, answerMode: 'no-match', retrievalMode, message: 'I could not find a relevant passage in the selected documents. Try different terms or upload the right material.', sources: [] };
   const answer = await generateAnswer(question, sources);
   return {
     answer,
     answerMode: answer ? 'ollama' : 'retrieval-only',
+    retrievalMode,
     message: answer ? null : 'Relevant passages found. To generate a cited answer, configure Ollama in server/.env and restart the API.',
     sources: sources.map(({ score, ...source }) => source),
   };
