@@ -4,7 +4,7 @@ Last updated: 2026-11-04
 
 ## Current phase
 
-Phase 32 — Local-service integration and workspace flow fixes.
+Phase 33 — Role-aware personal dashboards.
 
 Estimated completion: 90% of the planned feature implementation. Production readiness is lower while live-service verification, team sharing, and deployment remain outstanding.
 
@@ -51,9 +51,11 @@ Estimated completion: 90% of the planned feature implementation. Production read
 - Fixed client requests for document/webpage embedding and webpage refresh actions to send the JSON body required by the API origin guard.
 - Replaced deprecated Mongoose `new: true` update options with `returnDocument: 'after'` for the installed Mongoose 9 runtime.
 - Added a local integration smoke command covering registration, notes/folders, TXT upload and indexing, webpage add/refresh/index, cited hybrid chat, saved passages, quiz attempts, flashcards, tasks, assignments, and notification read state. It cleans up its synthetic account and files.
+- Added role-aware dashboard summaries and quick actions for students, teachers, employees, and business professionals; each keeps personal-data access clear and links only to implemented features.
 
 ## In progress
 
+- Implement secure teacher/class and business/team workspaces with explicit membership and sharing permissions.
 - Review AI generation quality and browser experience against representative study materials.
 - Review auth, workspace, source, chat, notes, and quiz screens at desktop and mobile widths.
 
@@ -69,8 +71,8 @@ Estimated completion: 90% of the planned feature implementation. Production read
 - `npm run check:integration` passes against local MongoDB/Ollama: registration/profile, folders/notes, TXT upload/indexing, webpage add/refresh/indexing, cited hybrid chat, saved passage, quiz/attempt, flashcards, task updates, assignment submission, and notification read-state. The script removes its synthetic account and uploaded files after each run.
 - Client production build passes. `git diff --check` passes. Both npm dependency audits report zero vulnerabilities.
 - Email verification and recovery have not been exercised against configured SMTP credentials.
-- Browser review and deployment verification are pending. SMTP email actions remain untested because SMTP credentials are not configured.
-- Current branch: `main`; latest integration fixes and smoke tooling are pending commit and push.
+- Browser visual review and deployment verification are pending. Local browser automation could not reach the temporary Vite preview; API and end-to-end service checks passed. SMTP email actions remain untested because SMTP credentials are not configured.
+- Current branch: `main`; role-aware dashboard polish is pending commit and push.
 
 ## Known constraints
 
@@ -79,5 +81,5 @@ Estimated completion: 90% of the planned feature implementation. Production read
 - AI functionality requires a configured provider or local Ollama runtime; no fabricated fallback responses are allowed.
 - Semantic search requires an installed Ollama embedding model configured with `OLLAMA_EMBEDDING_MODEL`; existing sources must be explicitly indexed, and chat falls back to keyword retrieval when embeddings are unavailable.
 - Deadline reminders refresh when the signed-in user opens Notifications; scheduled background, email, and push delivery are not implemented.
-- Website ingestion currently handles public HTML pages up to 2 MiB with a bounded redirect count and pinned public IPv4 DNS result. JavaScript-rendered pages, authentication-required pages, PDFs, and IPv6-only hosts are not supported; browser review and live fetching against the configured runtime remain pending.
-- Quiz creation requires a configured Ollama-compatible chat model; quiz generation and attempt persistence still need live database/provider verification.
+- Website ingestion currently handles public HTML pages up to 2 MiB with a bounded redirect count and pinned public IPv4 DNS result. JavaScript-rendered pages, authentication-required pages, PDFs, and IPv6-only hosts are not supported; the live example.com add/refresh/index flow passes.
+- Quiz generation requires a configured Ollama-compatible chat model; local generation and attempt persistence pass, while quality review across diverse study materials remains pending.

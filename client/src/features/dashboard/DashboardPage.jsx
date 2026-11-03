@@ -12,6 +12,44 @@ import { assignmentApi } from '../../services/assignmentApi.js';
 
 const emptyStats = { documents: 0, websites: 0, notes: 0, quizzes: 0, tasks: 0, assignments: 0 };
 const dateLabel = value => new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+const roleViews = {
+  student: {
+    overview: 'Your study materials, personal notes, and next steps.',
+    activityTitle: 'Continue learning',
+    activityDescription: 'Pick up where you left off with your own materials.',
+    chatTitle: 'Ask your study materials',
+    chatDescription: 'Get cited answers from your sources',
+    documentTitle: 'Add study materials',
+    documentDescription: 'Upload PDFs, DOCX, or text files',
+  },
+  teacher: {
+    overview: 'Your teaching materials, preparation notes, and upcoming work.',
+    activityTitle: 'Prepare a lesson',
+    activityDescription: 'Use your own teaching materials and notes.',
+    chatTitle: 'Ask your teaching materials',
+    chatDescription: 'Find cited details in your resources',
+    documentTitle: 'Add teaching resources',
+    documentDescription: 'Upload lesson plans, PDFs, or text files',
+  },
+  employee: {
+    overview: 'Your work documents, professional notes, and upcoming tasks.',
+    activityTitle: 'Continue your work',
+    activityDescription: 'Search the documents in your personal workspace.',
+    chatTitle: 'Search your work documents',
+    chatDescription: 'Get cited answers from your own sources',
+    documentTitle: 'Add work documents',
+    documentDescription: 'Upload reports, PDFs, DOCX, or text files',
+  },
+  business: {
+    overview: 'Your business materials, planning notes, and upcoming work.',
+    activityTitle: 'Review your materials',
+    activityDescription: 'Use your own business documents and notes.',
+    chatTitle: 'Search your business materials',
+    chatDescription: 'Get cited answers from your own sources',
+    documentTitle: 'Add business documents',
+    documentDescription: 'Upload reports, PDFs, DOCX, or text files',
+  },
+};
 
 export default function DashboardPage() {
   const { user, accessToken, refreshAccessToken } = useAuth();
@@ -22,6 +60,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const roleLabels = { student: 'Student', teacher: 'Teacher / educator', employee: 'Employee', business: 'Business professional' };
+  const roleView = roleViews[user?.role] || roleViews.student;
 
   useEffect(() => {
     let active = true;
@@ -68,13 +107,13 @@ export default function DashboardPage() {
   ];
 
   return <WorkspaceShell active="overview">
-    <div className="welcome-banner"><div><p className="eyebrow"><Sparkles size={14} /> YOUR STUDYRAG WORKSPACE</p><h1>Welcome back, {user?.displayName?.split(' ')[0]}.</h1><p>Your study materials and next steps, all in one place.</p></div><div className="welcome-illustration"><div className="welcome-orbit" /><span><GraduationCap size={38} /></span><i><Sparkles size={15} /></i></div></div>
-    <div className="dashboard-section-heading"><div><h2>Workspace overview</h2><p>{loading ? 'Gathering your latest study activity…' : `Your account is set up as ${roleLabels[user?.role] || 'Member'}.`}</p></div><Link className="dashboard-text-link" to="/app/settings">Account settings <ArrowRight size={14} /></Link></div>
+    <div className="welcome-banner"><div><p className="eyebrow"><Sparkles size={14} /> {roleLabels[user?.role]?.toUpperCase() || 'YOUR'} STUDYRAG WORKSPACE</p><h1>Welcome back, {user?.displayName?.split(' ')[0]}.</h1><p>{roleView.overview}</p></div><div className="welcome-illustration"><div className="welcome-orbit" /><span><GraduationCap size={38} /></span><i><Sparkles size={15} /></i></div></div>
+    <div className="dashboard-section-heading"><div><h2>Workspace overview</h2><p>{loading ? 'Gathering your latest activity…' : `Personal workspace · ${roleLabels[user?.role] || 'Member'}`}</p></div><Link className="dashboard-text-link" to="/app/settings">Account settings <ArrowRight size={14} /></Link></div>
     {error && <p className="dashboard-load-message" role="status">{error}</p>}
     <div className="dashboard-stats-grid">{cards.map(({ label, value, icon: Icon, tone, href }) => <Link key={label} className="dashboard-stat-card" to={href}><span className={`dashboard-stat-icon ${tone}`}><Icon size={17} /></span><span className="dashboard-stat-value">{loading ? <LoaderCircle size={17} className="spin" /> : value ?? '—'}</span><span className="dashboard-stat-label">{label}</span></Link>)}</div>
-    <div className="dashboard-lower-grid"><section className="dashboard-panel"><div className="dashboard-panel-heading"><span><CalendarClock size={16} /></span><div><h2>Upcoming deadlines</h2><p>Due dates from your tasks and assignments</p></div></div>
+    <div className="dashboard-lower-grid"><section className="dashboard-panel"><div className="dashboard-panel-heading"><span><CalendarClock size={16} /></span><div><h2>Upcoming deadlines</h2><p>Your task and assignment due dates</p></div></div>
       {loading ? <p className="dashboard-panel-empty">Loading your deadlines…</p> : deadlines.length ? <div className="dashboard-deadlines">{deadlines.map(item => { const overdue = new Date(item.dueAt) < new Date(); return <Link to={item.href} className="dashboard-deadline" key={`${item.type}-${item.id}`}><span className={`deadline-dot ${overdue ? 'overdue' : ''}`} /><span className="deadline-copy"><b>{item.title}</b><small>{item.type}</small></span><time className={overdue ? 'overdue' : ''}>{overdue ? 'Overdue · ' : ''}{dateLabel(item.dueAt)}</time></Link>; })}</div> : <div className="dashboard-panel-empty">{deadlinesUnavailable ? <><span>Could not load all deadlines.</span><Link to="/app/tasks">View tasks <ArrowRight size={13} /></Link></> : <><CheckCircle2 size={19} /><span>No upcoming deadlines. You’re all caught up.</span><Link to="/app/tasks">Plan a task <ArrowRight size={13} /></Link></>}</div>}
-    </section><section className="dashboard-panel dashboard-quick-panel"><div className="dashboard-panel-heading"><span><Sparkles size={16} /></span><div><h2>Continue learning</h2><p>Jump into a study activity</p></div></div><Link className="dashboard-quick-link" to="/app/chat"><MessageCircle size={16} /><span><b>Ask your materials</b><small>Get cited answers from your sources</small></span><ArrowRight size={14} /></Link><Link className="dashboard-quick-link" to="/app/documents"><FileText size={16} /><span><b>Add study materials</b><small>Upload PDFs, DOCX, or text files</small></span><ArrowRight size={14} /></Link></section></div>
-    <p className="dashboard-footnote"><ShieldCheck size={15} /> Your workspace data is private to your account.</p>
+    </section><section className="dashboard-panel dashboard-quick-panel"><div className="dashboard-panel-heading"><span><Sparkles size={16} /></span><div><h2>{roleView.activityTitle}</h2><p>{roleView.activityDescription}</p></div></div><Link className="dashboard-quick-link" to="/app/chat"><MessageCircle size={16} /><span><b>{roleView.chatTitle}</b><small>{roleView.chatDescription}</small></span><ArrowRight size={14} /></Link><Link className="dashboard-quick-link" to="/app/documents"><FileText size={16} /><span><b>{roleView.documentTitle}</b><small>{roleView.documentDescription}</small></span><ArrowRight size={14} /></Link></section></div>
+    <p className="dashboard-footnote"><ShieldCheck size={15} /> Only you can access the data in this personal workspace.</p>
   </WorkspaceShell>;
 }
