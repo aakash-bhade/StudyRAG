@@ -10,8 +10,9 @@ import { removeStoredDocument } from '../src/config/storage.js';
 
 const api = `http://127.0.0.1:${process.env.PORT || 4000}/api/v1`;
 const email = `studyrag-smoke-${randomUUID()}@example.test`;
+const peerEmail = `studyrag-smoke-peer-${randomUUID()}@example.test`;
 const tempFile = path.join(tmpdir(), `studyrag-smoke-${randomUUID()}.txt`);
-let ownerId;
+const ownerIds = [];
 
 async function request(route, { method = 'GET', token, json, form } = {}) {
   const headers = {};
@@ -28,20 +29,33 @@ async function request(route, { method = 'GET', token, json, form } = {}) {
   return body;
 }
 
+async function expectStatus(route, { method = 'GET', token, json } = {}, expectedStatus = 404) {
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const options = { method, headers };
+  if (json !== undefined) {
+    headers['Content-Type'] = 'application/json';
+    options.body = JSON.stringify(json);
+  }
+  const response = await fetch(`${api}${route}`, options);
+  assert.equal(response.status, expectedStatus, `${method} ${route} should return ${expectedStatus}, got ${response.status}`);
+  return response.json();
+}
+
 async function cleanAccount() {
   if (!mongoose.connection.readyState) return;
-  const user = ownerId ? await User.findById(ownerId).lean() : await User.findOne({ email }).lean();
-  if (!user) return;
+  const users = await User.find({ $or: [{ _id: { $in: ownerIds } }, { email: { $in: [email, peerEmail] } }] }).lean();
   const collections = await mongoose.connection.db.listCollections({ type: 'collection' }).toArray();
-  const documents = await mongoose.connection.db.collection('documents').find({ ownerId: user._id }, { projection: { storageKey: 1 } }).toArray();
-  for (const document of documents) await removeStoredDocument(document.storageKey).catch(() => {});
-  for (const { name } of collections) {
-    if (name === 'users') continue;
-    const collection = mongoose.connection.db.collection(name);
-    await collection.deleteMany({ ownerId: user._id }).catch(() => {});
-    await collection.deleteMany({ userId: user._id }).catch(() => {});
+  for (const user of users) {
+    const documents = await mongoose.connection.db.collection('documents').find({ ownerId: user._id }, { projection: { storageKey: 1 } }).toArray();
+    for (const document of documents) await removeStoredDocument(document.storageKey).catch(() => {});
+    for (const { name } of collections) {
+      if (name === 'users') continue;
+      const collection = mongoose.connection.db.collection(name);
+      await collection.deleteMany({ ownerId: user._id }).catch(() => {});
+      await collection.deleteMany({ userId: user._id }).catch(() => {});
+    }
+    await User.deleteOne({ _id: user._id });
   }
-  await User.deleteOne({ _id: user._id });
 }
 
 try {
@@ -53,9 +67,13 @@ try {
   const account = await request('/auth/register', {
     method: 'POST', json: { displayName: 'StudyRAG Smoke', email, password: 'LocalSmoke-8#Pass', role: 'student' },
   });
-  ownerId = account.user.id;
+  ownerIds.push(account.user.id);
   const me = await request('/auth/me', { token: account.accessToken });
-  assert.equal(me.user.id, ownerId);
+  assert.equal(me.user.id, account.user.id);
+  const peer = await request('/auth/register', {
+    method: 'POST', json: { displayName: 'StudyRAG Peer', email: peerEmail, password: 'LocalSmoke-8#Pass', role: 'employee' },
+  });
+  ownerIds.push(peer.user.id);
 
   const folder = await request('/folders', {
     method: 'POST', token: account.accessToken, json: { name: 'Biology' },
@@ -73,6 +91,11 @@ try {
   const uploaded = await request('/documents', { method: 'POST', token: account.accessToken, form });
   const documentId = uploaded.item.id;
   assert.ok(uploaded.item.chunkCount >= 3);
+  await expectStatus(`/documents/${documentId}/download`, { token: peer.accessToken }, 404);
+  await expectStatus('/chat/ask', {
+    method: 'POST', token: peer.accessToken,
+    json: { question: 'Which pigment captures sunlight?', documentIds: [documentId] },
+  }, 404);
 
   const indexed = await request(`/documents/${documentId}/embeddings`, { method: 'POST', token: account.accessToken, json: {} });
   assert.equal(indexed.item.indexedChunkCount, uploaded.item.chunkCount);
@@ -93,6 +116,7 @@ try {
   assert.equal(chat.item.answerMode, 'ollama');
   assert.ok(chat.item.sources.length > 0);
   const conversationId = chat.conversation.id;
+  await expectStatus(`/chat/conversations/${conversationId}`, { token: peer.accessToken }, 404);
   const documentCitation = chat.item.sources.find(source => source.sourceType === 'document');
   assert.ok(documentCitation);
   const saved = await request('/saved-items', {
@@ -146,7 +170,7 @@ try {
 
   await request(`/chat/conversations/${conversationId}`, { method: 'DELETE', token: account.accessToken });
   console.log(JSON.stringify({
-    health: 'connected', account: 'register/me passed', folder: 'created', note: 'created in folder',
+    health: 'connected', account: 'register/me passed', isolation: 'cross-user documents and conversations denied', folder: 'created', note: 'created in folder',
     document: `uploaded and indexed ${indexed.item.indexedChunkCount} chunks`,
     website: `added, refreshed, and indexed ${websiteIndex.item.indexedChunkCount} chunks`,
     chat: `${chat.item.answerMode}/${chat.item.retrievalMode} with ${chat.item.sources.length} citations`,

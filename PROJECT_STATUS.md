@@ -51,6 +51,7 @@ Estimated completion: 90% of the planned feature implementation. Production read
 - Fixed client requests for document/webpage embedding and webpage refresh actions to send the JSON body required by the API origin guard.
 - Replaced deprecated Mongoose `new: true` update options with `returnDocument: 'after'` for the installed Mongoose 9 runtime.
 - Added a local integration smoke command covering registration, notes/folders, TXT upload and indexing, webpage add/refresh/index, cited hybrid chat, saved passages, quiz attempts, flashcards, tasks, assignments, and notification read state. It cleans up its synthetic account and files.
+- Extended the integration smoke to use two temporary accounts and verify cross-user document downloads, source retrieval, and conversation reads are denied.
 - Added role-aware dashboard summaries and quick actions for students, teachers, employees, and business professionals; each keeps personal-data access clear and links only to implemented features.
 
 ## In progress
@@ -68,11 +69,11 @@ Estimated completion: 90% of the planned feature implementation. Production read
 - Frontend and server dependencies installed with lockfiles; npm install audits reported zero vulnerabilities for both packages.
 - Current `client`: production build passes with notes-grounded chat, answer copying, source-grounded flashcards, and mobile navigation.
 - Current `server`: Node syntax checks and full Express app runtime import smoke check pass; local MongoDB and Ollama health have been confirmed.
-- `npm run check:integration` passes against local MongoDB/Ollama: registration/profile, folders/notes, TXT upload/indexing, webpage add/refresh/indexing, cited hybrid chat, saved passage, quiz/attempt, flashcards, task updates, assignment submission, and notification read-state. The script removes its synthetic account and uploaded files after each run.
+- `npm run check:integration` passes against local MongoDB/Ollama: registration/profile, cross-user privacy, folders/notes, TXT upload/indexing, webpage add/refresh/indexing, cited hybrid chat, saved passage, quiz/attempt, flashcards, task updates, assignment submission, and notification read-state. The script removes both synthetic accounts and their uploaded files after each run.
 - Client production build passes. `git diff --check` passes. Both npm dependency audits report zero vulnerabilities.
 - Email verification and recovery have not been exercised against configured SMTP credentials.
 - Browser visual review and deployment verification are pending. Local browser automation could not reach the temporary Vite preview; API and end-to-end service checks passed. SMTP email actions remain untested because SMTP credentials are not configured.
-- Current branch: `main`; role-aware dashboard polish is pending commit and push.
+- Current branch: `main`; role-aware dashboard commit is pushed, while the expanded two-account privacy regression check is pending commit and push.
 
 ## Known constraints
 
