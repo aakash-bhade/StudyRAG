@@ -385,7 +385,8 @@ h1, h2, h3, p { margin-top: 0; }
 .documents-state { min-height: 150px; display: flex; align-items: center; justify-content: center; gap: 10px; border: 1px solid #e9eef5; border-radius: 14px; background: #fff; color: #8090a5; font-size: 11px; }
 .documents-state .spin { color: #3286e3; }
 .documents-empty { min-height: 185px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 22px; border: 1px solid #e9eef5; border-radius: 14px; background: #fff; text-align: center; }
-.documents-empty > span { width: 42px; height: 42px; display: grid; place-items: center; margin-bottom: 9px; border-radius: 14px; background: #edf5ff; color: #4189dc; }
+.documents-empty-icon { width: 42px; height: 42px; display: grid; place-items: center; margin-bottom: 9px; border-radius: 14px; background: #edf5ff; color: #4189dc; }
+.documents-empty-copy { display: block; width: auto; max-width: 100%; color: #8997aa; font-size: 13px; line-height: 1.6; }
 .documents-empty h3 { margin: 0 0 5px; color: #3d506a; font: 700 12px 'Manrope',sans-serif; }
 .documents-empty p { margin: 0; color: #8997aa; font-size: 9px; }
 .clear-search { margin-top: 12px; border: 0; background: none; color: #2675ce; font-size: 10px; font-weight: 700; cursor: pointer; }
