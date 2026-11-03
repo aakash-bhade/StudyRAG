@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Bookmark, BookmarkCheck, Bot, Check, FileText, Globe2, LoaderCircle, MessageCircle, Pencil, Plus, Send, ShieldCheck, Sparkles, Trash2, X } from 'lucide-react';
+import { Bookmark, BookmarkCheck, Bot, Check, CheckCheck, Copy, FileText, Globe2, LoaderCircle, MessageCircle, Pencil, Plus, Send, ShieldCheck, Sparkles, Trash2, X } from 'lucide-react';
 import WorkspaceShell from '../dashboard/WorkspaceShell.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { documentApi } from '../../services/documentApi.js';
@@ -28,6 +28,7 @@ export default function ChatPage() {
   const [renaming, setRenaming] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [copiedMessage, setCopiedMessage] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -102,6 +103,16 @@ export default function ChatPage() {
     finally { setDeleting(false); }
   }
 
+  async function copyAnswer(message, index) {
+    const content = message.answer || message.message || message.text;
+    if (!content) return;
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopiedMessage(message.id || String(index));
+      window.setTimeout(() => setCopiedMessage(''), 1800);
+    } catch { setError('Could not copy the answer. Check clipboard permissions and try again.'); }
+  }
+
   async function submit(event) {
     event.preventDefault();
     const value = question.trim();
@@ -140,7 +151,7 @@ export default function ChatPage() {
           {messages.map((message, index) => <article className={`chat-message ${message.role}`} key={index}>
             <span className="chat-message-icon">{message.role === 'user' ? <MessageCircle size={16} /> : <Bot size={16} />}</span>
             <div className="chat-message-body">{message.pending ? <p className="chat-loading"><LoaderCircle size={15} className="spin" /> Searching your materials…</p> : message.role === 'user' ? <p>{message.text}</p> : <>
-              {message.answer && <p className="chat-answer">{message.answer}</p>}
+              {message.answer && <div className="chat-answer-row"><p className="chat-answer">{message.answer}</p><button className="chat-copy-answer" onClick={() => copyAnswer(message, index)} aria-label="Copy answer" title="Copy answer">{copiedMessage === (message.id || String(index)) ? <CheckCheck size={14} /> : <Copy size={14} />}</button></div>}
               {message.message && <p className="chat-note">{message.message}</p>}
               {message.retrievalMode && <span className="chat-retrieval-mode">{message.retrievalMode === 'hybrid' ? 'Semantic + keyword search' : 'Keyword search'}</span>}
               {!!message.sources?.length && <div className="chat-sources"><b>Sources</b>{message.sources.map((source, sourceIndex) => { const sourceId = source.sourceType === 'website' ? source.websiteSourceId : source.documentId; const saveKey = `${source.sourceType}-${sourceId}-${source.ordinal}`; const saved = savedKeys.has(saveKey); return <details key={saveKey}><summary>{source.sourceType === 'website' ? <Globe2 size={13} /> : <FileText size={13} />} [{sourceIndex + 1}] {source.documentName}{source.page ? ` · page ${source.page}` : ` · section ${source.ordinal + 1}`}</summary><div className="chat-citation-actions">{source.url && <a className="chat-citation-link" href={source.url} target="_blank" rel="noreferrer">Open webpage source ↗</a>}<button disabled={saved || savingKey === saveKey} onClick={() => savePassage(source)}>{saved ? <BookmarkCheck size={13} /> : savingKey === saveKey ? <LoaderCircle size={13} className="spin" /> : <Bookmark size={13} />}{saved ? 'Saved' : 'Save passage'}</button></div><p>{source.text}</p></details>; })}</div>}
