@@ -1472,6 +1472,10 @@ h1, h2, h3, p { margin-top: 0; }
 .chat-empty-links { display: grid; grid-template-columns: 1fr; gap: 8px; }
 .chat-empty-links a { min-height: 40px; justify-content: space-between; padding: 0 12px; border-radius: 11px; background: linear-gradient(110deg,#fff,#f7fbff); box-shadow: 0 3px 9px rgba(43,97,155,.045); }
 .chat-empty-links a span { color: #78a5d8; font-size: 16px; }
+.chat-no-documents h3 { margin: 8px 0 12px; color: #304968; font: 800 15px/1.35 'Manrope',sans-serif; letter-spacing: -.015em; }
+.chat-composer { border-color: #b4c7df; }
+.chat-composer:focus-within { border-color: #557ca9; box-shadow: 0 0 0 3px rgba(74,116,163,.12),0 8px 22px rgba(34,76,129,.1); }
+.dashboard-content .chat-composer textarea:focus-visible { outline: 2px solid #7892b1; outline-offset: 2px; box-shadow: none; }
 @media (max-width: 700px) {
   .dashboard-topbar .breadcrumb { font-size: 12px; }
   .chat-heading { min-height: 0; padding: 19px 17px; }
