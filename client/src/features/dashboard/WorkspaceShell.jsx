@@ -1,12 +1,13 @@
 import { Bell, BookOpen, Bookmark, ChevronDown, ClipboardCheck, ClipboardList, FileText, Globe2, GraduationCap, Layers2, LogOut, MessageCircle, Settings, Sparkles, UserRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
 
 const roleLabels = { student: 'Student', teacher: 'Teacher / educator', employee: 'Employee', business: 'Business professional' };
 
 export default function WorkspaceShell({ active, children }) {
   const { user, logout } = useAuth();
+  const [profileImage, setProfileImage] = useState('');
   const [loggingOut, setLoggingOut] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState(() => ({
@@ -15,6 +16,14 @@ export default function WorkspaceShell({ active, children }) {
     planning: ['tasks', 'assignments', 'notifications'].includes(active),
   }));
   const toggleGroup = group => setOpenGroups(current => ({ ...current, [group]: !current[group] }));
+
+  useEffect(() => {
+    const key = user?.email ? `studyrag:profile-image:${user.email.toLowerCase()}` : '';
+    const syncProfileImage = () => setProfileImage(key ? window.localStorage.getItem(key) || '' : '');
+    syncProfileImage();
+    window.addEventListener('studyrag:profile-image-updated', syncProfileImage);
+    return () => window.removeEventListener('studyrag:profile-image-updated', syncProfileImage);
+  }, [user?.email]);
 
   async function handleLogout() {
     if (loggingOut) return;
@@ -48,7 +57,7 @@ export default function WorkspaceShell({ active, children }) {
       </div>}
     </nav>
     <section className="dashboard-main">
-      <header className="dashboard-topbar"><span className="breadcrumb">My workspace <span>/</span> {active === 'documents' ? 'Documents' : active === 'chat' ? 'Ask materials' : active === 'notes' ? 'Notes' : active === 'sources' ? 'Website sources' : active === 'quizzes' ? 'Quizzes' : active === 'flashcards' ? 'Flashcards' : active === 'tasks' ? 'Tasks' : active === 'assignments' ? 'Assignments' : active === 'saved' ? 'Saved items' : active === 'notifications' ? 'Notifications' : active === 'settings' ? 'Settings' : 'Overview'}</span><span className="topbar-avatar">{user?.displayName?.slice(0, 1)?.toUpperCase() || 'S'}</span></header>
+      <header className="dashboard-topbar"><span className="breadcrumb">My workspace <span>/</span> {active === 'documents' ? 'Documents' : active === 'chat' ? 'Ask materials' : active === 'notes' ? 'Notes' : active === 'sources' ? 'Website sources' : active === 'quizzes' ? 'Quizzes' : active === 'flashcards' ? 'Flashcards' : active === 'tasks' ? 'Tasks' : active === 'assignments' ? 'Assignments' : active === 'saved' ? 'Saved items' : active === 'notifications' ? 'Notifications' : active === 'settings' ? 'Settings' : 'Overview'}</span><Link className="topbar-avatar" to="/app/settings" aria-label="Open your profile" title="Your profile">{profileImage ? <img src={profileImage} alt="" /> : user?.displayName?.slice(0, 1)?.toUpperCase() || 'S'}</Link></header>
       <div className="dashboard-content">{children}</div>
     </section>
   </main>;

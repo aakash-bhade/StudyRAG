@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Download, KeyRound, LoaderCircle, Save, ShieldCheck, UserRound } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Camera, Download, KeyRound, LoaderCircle, Save, ShieldCheck, Trash2, UserRound } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import WorkspaceShell from '../dashboard/WorkspaceShell.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
@@ -14,8 +14,55 @@ export default function SettingsPage() {
   const [profileNotice, setProfileNotice] = useState('');
   const [profileName, setProfileName] = useState(user?.displayName || '');
   const [profileBusy, setProfileBusy] = useState(false);
+  const profileImageKey = user?.email ? `studyrag:profile-image:${user.email.toLowerCase()}` : '';
+  const [profileImage, setProfileImage] = useState(() => profileImageKey ? window.localStorage.getItem(profileImageKey) || '' : '');
   const [exportBusy, setExportBusy] = useState(false);
   const [exportError, setExportError] = useState('');
+
+  useEffect(() => {
+    setProfileImage(profileImageKey ? window.localStorage.getItem(profileImageKey) || '' : '');
+  }, [profileImageKey]);
+
+  async function saveProfileImage(event) {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    setProfileError(''); setProfileNotice('');
+    if (!file.type.startsWith('image/')) { setProfileError('Choose an image file.'); return; }
+    if (file.size > 8 * 1024 * 1024) { setProfileError('Choose an image smaller than 8 MB.'); return; }
+    let imageUrl = '';
+    try {
+      imageUrl = URL.createObjectURL(file);
+      const source = await new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => reject(new Error('This image could not be opened.'));
+        image.src = imageUrl;
+      });
+      URL.revokeObjectURL(imageUrl);
+      imageUrl = '';
+      const scale = Math.min(1, 320 / Math.max(source.width, source.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(source.width * scale));
+      canvas.height = Math.max(1, Math.round(source.height * scale));
+      canvas.getContext('2d').drawImage(source, 0, 0, canvas.width, canvas.height);
+      const data = canvas.toDataURL('image/jpeg', .82);
+      window.localStorage.setItem(profileImageKey, data);
+      setProfileImage(data);
+      window.dispatchEvent(new Event('studyrag:profile-image-updated'));
+      setProfileNotice('Your profile photo has been updated.');
+    } catch (imageError) {
+      if (imageUrl) URL.revokeObjectURL(imageUrl);
+      setProfileError(imageError.name === 'QuotaExceededError' ? 'There is not enough browser storage for this photo.' : imageError.message);
+    }
+  }
+
+  function removeProfileImage() {
+    if (profileImageKey) window.localStorage.removeItem(profileImageKey);
+    setProfileImage('');
+    window.dispatchEvent(new Event('studyrag:profile-image-updated'));
+    setProfileNotice('Your profile photo was removed.');
+  }
 
   async function saveProfile(event) {
     event.preventDefault();
@@ -77,6 +124,7 @@ export default function SettingsPage() {
     <div className="documents-heading"><div><p className="eyebrow"><ShieldCheck size={13} /> ACCOUNT & SECURITY</p><h1>Settings</h1><p>Manage your account details and keep your sign-in secure.</p></div></div>
     <section className="settings-card"><header><span><UserRound size={18} /></span><div><h2>Account profile</h2><p>Update how your name appears across StudyRAG.</p></div></header>
       {profileError && <p className="note-feedback error" role="alert">{profileError}</p>}{profileNotice && <p className="note-feedback success" role="status">{profileNotice}</p>}
+      <div className="profile-photo-row"><span className="profile-photo-preview">{profileImage ? <img src={profileImage} alt="Your profile" /> : user?.displayName?.slice(0, 1)?.toUpperCase() || <UserRound size={22} />}</span><div><b>Profile photo</b><small>Shown in the top corner. JPEG or PNG, up to 8 MB.</small><div className="profile-photo-actions"><label className="button button-secondary"><Camera size={15} />{profileImage ? 'Change photo' : 'Upload photo'}<input type="file" accept="image/*" onChange={saveProfileImage} /></label>{profileImage && <button type="button" className="button button-secondary" onClick={removeProfileImage}><Trash2 size={14} /> Remove</button>}</div></div></div>
       <form className="settings-password-form" onSubmit={saveProfile}><label>Display name<input value={profileName} onChange={event => setProfileName(event.target.value)} minLength={2} maxLength={80} autoComplete="name" required /></label><button className="button button-primary" disabled={profileBusy || profileName.trim() === user?.displayName}>{profileBusy ? <LoaderCircle className="spin" size={15} /> : <Save size={15} />}{profileBusy ? 'Saving…' : 'Save profile'}</button></form>
       <dl className="settings-profile"><div><dt>Email</dt><dd>{user?.email}</dd></div><div><dt>Account type</dt><dd>{user?.role}</dd></div></dl>
     </section>
