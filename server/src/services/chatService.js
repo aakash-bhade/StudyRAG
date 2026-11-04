@@ -43,6 +43,7 @@ async function generateAnswer(question, sources, onToken, grounded = true, conve
       body: JSON.stringify({
         model: env.OLLAMA_MODEL,
         keep_alive: '15m',
+        think: false,
         stream: true,
         options: { num_predict: grounded ? 520 : 420, temperature: grounded ? 0.2 : 0.45 },
         messages: [
