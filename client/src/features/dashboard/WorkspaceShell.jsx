@@ -22,7 +22,7 @@ export default function WorkspaceShell({ active, children }) {
     try { await logout(); } finally { window.location.assign('/'); }
   }
 
-  return <main className="dashboard-shell unified-theme">
+  return <main className="dashboard-shell">
     <aside className="dashboard-sidebar">
       <Link className="auth-brand dashboard-brand" to="/" aria-label="StudyRAG home"><span><GraduationCap size={26} /></span><b>Study<span>RAG</span></b></Link>
       <div className="sidebar-label">WORKSPACE</div>
