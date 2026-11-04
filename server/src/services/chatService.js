@@ -9,6 +9,7 @@ import { Note } from '../models/Note.js';
 import { embedTexts } from './embeddingService.js';
 
 const STOP_WORDS = new Set('a an and are as at be by can do for from how i in is it me my of on or the this to was what when where which who why with you your explain tell hai hain ho kya ka ki ke ko me mein par se kaise batao bataiye mujhe mera meri ye yeh aur is क्या है हैं हो का की के को में पर से और यह ये बताओ बताइए मुझे मेरा मेरी'.split(' '));
+const GREETING_ONLY = /^(?:(?:hi+|hello+|hey+|hiya|heya|howdy|namaste|namaskar|नमस्ते|नमस्कार)(?:\s+(?:there|studyrag|study\s*rag))?|good\s+(?:morning|afternoon|evening|day))(?:[.!?।,\s]*)$/iu;
 
 function terms(value) {
   return [...new Set(value.toLowerCase().match(/[\p{L}\p{N}]{2,}/gu)?.filter(word => !STOP_WORDS.has(word)) || [])];
@@ -85,6 +86,18 @@ async function generateAnswer(question, sources, onToken) {
 }
 
 export async function answerFromDocuments(userId, { question, documentIds, websiteSourceIds, noteIds }, { onToken } = {}) {
+  if (GREETING_ONLY.test(question.trim())) {
+    const isHindiGreeting = /namaste|namaskar|नमस्ते|नमस्कार/iu.test(question);
+    return {
+      answer: isHindiGreeting
+        ? 'Namaste! Apne study materials ke baare mein kuch bhi poochhiye—main sources ke saath samjhaunga.'
+        : 'Hi! Ask me anything about your study materials, and I’ll explain it with source references.',
+      answerMode: 'conversational',
+      retrievalMode: 'none',
+      message: null,
+      sources: [],
+    };
+  }
   const hasFilters = Boolean(documentIds?.length || websiteSourceIds?.length || noteIds?.length);
   const filter = { ownerId: userId };
   if (hasFilters) {
