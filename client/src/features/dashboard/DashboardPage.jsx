@@ -61,6 +61,7 @@ export default function DashboardPage() {
   const [error, setError] = useState('');
   const roleLabels = { student: 'Student', teacher: 'Teacher / educator', employee: 'Employee', business: 'Business professional' };
   const roleView = roleViews[user?.role] || roleViews.student;
+  const needsFirstMaterial = !loading && stats.documents === 0 && stats.websites === 0 && stats.notes === 0;
 
   useEffect(() => {
     let active = true;
@@ -108,6 +109,7 @@ export default function DashboardPage() {
 
   return <WorkspaceShell active="overview">
     <div className="welcome-banner"><div><p className="eyebrow"><Sparkles size={14} /> {roleLabels[user?.role]?.toUpperCase() || 'YOUR'} STUDYRAG WORKSPACE</p><h1>Welcome back, {user?.displayName?.split(' ')[0]}.</h1><p>{roleView.overview}</p></div><div className="welcome-illustration"><div className="welcome-orbit" /><span><GraduationCap size={38} /></span><i><Sparkles size={15} /></i></div></div>
+    {needsFirstMaterial && <section className="dashboard-onboarding" aria-labelledby="onboarding-title"><div className="onboarding-copy"><span className="onboarding-step">START HERE · 2 SIMPLE STEPS</span><h2 id="onboarding-title">Let’s make your workspace useful</h2><p>Add one study material first. Then ask a question and get an answer based on what you added.</p><div className="onboarding-actions"><Link to="/app/documents"><FileText size={17} /> Add a document <ArrowRight size={15} /></Link><Link to="/app/sources"><Globe2 size={17} /> Add a website</Link><Link to="/app/notes"><BookOpen size={17} /> Write a note</Link></div></div><div className="onboarding-next"><span>THEN</span><MessageCircle size={20} /><b>Ask your materials</b><small>Find Ask in the left menu when you’re ready.</small></div></section>}
     <div className="dashboard-section-heading"><div><h2>Workspace overview</h2><p>{loading ? 'Gathering your latest activity…' : `Personal workspace · ${roleLabels[user?.role] || 'Member'}`}</p></div><Link className="dashboard-text-link" to="/app/settings">Account settings <ArrowRight size={14} /></Link></div>
     {error && <p className="dashboard-load-message" role="status">{error}</p>}
     <div className="dashboard-stats-grid">{cards.map(({ label, value, icon: Icon, tone, href }) => <Link key={label} className="dashboard-stat-card" to={href}><span className={`dashboard-stat-icon ${tone}`}><Icon size={17} /></span><span className="dashboard-stat-value">{loading ? <LoaderCircle size={17} className="spin" /> : value ?? '—'}</span><span className="dashboard-stat-label">{label}</span></Link>)}</div>

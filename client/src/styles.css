@@ -300,6 +300,19 @@ h1, h2, h3, p { margin-top: 0; }
 .welcome-orbit { position: absolute; width: 130px; height: 78px; border: 1px solid rgba(65,144,222,.22); border-radius: 50%; transform: rotate(-21deg); }
 .welcome-illustration > span { height: 67px; width: 67px; z-index: 1; display: grid; place-items: center; border: 3px solid rgba(255,255,255,.75); border-radius: 24px; background: linear-gradient(145deg,#78bfff,#1478ea); box-shadow: 0 10px 24px rgba(28,111,205,.24); color: white; transform: rotate(-6deg); }
 .welcome-illustration > i { position: absolute; top: 10px; right: 9px; z-index: 2; width: 29px; height: 29px; display: grid; place-items: center; border-radius: 10px; background: white; color: #2083f3; box-shadow: 0 5px 15px rgba(55,116,181,.15); font-style: normal; }
+.dashboard-onboarding { display: grid; grid-template-columns: minmax(0,1fr) 190px; gap: 22px; align-items: center; margin-top: 17px; padding: 21px 23px; border: 1px solid #dceafa; border-radius: 17px; background: linear-gradient(110deg,#fff 0%,#f6faff 100%); box-shadow: 0 6px 20px rgba(45,91,145,.045); }
+.onboarding-step { color: #4786c8; font-size: 11px; font-weight: 800; letter-spacing: .08em; }
+.onboarding-copy h2 { margin: 6px 0 4px; color: #253b57; font: 700 19px/1.35 'Manrope',sans-serif; }
+.onboarding-copy > p { margin: 0; color: #71839a; font-size: 14px; }
+.onboarding-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
+.onboarding-actions a { min-height: 39px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 0 12px; border: 1px solid #d7e6f8; border-radius: 10px; color: #3476ba; background: #fff; font-size: 13px; font-weight: 700; transition: background .16s,border-color .16s,transform .16s; }
+.onboarding-actions a:first-child { border-color: #247be0; color: #fff; background: #247be0; }
+.onboarding-actions a:hover { transform: translateY(-1px); border-color: #a9c9eb; background: #f4f9ff; }
+.onboarding-actions a:first-child:hover { border-color: #1268c8; background: #1268c8; }
+.onboarding-next { min-height: 110px; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 5px; padding: 13px 16px; border-left: 1px solid #e4edf8; color: #4784c1; }
+.onboarding-next > span { color: #91a2b7; font-size: 10px; font-weight: 800; letter-spacing: .08em; }
+.onboarding-next b { color: #344963; font-size: 14px; }
+.onboarding-next small { color: #8191a5; font-size: 12px; line-height: 1.45; }
 .dashboard-section-heading { display: flex; align-items: end; justify-content: space-between; margin: 29px 0 14px; }
 .dashboard-section-heading h2 { margin: 0 0 5px; color: #253650; font: 700 16px 'Manrope',sans-serif; }
 .dashboard-section-heading p { margin: 0; color: #8290a3; font-size: 10px; }
@@ -838,6 +851,7 @@ h1, h2, h3, p { margin-top: 0; }
 
 @media (max-width: 800px) {
   .dashboard-shell { grid-template-columns: 190px 1fr; }
+  .dashboard-onboarding { grid-template-columns: minmax(0,1fr) 155px; gap: 12px; padding: 18px; }
   .chat-layout { grid-template-columns: minmax(0,1fr); }
   .chat-source-panel { order: 1; padding: 12px; border-left: 0; border-bottom: 0; border-top: 1px solid #e8eef5; }
   .chat-source-list { grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); max-height: 130px; }
@@ -893,6 +907,14 @@ h1, h2, h3, p { margin-top: 0; }
   .dashboard-section-heading h2, .documents-toolbar h2, .quiz-builder > h2, .quiz-saved-heading h2, .notes-list-heading h2, .task-create-card h2, .assignment-create-card h2, .settings-card > header h2 { font-size: 17px; }
   .quiz-source-pickers h3, .task-column > header h2 { font-size: 15px; }
   .welcome-banner { min-height: 148px; padding: 20px 17px; }
+  .dashboard-onboarding { grid-template-columns: 1fr; gap: 14px; padding: 17px 15px; }
+  .onboarding-copy h2 { font-size: 17px; }
+  .onboarding-actions { gap: 7px; }
+  .onboarding-actions a { min-height: 40px; padding: 0 10px; }
+  .onboarding-next { min-height: 0; display: grid; grid-template-columns: 22px 1fr; align-items: center; column-gap: 9px; padding: 12px 0 0; border-top: 1px solid #e4edf8; border-left: 0; }
+  .onboarding-next > span { grid-column: 1 / -1; }
+  .onboarding-next > svg { grid-row: 2 / 4; }
+  .onboarding-next small { grid-column: 2; }
   .welcome-banner h1 { font-size: 22px; }
   .welcome-banner > div:first-child > p:last-child { max-width: 230px; font-size: 10px; line-height: 1.5; }
   .welcome-illustration { width: 70px; height: 90px; flex: 0 0 auto; }

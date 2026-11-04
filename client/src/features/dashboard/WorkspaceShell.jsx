@@ -11,7 +11,7 @@ export default function WorkspaceShell({ active, children }) {
   const [moreOpen, setMoreOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState(() => ({
     study: ['quizzes', 'flashcards'].includes(active),
-    materials: ['documents', 'sources', 'notes', 'saved'].includes(active),
+    materials: true,
     planning: ['tasks', 'assignments', 'notifications'].includes(active),
   }));
   const toggleGroup = group => setOpenGroups(current => ({ ...current, [group]: !current[group] }));
