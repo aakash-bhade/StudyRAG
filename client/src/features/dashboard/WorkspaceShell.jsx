@@ -22,7 +22,7 @@ export default function WorkspaceShell({ active, children }) {
     try { await logout(); } finally { window.location.assign('/'); }
   }
 
-  return <main className={`dashboard-shell ${active === 'chat' ? 'chat-workspace' : ''}`}>
+  return <main className="dashboard-shell unified-theme">
     <aside className="dashboard-sidebar">
       <Link className="auth-brand dashboard-brand" to="/" aria-label="StudyRAG home"><span><GraduationCap size={26} /></span><b>Study<span>RAG</span></b></Link>
       <div className="sidebar-label">WORKSPACE</div>
