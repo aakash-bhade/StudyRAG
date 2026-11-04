@@ -90,6 +90,8 @@ export default function ChatPage() {
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [copiedMessage, setCopiedMessage] = useState('');
+  const selectedSourceCount = selected.length + selectedWebsites.length + selectedNotes.length;
+  const totalSourceCount = documents.length + websites.length + notes.length;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -235,10 +237,10 @@ export default function ChatPage() {
         {error && <p className="chat-error" role="alert">{error}</p>}
         <form className="chat-composer" onSubmit={submit}><textarea aria-label="Ask a question" value={question} onChange={event => setQuestion(event.target.value)} placeholder="Ask something about your study materials…" maxLength={1200} rows={2} /><button type="submit" disabled={sending || question.trim().length < 3} aria-label="Send question" title="Send question"><Send size={18} /></button><small><ShieldCheck size={13} /> Answers use your private study materials</small></form>
       </section>
-      <aside className="chat-source-panel">
+      <aside className="chat-source-panel" aria-label="Study material sources">
         <button className="chat-new-button" onClick={startNewConversation}><Plus size={14} /> New conversation</button>
-        <h2><FileText size={16} /> Search sources</h2>
-        <p>Select sources, or leave all unchecked to search everything.</p>
+        <div className="chat-source-heading"><h2><FileText size={16} /> Search sources</h2><span>{loading ? 'Loading…' : totalSourceCount === 0 ? 'No materials yet' : selectedSourceCount ? `${selectedSourceCount} selected` : 'All materials'}</span></div>
+        <p>Choose materials to focus your answer. Leave unchecked to search all.</p>
         {loading ? <div className="chat-source-state"><LoaderCircle size={15} className="spin" /> Loading sources…</div> : <>
           <div className="chat-source-list">
             {documents.map(document => <label key={document.id}><input type="checkbox" checked={selected.includes(document.id)} onChange={() => toggleDocument(document.id)} /><span className="chat-source-file"><FileText size={15} /><span><b>{document.displayName}</b><small>{document.chunkCount} searchable sections</small></span></span></label>)}
