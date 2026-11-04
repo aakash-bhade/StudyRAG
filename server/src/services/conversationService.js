@@ -70,7 +70,10 @@ export async function askInConversation(userId, { question, documentIds, website
     conversation = new Conversation({ ownerId: userId, title: question.slice(0, 116).trim() + (question.length > 116 ? '…' : ''), sourceFilters: documentIds || [], websiteSourceFilters: websiteSourceIds || [], noteFilters: noteIds || [] });
   }
 
-  const result = await answerFromDocuments(userId, { question, documentIds, websiteSourceIds, noteIds }, options);
+  const conversationHistory = conversation.isNew ? [] : (await Message.find({ ownerId: userId, conversationId: conversation._id })
+    .select('role content').sort({ createdAt: -1 }).limit(8).lean()).reverse()
+    .map(({ role, content }) => ({ role, content }));
+  const result = await answerFromDocuments(userId, { question, documentIds, websiteSourceIds, noteIds }, { ...options, conversationHistory });
   const wasNew = conversation.isNew;
   await conversation.save();
   let created;
