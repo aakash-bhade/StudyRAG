@@ -1229,6 +1229,63 @@ h1, h2, h3, p { margin-top: 0; }
 .dashboard-quick-link { min-height: 70px; border-radius: 14px; }
 .dashboard-quick-link:hover { background: #f4f9ff; }
 
+/* Dashboard refinements: clear hierarchy, compact panels, and gentle card depth. */
+.welcome-banner {
+  min-height: 182px;
+  border-radius: 24px;
+  background: radial-gradient(circle at 78% 22%, rgba(255,255,255,.84), transparent 24%), linear-gradient(115deg,#e8f4ff 0%,#d9ecff 58%,#eef8ff 100%);
+  box-shadow: 0 16px 34px rgba(53,111,177,.1), inset 0 1px 0 rgba(255,255,255,.95);
+}
+.welcome-banner h1 { font-size: clamp(25px,3vw,32px); }
+.welcome-banner > div:first-child > p:last-child { max-width: 440px; font-size: 13px; line-height: 1.65; }
+.dashboard-section-heading { margin-top: 24px; }
+.dashboard-section-heading h2 { font-size: 20px; font-weight: 800; letter-spacing: -.025em; }
+.dashboard-section-heading p { font-size: 12px; }
+.dashboard-text-link { font-size: 12px; }
+.dashboard-stat-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 104px;
+  border-radius: 18px;
+  background: linear-gradient(145deg,#fff 0%,#f9fcff 100%);
+  box-shadow: 0 5px 0 #e5eef9, 0 10px 19px rgba(49,95,151,.09), inset 0 1px 0 #fff;
+  transform: perspective(700px) rotateX(1.2deg);
+}
+.dashboard-stat-card::after {
+  position: absolute;
+  top: -32px;
+  right: -26px;
+  width: 92px;
+  height: 76px;
+  border-radius: 50%;
+  background: radial-gradient(circle,rgba(96,164,237,.11),transparent 70%);
+  content: '';
+  pointer-events: none;
+}
+.dashboard-stat-card:hover { transform: perspective(700px) translateY(-4px) rotateX(0); box-shadow: 0 7px 0 #dce9f8, 0 18px 27px rgba(49,105,171,.14), inset 0 1px 0 #fff; }
+.dashboard-stat-icon { box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 4px 9px rgba(55,105,167,.08); }
+.dashboard-panel { border-radius: 20px; }
+.dashboard-panel-heading { padding-bottom: 10px; }
+.dashboard-panel-heading h2 { font-size: 13px; font-weight: 800; }
+.dashboard-panel-heading p { font-size: 10px; }
+.dashboard-lower-grid > .dashboard-panel:first-child { align-self: start; }
+.dashboard-panel-empty { min-height: 58px; gap: 7px; font-size: 11px; }
+.dashboard-quick-panel { padding-bottom: 10px; }
+.dashboard-quick-link { min-height: 60px; gap: 11px; padding: 10px 9px; border: 1px solid transparent; border-bottom-color: #edf2f8; border-radius: 13px; }
+.dashboard-quick-link:hover { border-color: #e1edfb; background: linear-gradient(110deg,#f8fbff,#eef6ff); box-shadow: 0 5px 12px rgba(60,112,172,.07); }
+.dashboard-quick-link > svg:first-child { flex: 0 0 auto; width: 34px; height: 34px; padding: 8px; border-radius: 11px; background: #eaf4ff; box-shadow: inset 0 1px 0 #fff; }
+.dashboard-quick-link > svg:last-child { flex: 0 0 auto; }
+.dashboard-quick-link b { font-size: 11px; font-weight: 750; }
+.dashboard-quick-link small { font-size: 10px; }
+.dashboard-content .dashboard-stat-card {
+  transform: perspective(700px) rotateX(1.2deg);
+  box-shadow: 0 5px 0 #e5eef9, 0 10px 19px rgba(49,95,151,.09), inset 0 1px 0 #fff;
+}
+.dashboard-content .dashboard-stat-card:hover {
+  transform: perspective(700px) translateY(-4px) rotateX(0);
+  box-shadow: 0 7px 0 #dce9f8, 0 18px 27px rgba(49,105,171,.14), inset 0 1px 0 #fff;
+}
+
 /* Friendly 3D study guide illustration, made with lightweight CSS shapes */
 .study-mascot { position: relative; width: 320px; height: 250px; perspective: 850px; transform-style: preserve-3d; pointer-events: none; }
 .mascot-orbit { position: absolute; top: 22%; left: 12%; width: 75%; height: 60%; border: 1px solid rgba(62,144,235,.22); border-radius: 50%; transform: rotate(-22deg); }
@@ -1356,6 +1413,20 @@ h1, h2, h3, p { margin-top: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   *,*::before,*::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+@media (max-width: 700px) {
+  .welcome-banner { min-height: 158px; padding: 19px 17px; }
+  .welcome-banner > div:first-child { max-width: 74%; }
+  .welcome-banner > div:first-child > p:last-child { max-width: 250px; font-size: 11px; }
+  .dashboard-section-heading { align-items: center; margin-top: 20px; }
+  .dashboard-section-heading h2 { font-size: 18px; }
+  .dashboard-section-heading p { font-size: 10px; }
+  .dashboard-text-link { font-size: 10px; }
+  .dashboard-stat-card { min-height: 82px; padding: 10px; }
+  .dashboard-stat-value { font-size: 17px; }
+  .dashboard-stat-label { font-size: 9px; }
+  .dashboard-panel-empty { min-height: 52px; }
 }
 
 /* Keep one calm blue-white workspace theme, with a subtle floating study sheet */
