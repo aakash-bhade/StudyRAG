@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Bookmark, BookmarkCheck, Bot, Check, CheckCheck, Copy, FileText, Globe2, LoaderCircle, MessageCircle, NotebookPen, Pencil, Plus, Send, ShieldCheck, Sparkles, Trash2, X } from 'lucide-react';
+import { Bookmark, BookmarkCheck, BookOpen, Bot, Check, CheckCheck, Copy, FileText, Globe2, LoaderCircle, MessageCircle, NotebookPen, Pencil, Plus, Send, ShieldCheck, Sparkles, Trash2, X } from 'lucide-react';
 import WorkspaceShell from '../dashboard/WorkspaceShell.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { documentApi } from '../../services/documentApi.js';
@@ -7,6 +7,7 @@ import { chatApi } from '../../services/chatApi.js';
 import { sourceApi } from '../../services/sourceApi.js';
 import { savedItemApi } from '../../services/savedItemApi.js';
 import { noteApi } from '../../services/noteApi.js';
+import StudyMascot from '../dashboard/StudyMascot.jsx';
 
 function AnswerText({ text }) {
   const blocks = [];
@@ -219,11 +220,11 @@ export default function ChatPage() {
   }
 
   return <WorkspaceShell active="chat"><div className="chat-page">
-    <div className="documents-heading chat-heading"><div><p className="eyebrow"><Sparkles size={13} /> GROUNDED STUDY CHAT</p><h1>Ask your materials</h1><p>Answers use passages from your private documents and include source references.</p></div><span className="documents-count"><ShieldCheck size={15} /> Private to you</span></div>
+    <div className="documents-heading chat-heading"><div><p className="eyebrow"><Sparkles size={13} /> GROUNDED STUDY CHAT</p><h1>Ask your materials</h1><p>Your study assistant, grounded in your own sources.</p></div><span className="documents-count"><ShieldCheck size={15} /> Private to you</span><StudyMascot className="chat-mascot" /></div>
     <div className="chat-layout">
       <section className="chat-panel" aria-label="StudyRAG conversation">
         <div className="chat-messages" aria-live="polite">
-          {!messages.length && <div className="chat-welcome"><span><Bot size={25} /></span><h2>What would you like to understand?</h2><p>Ask about your documents, webpages, or saved notes. Select sources from the panel to focus your search.</p><div className="chat-suggestions"><button onClick={() => setQuestion('Summarize the key ideas in my materials')}>Summarize key ideas</button><button onClick={() => setQuestion('Explain the main concepts simply')}>Explain concepts</button></div></div>}
+          {!messages.length && <div className="chat-welcome"><span><Bot size={25} /></span><h2>What would you like to learn today?</h2><p>Ask a question, explore a concept, or summarize your study material.</p><div className="chat-suggestions"><button onClick={() => setQuestion('Summarize the key ideas in my materials')}><Sparkles size={15} /> Summarize key ideas <span>›</span></button><button onClick={() => setQuestion('Explain the main concepts simply')}><BookOpen size={15} /> Explain a concept <span>›</span></button></div></div>}
           {messages.map((message, index) => <article className={`chat-message ${message.role}`} key={index}>
             <span className="chat-message-icon">{message.role === 'user' ? <MessageCircle size={16} /> : <Bot size={16} />}</span>
             <div className="chat-message-body">{message.pending ? <p className="chat-loading"><LoaderCircle size={15} className="spin" /> Searching your materials…</p> : message.role === 'user' ? <p>{message.text}</p> : <>
