@@ -1,6 +1,6 @@
 # Database Schema Plan (Phase 1)
 
-All user-owned records carry `ownerId`; workspace data also carries `workspaceId`. References are validated and access-filtered in service queries. Schemas use timestamps, explicit validators, and indexes for common owner-scoped lists. Large file binaries and embedding arrays are not stored in general-purpose user documents.
+All user-owned records carry `ownerId`; workspace data also carries `workspaceId`. References are validated and access-filtered in service queries. Schemas use timestamps, explicit validators, and indexes for common owner-scoped lists. Large file binaries are not stored in general-purpose user documents.
 
 | Collection | Main fields | Access and indexes |
 |---|---|---|
@@ -10,9 +10,9 @@ All user-owned records carry `ownerId`; workspace data also carries `workspaceId
 | `workspaceMembers` | workspaceId, userId, membershipRole, permissions, status | Unique workspace/user pair; membership checked on every shared-resource request |
 | `folders` | ownerId, name | Implemented with unique owner/name index; private notes folders |
 | `documents` | ownerId, displayName, originalName, private storageKey, mimeType, byteSize, ready status, pageCount, chunkCount, contentHash | Implemented with owner + createdAt and owner + displayName indexes; storage key and content hash excluded from default queries |
-| `documentChunks` | ownerId, documentId, ordinal, text, page, embedding?, embeddingModel? | Implemented with unique document/ordinal and owner/document indexes; vectors are private and excluded from default queries |
+| `documentChunks` | ownerId, documentId, ordinal, text, page | Implemented with unique document/ordinal and owner/document indexes; retrieved with keyword ranking |
 | `websiteSources` | ownerId, url, title, canonicalHost, ready status, fetchedAt, contentHash, chunkCount | Implemented with owner + createdAt index; safe-fetch policy runs on add and refresh; short-lived refresh lock serializes re-index and deletion |
-| `websiteChunks` | ownerId, sourceId, ordinal, text, embedding?, embeddingModel? | Implemented with unique owner/source/ordinal index; refresh restores old chunks if re-indexing fails; vectors are private |
+| `websiteChunks` | ownerId, sourceId, ordinal, text | Implemented with unique owner/source/ordinal index; refresh restores old chunks if re-indexing fails |
 | `quizzes` | ownerId, title, difficulty, sourceNames, questions with private answer key | Implemented with owner + createdAt index; list and get responses omit correct answer and explanation until an attempt is graded |
 | `quizAttempts` | ownerId, quizId, answers, score, total, completedAt | Implemented with owner + quiz + completion index; score is computed on the server |
 | `flashcardDecks` | ownerId, title, sourceNames, cards[{front, back}] | Implemented with owner + createdAt index; decks are generated from owner-authorized source passages and remain private |

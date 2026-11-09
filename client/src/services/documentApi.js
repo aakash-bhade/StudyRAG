@@ -35,10 +35,6 @@ export const documentApi = {
     const response = await authenticatedRequest('', { token, refreshAccessToken, method: 'POST', body });
     return response.json();
   },
-  async indexEmbeddings(id, { token, refreshAccessToken }) {
-    const response = await authenticatedRequest(`/${id}/embeddings`, { token, refreshAccessToken, method: 'POST', body: {} });
-    return response.json();
-  },
   async rename(id, displayName, { token, refreshAccessToken }) {
     const response = await authenticatedRequest(`/${id}`, { token, refreshAccessToken, method: 'PATCH', body: { displayName } });
     return response.json();

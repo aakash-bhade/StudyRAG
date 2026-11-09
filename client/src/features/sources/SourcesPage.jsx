@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ExternalLink, Globe2, LoaderCircle, Plus, RotateCw, ShieldCheck, Sparkles, Trash2 } from 'lucide-react';
+import { ExternalLink, Globe2, LoaderCircle, Plus, RotateCw, ShieldCheck, Trash2 } from 'lucide-react';
 import WorkspaceShell from '../dashboard/WorkspaceShell.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { sourceApi } from '../../services/sourceApi.js';
@@ -13,7 +13,6 @@ export default function SourcesPage() {
   const [saving, setSaving] = useState(false);
   const [removing, setRemoving] = useState('');
   const [refreshing, setRefreshing] = useState('');
-  const [indexing, setIndexing] = useState('');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
 
@@ -47,18 +46,11 @@ export default function SourcesPage() {
     finally { setRefreshing(''); }
   }
 
-  async function indexEmbeddings(id) {
-    setIndexing(id); setError(''); setNotice('');
-    try { const result = await sourceApi.indexEmbeddings(id, auth); setNotice(`${result.item.indexedChunkCount} webpage passages indexed for semantic search using ${result.item.embeddingModel}.`); }
-    catch (e) { setError(e.message); }
-    finally { setIndexing(''); }
-  }
-
   return <WorkspaceShell active="sources"><div className="documents-page">
-    <div className="documents-heading"><div><p className="eyebrow"><Globe2 size={13} /> WEB SOURCES</p><h1>Website sources</h1><p>Add public webpages; use the sparkle action to add meaning-based semantic search.</p></div><span className="documents-count"><ShieldCheck size={15} /> Private to you</span></div>
+    <div className="documents-heading"><div><p className="eyebrow"><Globe2 size={13} /> WEB SOURCES</p><h1>Website sources</h1><p>Add public webpages and ask questions about their content.</p></div><span className="documents-count"><ShieldCheck size={15} /> Private to you</span></div>
     <section className="source-add-card"><h2>Add a webpage</h2><p>StudyRAG saves readable text from public HTML pages. Login-only pages and files are not supported.</p><form onSubmit={add}><label htmlFor="website-url">Website URL</label><div><input id="website-url" type="url" value={url} onChange={event => setUrl(event.target.value)} placeholder="https://example.com/article" maxLength={2048} required /><button type="submit" disabled={saving}>{saving ? <LoaderCircle size={15} className="spin" /> : <Plus size={15} />} {saving ? 'Adding…' : 'Add source'}</button></div></form></section>
     {error && <p className="source-feedback error" role="alert">{error}</p>}{notice && <p className="source-feedback success" role="status">{notice}</p>}
     <div className="source-list-heading"><h2>Your sources</h2><span>{sources.length} saved</span></div>
-    {loading ? <div className="documents-empty"><LoaderCircle className="spin" size={20} /> Loading website sources…</div> : sources.length ? <div className="website-source-list">{sources.map(source => <article key={source.id}><span className="website-source-icon"><Globe2 size={18} /></span><div className="website-source-details"><b>{source.title}</b><a href={source.url} target="_blank" rel="noreferrer">{source.canonicalHost}<ExternalLink size={12} /></a><small>{source.chunkCount} searchable sections · refreshed {new Date(source.fetchedAt).toLocaleDateString()}</small></div><div className="website-source-actions"><button className="source-refresh" onClick={() => refresh(source.id)} disabled={Boolean(refreshing || removing || indexing)} aria-label={`Refresh ${source.title}`} title="Refresh webpage">{refreshing === source.id ? <LoaderCircle size={15} className="spin" /> : <RotateCw size={15} />}</button><button className="source-refresh" onClick={() => indexEmbeddings(source.id)} disabled={Boolean(indexing || removing || refreshing)} aria-label="Build semantic search index" title="Build semantic search index">{indexing === source.id ? <LoaderCircle size={15} className="spin" /> : <Sparkles size={15} />}</button><button className="source-delete" onClick={() => remove(source.id)} disabled={Boolean(removing || refreshing || indexing)} aria-label={`Remove ${source.title}`}>{removing === source.id ? <LoaderCircle size={16} className="spin" /> : <Trash2 size={16} />}</button></div></article>)}</div> : <div className="documents-empty"><span className="documents-empty-icon"><Globe2 size={24} /></span><b>No website sources yet</b><span className="documents-empty-copy">Add a public article, guide, or reference page to search it in chat.</span></div>}
+    {loading ? <div className="documents-empty"><LoaderCircle className="spin" size={20} /> Loading website sources…</div> : sources.length ? <div className="website-source-list">{sources.map(source => <article key={source.id}><span className="website-source-icon"><Globe2 size={18} /></span><div className="website-source-details"><b>{source.title}</b><a href={source.url} target="_blank" rel="noreferrer">{source.canonicalHost}<ExternalLink size={12} /></a><small>{source.chunkCount} searchable sections · refreshed {new Date(source.fetchedAt).toLocaleDateString()}</small></div><div className="website-source-actions"><button className="source-refresh" onClick={() => refresh(source.id)} disabled={Boolean(refreshing || removing)} aria-label={`Refresh ${source.title}`} title="Refresh webpage">{refreshing === source.id ? <LoaderCircle size={15} className="spin" /> : <RotateCw size={15} />}</button><button className="source-delete" onClick={() => remove(source.id)} disabled={Boolean(removing || refreshing)} aria-label={`Remove ${source.title}`}>{removing === source.id ? <LoaderCircle size={16} className="spin" /> : <Trash2 size={16} />}</button></div></article>)}</div> : <div className="documents-empty"><span className="documents-empty-icon"><Globe2 size={24} /></span><b>No website sources yet</b><span className="documents-empty-copy">Add a public article, guide, or reference page to search it in chat.</span></div>}
   </div></WorkspaceShell>;
 }

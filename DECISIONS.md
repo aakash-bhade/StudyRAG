@@ -12,11 +12,11 @@
 
 **Reason:** Client route guards are usability controls, not authorization. This is necessary to prevent cross-user and cross-tenant access.
 
-## 2026-11-03 — Keep AI and vector retrieval provider-neutral
+## 2026-11-09 — Use hosted Groq generation and keyword retrieval
 
-**Decision:** Define embedding, generation, and retrieval service interfaces; do not couple core feature flows to one paid or hosted provider.
+**Decision:** Use Groq as the only language-model provider for chat, quizzes, and flashcards. Retrieve owned source passages with server-side keyword ranking; do not require local model or embedding runtimes.
 
-**Reason:** The budget target and provider quotas may change. Unavailable services should disable dependent AI actions clearly while leaving CRUD features usable.
+**Reason:** The deployed service must work without the owner's laptop. Groq provides hosted chat completion; semantic embeddings are not part of this provider setup. Missing keys and rate limits produce explicit errors.
 
 ## 2026-11-03 — Treat free deployment as a constrained pilot until verified
 

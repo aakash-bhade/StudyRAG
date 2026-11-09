@@ -33,27 +33,26 @@ docs/                    Architecture and operational documentation
 - The React client calls a versioned Express REST API. It never connects directly to MongoDB or an AI provider.
 - Controllers validate and normalize HTTP input, call domain services, and return consistent responses.
 - Services enforce ownership and membership constraints. Authorization is not delegated to UI route guards.
-- File parsing, chunking, embedding, retrieval, and generation are independent services behind provider interfaces.
-- Local development may use local file storage and Ollama. Production storage/provider choices require a verified free-tier review and deployment smoke tests.
+- File parsing, chunking, and keyword retrieval run in the Express API; chat and study generation call Groq from the server.
+- The project has no local model runtime. Production storage choices still require a verified free-tier review and deployment smoke tests.
 
 ## RAG request flow
 
 1. Accept only permitted formats and bounded upload sizes; store binaries outside MongoDB.
 2. Extract text with parser-specific adapters, preserving page/source metadata when possible.
 3. Normalize text and split it into bounded, overlapping chunks.
-4. Create embeddings through a configured adapter; record processing failures instead of marking a source ready.
-5. At query time, derive the authenticated user and workspace from the session, never from caller-supplied ownership fields.
-6. Retrieve only chunks belonging to accessible, active sources. Use owner-filtered keyword retrieval by default and combine lexical scores with local cosine similarity when the owner has indexed passages using the configured Ollama embedding model; evaluate MongoDB vector search separately before production.
+4. At query time, derive the authenticated user and workspace from the session, never from caller-supplied ownership fields.
+5. Retrieve only chunks belonging to accessible, active sources using owner-filtered keyword ranking.
 7. Pass retrieved text as untrusted reference material to the configured LLM. Require citations to retrieved source IDs and page metadata.
-8. Return a clear unavailable/quota response if embedding or generation is not configured. Never invent a grounded answer.
+8. Return a clear unavailable/quota response if Groq generation is not configured. Never invent a grounded answer.
 
 ## Initial technology choices
 
 - Client: React, Vite, Tailwind CSS, React Router DOM, Axios, Context API, Lucide React, React Hook Form, Zod.
 - Server: Node.js, Express, Mongoose, Zod, Helmet, rate limiting, bcrypt or Argon2, JWT/session cookies.
 - Database: MongoDB, with Atlas Free as an evaluation candidate; use owner/workspace compound indexes.
-- Vector retrieval: provider-neutral retrieval interface; local similarity is the initial free development fallback. Atlas Vector Search compatibility and free-tier constraints must be validated before adoption.
-- AI: provider-neutral generation and embedding interfaces; Ollama is an optional local development adapter. Hosted providers are opt-in and quota-aware.
+- Retrieval: owner-scoped keyword ranking; no embeddings or local vector runtime are required.
+- AI: Groq is the sole hosted generation provider. Quota and provider errors are returned clearly; never fabricate a generated answer.
 
 ## UI direction
 

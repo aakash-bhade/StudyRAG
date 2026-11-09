@@ -7,8 +7,6 @@ import mongoose from 'mongoose';
 import { httpError } from '../middleware/errors.js';
 import { WebsiteChunk } from '../models/WebsiteChunk.js';
 import { WebsiteSource } from '../models/WebsiteSource.js';
-import { env } from '../config/env.js';
-import { embedTexts } from './embeddingService.js';
 
 const MAX_BYTES = 2 * 1024 * 1024;
 const MAX_TEXT = 1_000_000;
@@ -156,17 +154,4 @@ export async function refreshOwnedWebsiteSource(ownerId, id) {
     }
     throw error;
   }
-}
-
-export async function indexOwnedWebsiteEmbeddings(ownerId, id) {
-  if (!mongoose.isValidObjectId(id)) throw httpError(400, 'INVALID_ID', 'The website source ID is invalid.');
-  const source = await WebsiteSource.findOne({ _id: id, ownerId });
-  if (!source) throw httpError(404, 'SOURCE_NOT_FOUND', 'Website source not found.');
-  const chunks = await WebsiteChunk.find({ ownerId, sourceId: source._id }).select('_id text').limit(2000).lean();
-  if (!chunks.length) throw httpError(422, 'SOURCE_HAS_NO_CHUNKS', 'This webpage has no searchable passages to index.');
-  const embeddings = await embedTexts(chunks.map(chunk => chunk.text));
-  const operations = chunks.map((chunk, index) => ({ updateOne: { filter: { _id: chunk._id, ownerId }, update: { $set: { embedding: embeddings[index], embeddingModel: env.OLLAMA_EMBEDDING_MODEL } } } }));
-  const result = await WebsiteChunk.bulkWrite(operations, { ordered: true });
-  if (result.matchedCount !== chunks.length) throw httpError(409, 'SOURCE_CHANGED', 'The webpage changed while its semantic index was being built. Please try again.');
-  return { id: String(source._id), indexedChunkCount: chunks.length, embeddingModel: env.OLLAMA_EMBEDDING_MODEL };
 }

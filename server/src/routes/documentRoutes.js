@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import multer from 'multer';
 import rateLimit from 'express-rate-limit';
-import { deleteDocumentAction, downloadDocumentAction, indexDocumentEmbeddingsAction, listDocumentsAction, renameDocumentAction, uploadDocumentAction } from '../controllers/documentController.js';
+import { deleteDocumentAction, downloadDocumentAction, listDocumentsAction, renameDocumentAction, uploadDocumentAction } from '../controllers/documentController.js';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { httpError } from '../middleware/errors.js';
 import { validate } from '../validators/auth.js';
@@ -32,7 +32,6 @@ function singleFile(req, res, next) {
 router.use(requireAuth);
 router.get('/', validateQuery(documentListSchema), listDocumentsAction);
 router.post('/', uploadLimiter, singleFile, uploadDocumentAction);
-router.post('/:id/embeddings', rateLimit({ windowMs: 15 * 60 * 1000, limit: 5, standardHeaders: 'draft-8', legacyHeaders: false }), indexDocumentEmbeddingsAction);
 router.get('/:id/download', downloadDocumentAction);
 router.patch('/:id', validate(renameDocumentSchema), renameDocumentAction);
 router.delete('/:id', deleteDocumentAction);

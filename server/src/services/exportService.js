@@ -22,9 +22,9 @@ export async function exportUserData(userId) {
   const [user, documents, documentChunks, websiteSources, websiteChunks, conversations, messages, notes, folders, quizzes, quizAttempts, flashcardDecks, tasks, assignments, savedItems, notifications] = await Promise.all([
     User.findOne({ _id: ownerId, status: 'active' }).select('_id email displayName role createdAt updatedAt').lean(),
     Document.find({ ownerId }).select('-storageKey -contentHash').sort(byCreated).lean(),
-    DocumentChunk.find({ ownerId }).select('-embedding -embeddingModel').sort({ documentId: 1, ordinal: 1 }).lean(),
+    DocumentChunk.find({ ownerId }).sort({ documentId: 1, ordinal: 1 }).lean(),
     WebsiteSource.find({ ownerId }).select('-contentHash').sort(byCreated).lean(),
-    WebsiteChunk.find({ ownerId }).select('-embedding -embeddingModel').sort({ sourceId: 1, ordinal: 1 }).lean(),
+    WebsiteChunk.find({ ownerId }).sort({ sourceId: 1, ordinal: 1 }).lean(),
     Conversation.find({ ownerId }).sort(byCreated).lean(),
     Message.find({ ownerId }).sort(byCreated).lean(),
     Note.find({ ownerId }).sort(byCreated).lean(),
@@ -43,6 +43,6 @@ export async function exportUserData(userId) {
     exportedAt: new Date().toISOString(),
     account: user ? { id: String(user._id), email: user.email, displayName: user.displayName, role: user.role, createdAt: user.createdAt, updatedAt: user.updatedAt } : null,
     data: { documents, documentChunks, websiteSources, websiteChunks, conversations, messages, notes, folders, quizzes, quizAttempts, flashcardDecks, tasks, assignments, savedItems, notifications },
-    excluded: ['password credentials and sessions', 'local document binary files', 'internal storage keys and content hashes', 'derived semantic embedding vectors'],
+    excluded: ['password credentials and sessions', 'local document binary files', 'internal storage keys and content hashes'],
   };
 }

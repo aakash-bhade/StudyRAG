@@ -16,7 +16,7 @@ function serializeConversation(conversation) {
 function serializeMessage(message) {
   return {
     id: String(message._id), role: message.role, text: message.content,
-    ...(message.role === 'assistant' ? { answer: ['ollama', 'conversational'].includes(message.answerMode) ? message.content : null, message: message.notice, answerMode: message.answerMode, retrievalMode: message.retrievalMode } : {}),
+    ...(message.role === 'assistant' ? { answer: ['retrieval-only', 'no-match'].includes(message.answerMode) ? null : message.content, message: message.notice, answerMode: message.answerMode, retrievalMode: message.retrievalMode } : {}),
     sources: (message.citations || []).map(citation => ({ sourceType: citation.sourceType, documentId: citation.documentId ? String(citation.documentId) : undefined, websiteSourceId: citation.websiteSourceId ? String(citation.websiteSourceId) : undefined, noteId: citation.noteId ? String(citation.noteId) : undefined, url: citation.url, documentName: citation.documentName, ordinal: citation.ordinal, page: citation.page, text: citation.excerpt })),
     createdAt: message.createdAt,
   };

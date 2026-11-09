@@ -124,23 +124,17 @@ try {
     json: { question: 'Which pigment captures sunlight?', documentIds: [documentId] },
   }, 404);
 
-  const indexed = await request(`/documents/${documentId}/embeddings`, { method: 'POST', token: account.accessToken, json: {} });
-  assert.equal(indexed.item.indexedChunkCount, uploaded.item.chunkCount);
-
   const website = await request('/sources', {
     method: 'POST', token: account.accessToken, json: { url: 'https://example.com/' },
   });
   const websiteId = website.item.id;
   const refreshed = await request(`/sources/${websiteId}/refresh`, { method: 'POST', token: account.accessToken, json: {} });
   assert.ok(refreshed.item.chunkCount > 0);
-  const websiteIndex = await request(`/sources/${websiteId}/embeddings`, { method: 'POST', token: account.accessToken, json: {} });
-  assert.ok(websiteIndex.item.indexedChunkCount > 0);
-
   const chat = await request('/chat/ask', {
     method: 'POST', token: account.accessToken,
     json: { question: 'Which pigment captures sunlight in photosynthesis?', documentIds: [documentId], websiteSourceIds: [websiteId], noteIds: [note.item.id] },
   });
-  assert.equal(chat.item.answerMode, 'ollama');
+  assert.equal(chat.item.answerMode, 'conversational');
   assert.ok(chat.item.sources.length > 0);
   const conversationId = chat.conversation.id;
   await expectStatus(`/chat/conversations/${conversationId}`, { token: peer.accessToken }, 404);

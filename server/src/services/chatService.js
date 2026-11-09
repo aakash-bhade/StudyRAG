@@ -1,12 +1,10 @@
 import mongoose from 'mongoose';
-import { env } from '../config/env.js';
 import { httpError } from '../middleware/errors.js';
 import { Document } from '../models/Document.js';
 import { DocumentChunk } from '../models/DocumentChunk.js';
 import { WebsiteSource } from '../models/WebsiteSource.js';
 import { WebsiteChunk } from '../models/WebsiteChunk.js';
 import { Note } from '../models/Note.js';
-import { embedTexts } from './embeddingService.js';
 import { aiSetupMessage, generateCompletion, isAiConfigured } from './aiService.js';
 
 const STOP_WORDS = new Set('a an and are as at be by can do for from how i in is it me my of on or the this to was what when where which who why with you your explain tell hai hain ho kya ka ki ke ko me mein par se kaise batao bataiye mujhe mera meri ye yeh aur is क्या है हैं हो का की के को में पर से और यह ये बताओ बताइए मुझे मेरा मेरी'.split(' '));
@@ -23,13 +21,6 @@ function rankChunk(text, queryTerms) {
   const score = queryTerms.reduce((sum, term) => sum + (counts.get(term) ? 1 + Math.log(counts.get(term)) : 0), 0);
   const coverage = queryTerms.length ? queryTerms.filter(term => counts.has(term)).length / queryTerms.length : 0;
   return score * (0.5 + coverage);
-}
-
-function cosine(left, right) {
-  if (!Array.isArray(left) || left.length !== right.length) return null;
-  let dot = 0; let leftNorm = 0; let rightNorm = 0;
-  for (let i = 0; i < left.length; i += 1) { dot += left[i] * right[i]; leftNorm += left[i] ** 2; rightNorm += right[i] ** 2; }
-  return leftNorm && rightNorm ? dot / Math.sqrt(leftNorm * rightNorm) : null;
 }
 
 async function generateAnswer(question, sources, onToken, grounded = true, conversationHistory = []) {
@@ -116,27 +107,20 @@ export async function answerFromDocuments(userId, { question, documentIds, websi
   if (noteIds?.length && notes.length !== new Set(noteIds).size) throw httpError(404, 'NOTE_NOT_FOUND', 'One or more selected notes were not found in your workspace.');
   if (!documents.length && !websites.length && !notes.length) return answerGenerally(question, onToken, conversationHistory);
   const queryTerms = terms(question);
-  let queryEmbedding = null;
-  if (env.OLLAMA_BASE_URL && env.OLLAMA_EMBEDDING_MODEL) {
-    try { [queryEmbedding] = await embedTexts([question]); }
-    catch (error) { console.warn('Semantic query unavailable; using keyword retrieval:', error.code || error.message); }
-  }
-  if (!queryTerms.length && !queryEmbedding) return answerGenerally(question, onToken, conversationHistory);
+  if (!queryTerms.length) return answerGenerally(question, onToken, conversationHistory);
   const [chunks, websiteChunks] = await Promise.all([
-    DocumentChunk.find({ ownerId: userId, documentId: { $in: documents.map(document => document._id) } }).select('documentId ordinal page text +embedding +embeddingModel').limit(1500).lean(),
-    WebsiteChunk.find({ ownerId: userId, sourceId: { $in: websites.map(source => source._id) } }).select('sourceId ordinal text +embedding +embeddingModel').limit(1500).lean(),
+    DocumentChunk.find({ ownerId: userId, documentId: { $in: documents.map(document => document._id) } }).select('documentId ordinal page text').limit(1500).lean(),
+    WebsiteChunk.find({ ownerId: userId, sourceId: { $in: websites.map(source => source._id) } }).select('sourceId ordinal text').limit(1500).lean(),
   ]);
   const candidates = [...chunks.map(chunk => ({
     sourceType: 'document', documentId: String(chunk.documentId),
     documentName: byId.get(String(chunk.documentId))?.displayName || 'Document', ordinal: chunk.ordinal, page: chunk.page, text: chunk.text,
     lexicalScore: queryTerms.length ? rankChunk(chunk.text, queryTerms) : 0,
-    similarity: queryEmbedding && chunk.embeddingModel === env.OLLAMA_EMBEDDING_MODEL ? cosine(chunk.embedding, queryEmbedding) : null,
   })), ...websiteChunks.map(chunk => ({
     sourceType: 'website', websiteSourceId: String(chunk.sourceId), documentId: String(chunk.sourceId),
     documentName: websiteById.get(String(chunk.sourceId))?.title || 'Website', url: websiteById.get(String(chunk.sourceId))?.url,
     ordinal: chunk.ordinal, page: null, text: chunk.text,
     lexicalScore: queryTerms.length ? rankChunk(chunk.text, queryTerms) : 0,
-    similarity: queryEmbedding && chunk.embeddingModel === env.OLLAMA_EMBEDDING_MODEL ? cosine(chunk.embedding, queryEmbedding) : null,
   }))];
   candidates.push(...notes.flatMap(note => {
     const noteSections = [];
@@ -144,19 +128,10 @@ export async function answerFromDocuments(userId, { question, documentIds, websi
     return noteSections.map((text, ordinal) => ({
       sourceType: 'note', noteId: String(note._id), documentName: note.title, ordinal, page: null,
       text, lexicalScore: queryTerms.length ? rankChunk(`${ordinal === 0 ? `${note.title} ${note.tags.join(' ')} ` : ''}${text}`, queryTerms) : 0,
-      similarity: null,
     }));
   }));
-  const lexicalMax = Math.max(0, ...candidates.map(source => source.lexicalScore));
-  const vectorScores = candidates.map(source => source.similarity).filter(Number.isFinite);
-  const vectorMin = vectorScores.length ? Math.min(...vectorScores) : 0;
-  const vectorMax = vectorScores.length ? Math.max(...vectorScores) : 0;
-  const retrievalMode = vectorScores.length ? 'hybrid' : 'keyword';
-  let sources = candidates.map(source => {
-    const lexicalScore = lexicalMax ? source.lexicalScore / lexicalMax : 0;
-    const semanticScore = Number.isFinite(source.similarity) && vectorMax > vectorMin ? (source.similarity - vectorMin) / (vectorMax - vectorMin) : 0;
-    return { ...source, score: retrievalMode === 'hybrid' ? (Number.isFinite(source.similarity) ? 0.65 * semanticScore + 0.35 * lexicalScore : 0.35 * lexicalScore) : source.lexicalScore };
-  }).filter(source => source.score > 0).sort((a, b) => b.score - a.score).slice(0, 3);
+  const retrievalMode = 'keyword';
+  let sources = candidates.map(source => ({ ...source, score: source.lexicalScore })).filter(source => source.score > 0).sort((a, b) => b.score - a.score).slice(0, 3);
 
   if (!sources.length && candidates.length && /\b(pdf|document|file|notes?|materials?|chapter|uploaded|summari[sz]e|summary|overview|main ideas|key points|content)\b|(?:pdf|document|notes?|material).{0,20}(?:kya|batao|samjhao|summary)|(?:kya|batao|samjhao).{0,20}(?:pdf|document|notes?|material)/iu.test(question)) {
     sources = [...candidates].sort((a, b) => a.ordinal - b.ordinal).slice(0, 3).map(source => ({ ...source, score: 1 }));

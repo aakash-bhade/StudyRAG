@@ -133,7 +133,7 @@ export default function SettingsPage() {
       <form className="settings-password-form" onSubmit={changePassword}><label>Current password<input name="currentPassword" type="password" autoComplete="current-password" maxLength={128} required /></label><label>New password<input name="newPassword" type="password" autoComplete="new-password" minLength={10} maxLength={128} required /><small>At least 10 characters.</small></label><label>Confirm new password<input name="confirmPassword" type="password" autoComplete="new-password" minLength={10} maxLength={128} required /></label><button className="button button-primary" disabled={busy}>{busy ? <LoaderCircle className="spin" size={15} /> : <KeyRound size={15} />}{busy ? 'Updating…' : 'Update password'}</button></form>
     </section>
     <section className="settings-card"><header><span><Download size={18} /></span><div><h2>Export your data</h2><p>Download your StudyRAG records and extracted study text as a private JSON file.</p></div></header>
-      <p className="settings-export-detail">The export leaves out password credentials, sessions, original uploaded files, internal storage details, and derived embedding vectors.</p>
+      <p className="settings-export-detail">The export leaves out password credentials, sessions, original uploaded files, and internal storage details.</p>
       {exportError && <p className="note-feedback error" role="alert">{exportError}</p>}
       <button className="button button-primary" onClick={downloadExport} disabled={exportBusy}>{exportBusy ? <LoaderCircle className="spin" size={15} /> : <Download size={15} />}{exportBusy ? 'Preparing export…' : 'Download my data'}</button>
     </section>

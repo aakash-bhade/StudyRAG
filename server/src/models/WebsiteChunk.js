@@ -5,8 +5,6 @@ const websiteChunkSchema = new mongoose.Schema({
   sourceId: { type: mongoose.Schema.Types.ObjectId, ref: 'WebsiteSource', required: true },
   ordinal: { type: Number, required: true, min: 0 },
   text: { type: String, required: true, maxlength: 1600 },
-  embedding: { type: [Number], default: undefined, select: false },
-  embeddingModel: { type: String, maxlength: 120, default: undefined, select: false },
 }, { timestamps: true, versionKey: false });
 
 websiteChunkSchema.index({ ownerId: 1, sourceId: 1, ordinal: 1 }, { unique: true });

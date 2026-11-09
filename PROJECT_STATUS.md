@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-11-04
+Last updated: 2026-11-09
 
 ## Current phase
 
@@ -19,7 +19,7 @@ Estimated completion: 90% of the planned feature implementation. Production read
 - Added server environment template and Vite `/api` development proxy.
 - Added authenticated, owner-scoped PDF, DOCX, and UTF-8 TXT upload, listing/search, rename, download/preview, and delete flows. Original files use private local disk storage; extracted text is split into owner-scoped MongoDB chunks for the upcoming RAG pipeline.
 - Added upload limits, document parser validation, private storage keys, document cleanup, and a shared workspace navigation shell.
-- Added authenticated document Q&A with owner-scoped chunk retrieval, lightweight keyword ranking, source excerpts, question rate limiting, and optional locally hosted Ollama answer generation with grounded prompts and explicit provider errors.
+- Added authenticated document Q&A with owner-scoped chunk retrieval, lightweight keyword ranking, source excerpts, question rate limiting, and Groq-hosted answer generation with grounded prompts and explicit provider errors.
 - Added the responsive “Ask materials” chat screen, document selection, inline source references, and a no-provider retrieval-only state.
 - Added owner-scoped conversation and message records, recent conversation listing, reopen and delete APIs, persisted source filters and citations, and a recent-conversations panel in chat.
 - Added private note create, edit, delete, and title/body/tag search flows with owner-scoped MongoDB records and a responsive workspace editor.
@@ -30,11 +30,11 @@ Estimated completion: 90% of the planned feature implementation. Production read
 - Added a private assignment tracker for instructions, due dates, response drafts, and an internal StudyRAG submitted status; no external school or LMS submission is performed.
 - Added private saved study passages: cited chat snippets can be bookmarked, reviewed later, and removed; the save API verifies the source belongs to the user and the excerpt matches the cited chunk.
 - Added website source refresh/re-index from the source library, with SSRF-safe redirect/DNS checks, per-source refresh locking, rate limiting, and rollback to old chunks if indexing or metadata update fails.
-- Added optional Ollama semantic embeddings for documents and webpages, per-source embedding index actions, private stored vectors, and hybrid cosine/keyword chat ranking; keyword retrieval remains the fallback.
+- Uses owner-scoped keyword retrieval for documents, webpages, and notes; no local embedding model or vector-index step is required.
 - Added a private notifications center that reconciles reminders from overdue and next-7-day task/assignment due dates, removes stale reminders, and tracks read state.
 - Added private notes folders with create, rename, delete, note assignment, and folder filtering; deleting a folder unfiles its notes without removing their content.
 - Added authenticated profile display-name editing with server validation and immediate account-context updates across the workspace.
-- Added an authenticated JSON data export for the account profile and owner-scoped study records, including extracted document/webpage text; excludes passwords, sessions, original file binaries, internal storage identifiers, content hashes, and embedding vectors.
+- Added an authenticated JSON data export for the account profile and owner-scoped study records, including extracted document/webpage text; excludes passwords, sessions, original file binaries, internal storage identifiers, and content hashes.
 - Replaced the generic post-login placeholder with owner-scoped live counts, upcoming task/assignment deadlines, and quick links; partial API failures are surfaced without hiding available sections.
 - Corrected the password-length hint so it appears on account creation only, not on sign-in.
 - Added optional SMTP email verification and password recovery using hashed, expiring one-time tokens; password resets revoke active sessions. Local auth preserves its existing behavior when SMTP is not configured.
@@ -47,10 +47,9 @@ Estimated completion: 90% of the planned feature implementation. Production read
 - Extended grounded chat to search private notes alongside documents and webpages, preserve note filters in conversations, and cite note sections.
 - Fixed the flashcard API route's validator import, which passed syntax checks but prevented the Express app from loading at runtime.
 - Added a server runtime import smoke check to CI so missing ESM exports across registered routes are caught before merge.
-- Configured ignored local `server/.env` with fresh development JWT secrets and MongoDB/Ollama connection settings; installed MongoDB 8.0 and Ollama locally, then pulled the configured Qwen chat and embedding models.
-- Fixed client requests for document/webpage embedding and webpage refresh actions to send the JSON body required by the API origin guard.
+- Configured ignored local `server/.env` with development JWT secrets and MongoDB connection settings.
 - Replaced deprecated Mongoose `new: true` update options with `returnDocument: 'after'` for the installed Mongoose 9 runtime.
-- Added a local integration smoke command covering registration, notes/folders, TXT upload and indexing, webpage add/refresh/index, cited hybrid chat, saved passages, quiz attempts, flashcards, tasks, assignments, and notification read state. It cleans up its synthetic account and files.
+- Added a local integration smoke command covering registration, notes/folders, TXT upload, webpage add/refresh, cited chat, saved passages, quiz attempts, flashcards, tasks, assignments, and notification read state. It cleans up its synthetic account and files.
 - Extended the integration smoke to use two temporary accounts and verify cross-user document downloads, source retrieval, and conversation reads are denied.
 - Added role-aware dashboard summaries and quick actions for students, teachers, employees, and business professionals; each keeps personal-data access clear and links only to implemented features.
 
@@ -68,8 +67,8 @@ Estimated completion: 90% of the planned feature implementation. Production read
 
 - Frontend and server dependencies installed with lockfiles; npm install audits reported zero vulnerabilities for both packages.
 - Current `client`: production build passes with notes-grounded chat, answer copying, source-grounded flashcards, and mobile navigation.
-- Current `server`: Node syntax checks and full Express app runtime import smoke check pass; local MongoDB and Ollama health have been confirmed.
-- `npm run check:integration` passes against local MongoDB/Ollama: registration/profile, cross-user privacy, folders/notes, TXT upload/indexing, webpage add/refresh/indexing, cited hybrid chat, saved passage, quiz/attempt, flashcards, task updates, assignment submission, and notification read-state. The script removes both synthetic accounts and their uploaded files after each run.
+- Current `server`: Node syntax checks and full Express app runtime import smoke check pass; the current Groq integration is syntax-checked but needs a Groq API key for live provider verification.
+- Integration coverage includes registration/profile, cross-user privacy, folders/notes, TXT upload, webpage add/refresh, cited chat, saved passages, quiz/attempt, flashcards, task updates, assignment submission, and notification read-state.
 - Client production build passes. `git diff --check` passes. Both npm dependency audits report zero vulnerabilities.
 - Email verification and recovery have not been exercised against configured SMTP credentials.
 - Browser visual review and deployment verification are pending. Local browser automation could not reach the temporary Vite preview; API and end-to-end service checks passed. SMTP email actions remain untested because SMTP credentials are not configured.
@@ -79,8 +78,8 @@ Estimated completion: 90% of the planned feature implementation. Production read
 
 - Free hosting options may not meet dependable public SaaS requirements; validate persistent storage, availability, quota, and billing requirements before deployment.
 - Local document disk storage is suitable for development only. Production needs a durable private object store and retention/backup policy; ephemeral free hosting may lose uploaded files.
-- AI functionality requires a configured provider or local Ollama runtime; no fabricated fallback responses are allowed.
-- Semantic search requires an installed Ollama embedding model configured with `OLLAMA_EMBEDDING_MODEL`; existing sources must be explicitly indexed, and chat falls back to keyword retrieval when embeddings are unavailable.
+- AI functionality requires `GROQ_API_KEY`; no local model runtime is used. Missing keys and provider quota errors are surfaced without fabricated responses.
+- Passage retrieval uses keyword ranking. Semantic vector search is not currently included.
 - Deadline reminders refresh when the signed-in user opens Notifications; scheduled background, email, and push delivery are not implemented.
 - Website ingestion currently handles public HTML pages up to 2 MiB with a bounded redirect count and pinned public IPv4 DNS result. JavaScript-rendered pages, authentication-required pages, PDFs, and IPv6-only hosts are not supported; the live example.com add/refresh/index flow passes.
-- Quiz generation requires a configured Ollama-compatible chat model; local generation and attempt persistence pass, while quality review across diverse study materials remains pending.
+- Quiz and flashcard generation require Groq access; quality review across diverse study materials remains pending.
