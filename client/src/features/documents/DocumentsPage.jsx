@@ -117,7 +117,7 @@ export default function DocumentsPage() {
     {error && <p className="document-alert error" role="alert"><FileWarning size={16} /> {error}</p>}
     {notice && <p className="document-alert success" role="status"><ShieldCheck size={16} /> {notice}</p>}
 
-    <div className="documents-toolbar"><div><h2>Your library</h2><p>Only you can access these documents.</p></div><label className="document-search"><Search size={16} /><input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search documents" aria-label="Search documents" /></label></div>
+    <div className="documents-toolbar"><div><h2>Your library</h2></div><label className="document-search"><Search size={16} /><input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search documents" aria-label="Search documents" /></label></div>
 
     {loading ? <div className="documents-state"><LoaderCircle className="spin" size={20} /> Loading your documents…</div> : documents.length === 0 ? <div className="documents-empty"><span><FileText size={23} /></span><h3>{query ? 'No matching documents' : 'Your library is ready'}</h3><p>{query ? 'Try a different name or clear your search.' : 'Upload a source to start building your private knowledge library.'}</p>{query && <button className="clear-search" onClick={() => setQuery('')}>Clear search</button>}</div> : <div className="document-list">{documents.map(document => <article className="document-row" key={document.id}>
       <span className={`document-type-icon ${document.mimeType === 'application/pdf' ? 'pdf' : document.mimeType === 'text/plain' ? 'txt' : 'docx'}`}><FileText size={20} /></span>
@@ -125,7 +125,6 @@ export default function DocumentsPage() {
       <span className="ready-label"><i /> Ready</span>
       <div className="document-actions">{document.mimeType !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' && <button onClick={() => downloadDocument(document, true)} title="Preview document" aria-label={`Preview ${document.displayName}`}><FileText size={16} /></button>}<button onClick={() => downloadDocument(document)} title="Download document" aria-label={`Download ${document.displayName}`}><Download size={16} /></button>{renamingId !== document.id && <button onClick={() => { setRenamingId(document.id); setRenameValue(document.displayName); }} title="Rename document" aria-label={`Rename ${document.displayName}`}><Pencil size={16} /></button>}<button className="delete-action" onClick={() => deleteDocument(document)} title="Delete document" aria-label={`Delete ${document.displayName}`}><Trash2 size={16} /></button></div>
     </article>)}</div>}
-    <p className="document-privacy-note"><ShieldCheck size={15} /> Documents are downloaded through an authenticated, owner-checked endpoint.</p>
     {preview && <div className="document-preview-backdrop" onMouseDown={event => event.target === event.currentTarget && closePreview()}><section className="document-preview-dialog" role="dialog" aria-modal="true" aria-label={`Preview ${preview.name}`}><header><span><FileText size={16} /> {preview.name}</span><button onClick={closePreview} aria-label="Close preview"><X size={19} /></button></header><iframe title={`Preview of ${preview.name}`} src={preview.url} /></section></div>}
   </WorkspaceShell>;
 }

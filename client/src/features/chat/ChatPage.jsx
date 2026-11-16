@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Bookmark, BookmarkCheck, BookOpen, Bot, Check, CheckCheck, Copy, FileText, Globe2, LoaderCircle, MessageCircle, NotebookPen, Pencil, Plus, Send, ShieldCheck, Sparkles, Trash2, X } from 'lucide-react';
+import { Bookmark, BookmarkCheck, BookOpen, Bot, Check, CheckCheck, Copy, FileText, Globe2, LoaderCircle, MessageCircle, NotebookPen, Pencil, Plus, Send, Sparkles, Trash2, X } from 'lucide-react';
 import WorkspaceShell from '../dashboard/WorkspaceShell.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { documentApi } from '../../services/documentApi.js';
@@ -67,8 +67,9 @@ function AnswerText({ text }) {
 }
 
 export default function ChatPage() {
-  const { accessToken, refreshAccessToken } = useAuth();
+  const { accessToken, refreshAccessToken, user } = useAuth();
   const auth = { token: accessToken, refreshAccessToken };
+  const activeConversationKey = user?.email ? `studyrag:active-chat:${user.email.toLowerCase()}` : '';
   const [documents, setDocuments] = useState([]);
   const [selected, setSelected] = useState([]);
   const [websites, setWebsites] = useState([]);
@@ -102,9 +103,29 @@ export default function ChatPage() {
       setNotes(noteResult);
       setConversations(conversationResult.items);
       setSavedKeys(new Set(savedResult.map(item => `${item.sourceType}-${item.sourceId}-${item.ordinal}`)));
+      if (activeConversationKey) {
+        const rememberedId = window.localStorage.getItem(activeConversationKey);
+        const targetId = rememberedId === '__new__' ? null : rememberedId || conversationResult.items[0]?.id;
+        if (targetId) {
+          try {
+            const conversation = await chatApi.get(targetId, auth);
+            setConversationId(conversation.id);
+            setSelected(conversation.sourceFilters || []);
+            setSelectedWebsites(conversation.websiteSourceFilters || []);
+            setSelectedNotes(conversation.noteFilters || []);
+            setMessages(conversation.messages);
+            window.localStorage.setItem(activeConversationKey, conversation.id);
+          } catch (conversationError) {
+            setConversationId(null);
+            setMessages([]);
+            if (rememberedId) window.localStorage.removeItem(activeConversationKey);
+            if (conversationError?.status) setError(conversationError.message);
+          }
+        }
+      }
     } catch (loadError) { setError(loadError.message); }
     finally { setLoading(false); }
-  }, [accessToken, refreshAccessToken]);
+  }, [accessToken, refreshAccessToken, activeConversationKey]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -123,6 +144,7 @@ export default function ChatPage() {
     setSelectedWebsites([]);
     setSelectedNotes([]);
     setError('');
+    if (activeConversationKey) window.localStorage.setItem(activeConversationKey, '__new__');
   }
 
   async function openConversation(id) {
@@ -135,6 +157,7 @@ export default function ChatPage() {
       setSelectedWebsites(conversation.websiteSourceFilters || []);
       setSelectedNotes(conversation.noteFilters || []);
       setMessages(conversation.messages);
+      if (activeConversationKey) window.localStorage.setItem(activeConversationKey, conversation.id);
     } catch (loadError) { setError(loadError.message); }
   }
 
@@ -166,6 +189,7 @@ export default function ChatPage() {
       if (conversationId === id) {
         setConversationId(null);
         setMessages([]);
+        if (activeConversationKey) window.localStorage.setItem(activeConversationKey, '__new__');
       }
       setConfirmDeleteId(null);
       setError('');
@@ -200,6 +224,7 @@ export default function ChatPage() {
         });
       });
       setConversationId(result.conversation.id);
+      if (activeConversationKey) window.localStorage.setItem(activeConversationKey, result.conversation.id);
       setMessages(items => [...items.slice(0, -1), result.messages[1]]);
       setConversations(items => [result.conversation, ...items.filter(item => item.id !== result.conversation.id)].slice(0, 30));
     } catch (requestError) {
@@ -249,7 +274,6 @@ export default function ChatPage() {
         </>}
         {!!conversations.length && <><h2 className="chat-recent-heading"><MessageCircle size={15} /> Recent conversations</h2>
         <div className="chat-recent-list">{conversations.map(conversation => <div className={`chat-recent-item ${conversation.id === conversationId ? 'selected' : ''}`} key={conversation.id}>{renamingId === conversation.id ? <form onSubmit={saveRename}><input autoFocus aria-label="Conversation title" value={renameTitle} maxLength={120} onChange={event => setRenameTitle(event.target.value)} /><button type="submit" disabled={renaming || !renameTitle.trim()} aria-label="Save conversation title"><Check size={13} /></button><button type="button" disabled={renaming} onClick={() => setRenamingId(null)} aria-label="Cancel rename"><X size={13} /></button></form> : confirmDeleteId === conversation.id ? <div className="chat-recent-confirm"><span>Delete?</span><button disabled={deleting} onClick={() => deleteSavedConversation(conversation.id)} aria-label="Confirm delete conversation"><Check size={13} /></button><button disabled={deleting} onClick={() => setConfirmDeleteId(null)} aria-label="Cancel delete"><X size={13} /></button></div> : <><button className="chat-recent-open" onClick={() => openConversation(conversation.id)} title={conversation.title}>{conversation.title}</button><button className="chat-recent-rename" onClick={() => beginRename(conversation)} aria-label={`Rename ${conversation.title}`} title="Rename"><Pencil size={12} /></button><button className="chat-recent-delete" onClick={() => setConfirmDeleteId(conversation.id)} aria-label={`Delete ${conversation.title}`} title="Delete"><Trash2 size={12} /></button></>}</div>)}</div></>}
-        <div className="chat-scope-note"><ShieldCheck size={14} /> Only your own sources are searched.</div>
       </aside>
     </div>
   </div></WorkspaceShell>;
