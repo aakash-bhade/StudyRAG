@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom';
 import {
   ArrowDown, ArrowRight, ArrowUpRight, BookOpen, Brain, Check,
   ChevronDown, Clock3, FileText, Globe2, GraduationCap, Layers3,
-  Menu, MessageCircle, Network, Play, ShieldCheck, Sparkles, X,
+  Lightbulb, Menu, MessageCircle, Network, Play, ShieldCheck, Sparkles, X,
 } from 'lucide-react';
+import StudyMascot from './features/dashboard/StudyMascot.jsx';
 
 const features = [
   { icon: MessageCircle, tint: 'blue', title: 'Ask your sources', text: 'StudyRAG is being built to answer from your PDFs, notes, and saved web pages—with references to the material they came from.' },
@@ -102,16 +103,25 @@ export default function LandingPage() {
     <main>
       <section className="hero" aria-labelledby="hero-heading">
         <div className="hero-cloud cloud-left" /><div className="hero-cloud cloud-right" /><div className="hero-halo" />
-        <div className="hero-content">
-          <div className="powered-pill"><Sparkles size={15} fill="currentColor" /> Thoughtful learning, powered by your sources</div>
-          <h1 id="hero-heading">Your Personal<br /><span>AI Learning</span> Assistant</h1>
-          <p className="hero-description">Upload PDFs, notes and websites. Ask questions, generate MCQs, create smart notes and complete assignments with intelligent AI assistance powered by RAG.</p>
-          <div className="hero-actions"><a className="button button-primary button-large" href="#features">Explore StudyRAG <ArrowRight size={17} /></a><button className="button button-secondary button-large" onClick={() => setDemoOpen(true)}><span className="play-icon"><Play size={12} fill="currentColor" /></span> See how it works</button></div>
-          <p className="hero-note"><ShieldCheck size={14} /> Answers designed to stay grounded in the sources you choose</p>
+        <div className="landing-hero-layout">
+          <div className="hero-content">
+            <div className="powered-pill"><Sparkles size={15} fill="currentColor" /> Your personal study workspace</div>
+            <h1 id="hero-heading">Your Personal<br /><span>AI Learning</span> Assistant</h1>
+            <p className="hero-description">Upload PDFs, notes and websites. Ask questions, generate MCQs, and organize your learning in one place.</p>
+            <div className="hero-actions"><Link className="button button-primary button-large" to="/signup">Start Learning Free <ArrowRight size={17} /></Link><a className="button button-secondary button-large" href="#features"><span className="play-icon"><Play size={12} fill="currentColor" /></span> Explore Features</a></div>
+            <p className="hero-note"><ShieldCheck size={14} /> Private workspace · Answers grounded in your sources</p>
+          </div>
+          <div className="landing-hero-art" aria-label="StudyRAG learning assistant illustration">
+            <div className="landing-art-orbit" />
+            <span className="landing-source-float landing-pdf"><FileText size={21} /><small>PDF</small></span>
+            <span className="landing-source-float landing-web"><Globe2 size={26} /></span>
+            <span className="landing-source-float landing-bulb"><Lightbulb size={24} /></span>
+            <span className="landing-source-float landing-book"><BookOpen size={22} /></span>
+            <StudyMascot className="landing-mascot" />
+          </div>
         </div>
-        <DashboardPreview />
       </section>
-      <section className="trust-strip" aria-label="Designed for different kinds of work"><span>One workspace for the way you learn and work</span><div><span><GraduationCap size={17} /> Students</span><span><BookOpen size={16} /> Educators</span><span><Layers3 size={16} /> Teams</span><span><Brain size={16} /> Curious minds</span></div></section>
+      <section className="trust-strip" aria-label="StudyRAG features"><span>Your learning tools, together</span><div><span><Network size={17} /> Multi-source study</span><span><Sparkles size={16} /> AI-powered practice</span><span><BookOpen size={16} /> Notes and flashcards</span><span><ShieldCheck size={16} /> Private workspace</span></div></section>
       <section className="section features-section" id="features"><div className="section-heading"><p className="eyebrow"><Sparkles size={14} /> YOUR KNOWLEDGE, IN MOTION</p><h2>A little more clarity.<br /><span>A lot more momentum.</span></h2><p>Bring your learning materials together and make them easier to explore, understand, and put to work.</p></div><div className="feature-grid">{features.map(({ icon: Icon, tint, title, text }, index) => <article className={`feature-card feature-${tint}`} key={title}><div className="feature-topline"><span className="feature-icon"><Icon size={22} /></span><span className="feature-number">0{index + 1}</span></div><h3>{title}</h3><p>{text}</p><a href="#how-it-works" className="text-link">Explore the workflow <ArrowUpRight size={15} /></a></article>)}</div></section>
       <section className="how-section" id="how-it-works"><div className="how-inner"><div className="how-copy"><p className="eyebrow"><Network size={15} /> A SIMPLE FLOW</p><h2>Start with what<br />you already know.</h2><p>StudyRAG connects your chosen materials to the questions you want to answer. You stay in control of what goes into each conversation.</p><a href="#faqs" className="button button-light">Learn about StudyRAG <ArrowRight size={16} /></a></div><div className="steps-list"><article className="step"><span className="step-index">01</span><div className="step-icon"><FileText size={21} /></div><div><h3>Bring in your material</h3><p>Add documents, notes, or a website you’re allowed to use.</p></div><Check className="step-check" size={17} /></article><article className="step"><span className="step-index">02</span><div className="step-icon"><MessageCircle size={21} /></div><div><h3>Explore with a question</h3><p>Ask for an explanation, a summary, or practice questions.</p></div><Check className="step-check" size={17} /></article><article className="step"><span className="step-index">03</span><div className="step-icon"><BookOpen size={21} /></div><div><h3>Follow the references</h3><p>Review the source context behind an answer and keep learning.</p></div><Check className="step-check" size={17} /></article></div></div></section>
       <section className="about-section section" id="about"><div className="about-mark"><span className="about-orbit orbit-a" /><span className="about-orbit orbit-b" /><div className="about-center"><GraduationCap size={42} /></div><span className="about-float float-a"><Sparkles size={18} /></span><span className="about-float float-b"><BookOpen size={18} /></span><span className="about-float float-c"><Globe2 size={18} /></span></div><div className="about-copy"><p className="eyebrow">ONE PLATFORM, MANY POSSIBILITIES</p><h2>Make room for<br /><span>better questions.</span></h2><p>Whether you’re studying a new topic, preparing a lesson, or finding your way through team documents, StudyRAG is being built to help you connect information with the work in front of you.</p><div className="about-points"><span><Check size={16} /> Your sources stay in context</span><span><Check size={16} /> Clear references to explore</span><span><Check size={16} /> Designed for learning and work</span></div></div></section>

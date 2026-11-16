@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const assignmentSchema = new mongoose.Schema({
   ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   title: { type: String, required: true, trim: true, maxlength: 160 },
-  instructions: { type: String, required: true, trim: true, maxlength: 5000 },
+  instructions: { type: String, required: true, trim: true },
   dueAt: { type: Date, default: null },
   status: { type: String, enum: ['assigned', 'in_progress', 'submitted'], default: 'assigned' },
   response: { type: String, trim: true, maxlength: 10000, default: '' },

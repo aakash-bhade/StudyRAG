@@ -18,13 +18,14 @@ import folderRoutes from './routes/folderRoutes.js';
 import flashcardRoutes from './routes/flashcardRoutes.js';
 import { errorHandler, notFound, requestId } from './middleware/errors.js';
 import { originGuard } from './middleware/originGuard.js';
+import { isAllowedOrigin } from './middleware/isAllowedOrigin.js';
 
 export const app = express();
 app.disable('x-powered-by');
 app.set('trust proxy', env.NODE_ENV === 'production' ? 1 : false);
 app.use(requestId);
 app.use(helmet());
-app.use(cors({ origin: env.FRONTEND_ORIGIN, credentials: true, methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], allowedHeaders: ['Content-Type', 'Authorization'] }));
+app.use(cors({ origin: (origin, callback) => callback(null, Boolean(origin && isAllowedOrigin(origin))), credentials: true, methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], allowedHeaders: ['Content-Type', 'Authorization'] }));
 app.use(express.json({ limit: '48kb', type: 'application/json' }));
 app.use(cookieParser());
 app.use(originGuard);
