@@ -2019,7 +2019,7 @@ button, input, textarea, select { font-family: inherit; }
 .note-accent-1 .notes-card-icon { color: #18a475; background: #e6f8f1; }
 .note-accent-2 .notes-card-icon { color: #367cda; background: #e8f2ff; }
 .notes-card-open > b { display: -webkit-box; overflow: hidden; color: #293e59; font: 750 13px/1.4 'Manrope',sans-serif; -webkit-box-orient: vertical; }
-.notes-card-body { display: -webkit-box; overflow: hidden; color: #7b8da4; font-size: 11px; line-height: 1.55; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.notes-card-body { display: -webkit-box; overflow: hidden; color: #7b8da4; font-size: 11px; line-height: 1.55; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; }
 .notes-card-open > small { margin-top: auto; color: #9aa8b9; font-size: 10px; }
 .notes-card-footer { display: flex; min-height: 27px; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; padding-top: 7px; border-top: 1px solid #eef2f7; }
 .notes-card-footer > span { display: flex; overflow: hidden; gap: 4px; }
