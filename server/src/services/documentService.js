@@ -1,8 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto';
-import { stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import mongoose from 'mongoose';
-import { documentFilePath, ensureDocumentStorage, removeStoredDocument } from '../config/storage.js';
+import { getStoredDocument, putStoredDocument, removeStoredDocument } from '../config/storage.js';
 import { Document } from '../models/Document.js';
 import { DocumentChunk } from '../models/DocumentChunk.js';
 import { httpError } from '../middleware/errors.js';
@@ -34,8 +33,7 @@ export async function uploadOwnedDocument(userId, file) {
   const parsed = await parseDocument(file.buffer, extension);
   const originalName = splitDocumentName(path.basename(file.originalname));
   const storageKey = `${randomUUID()}${extension}`;
-  await ensureDocumentStorage();
-  await writeFile(documentFilePath(storageKey), file.buffer, { flag: 'wx', mode: 0o600 });
+  await putStoredDocument(storageKey, file.buffer);
 
   let document;
   try {
@@ -102,8 +100,13 @@ export async function deleteOwnedDocument(userId, id) {
 
 export async function getOwnedDocumentFile(userId, id) {
   const document = await getOwnedDocument(userId, id, { includeStorageKey: true });
-  const filePath = documentFilePath(document.storageKey);
-  try { await stat(filePath); }
-  catch { throw httpError(404, 'DOCUMENT_FILE_NOT_FOUND', 'The stored document file is unavailable.'); }
-  return { document, filePath };
+  try {
+    const stored = await getStoredDocument(document.storageKey);
+    if (!stored) throw httpError(404, 'DOCUMENT_FILE_NOT_FOUND', 'The stored document file is unavailable.');
+    return { document, ...stored };
+  } catch (error) {
+    if (error.status) throw error;
+    if (error.code === 'ENOENT') throw httpError(404, 'DOCUMENT_FILE_NOT_FOUND', 'The stored document file is unavailable.');
+    throw httpError(502, 'DOCUMENT_STORAGE_UNAVAILABLE', 'The document could not be read from private storage.');
+  }
 }

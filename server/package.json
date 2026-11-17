@@ -8,7 +8,9 @@
     "start": "node src/index.js",
     "check": "node --check src/index.js",
     "check:runtime": "node scripts/runtime-smoke.js",
-    "check:integration": "node scripts/integration-smoke.js"
+    "check:integration": "node scripts/integration-smoke.js",
+    "admin:promote": "node scripts/promote-admin.js",
+    "storage:migrate": "node scripts/migrate-documents-to-s3.js"
   },
   "dependencies": {
     "@adobe/mammoth": "1.7.1-bleeding.2",

@@ -5,7 +5,7 @@ async function request(path, { token, refreshAccessToken, method = 'GET', body }
   let response = await send(token);
   if (response.status === 401) response = await send(await refreshAccessToken());
   const result = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(result.error?.message || 'This quiz request could not be completed.');
+  if (!response.ok) throw new Error(result.error?.message || result.message || 'This quiz request could not be completed.');
   return result;
 }
 

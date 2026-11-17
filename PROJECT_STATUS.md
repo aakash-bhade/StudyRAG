@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-11-09
+Last updated: 2026-11-17
 
 ## Current phase
 
@@ -17,7 +17,7 @@ Estimated completion: 90% of the planned feature implementation. Production read
 - Added React Router routes and responsive registration, login, and authenticated dashboard screens.
 - Added Express/Mongoose API foundation with validated registration/login, bcrypt password hashing, short-lived access JWTs, rotating HTTP-only refresh-cookie sessions, logout revocation, auth rate limiting, CORS, Helmet, request validation, and ownership-ready auth middleware.
 - Added server environment template and Vite `/api` development proxy.
-- Added authenticated, owner-scoped PDF, DOCX, and UTF-8 TXT upload, listing/search, rename, download/preview, and delete flows. Original files use private local disk storage; extracted text is split into owner-scoped MongoDB chunks for the upcoming RAG pipeline.
+- Added authenticated, owner-scoped PDF, DOCX, and UTF-8 TXT upload, listing/search, rename, download/preview, and delete flows. Development uses private local disk; deployment supports private S3-compatible object storage (including R2 endpoints), with startup checks that reject local disk in production.
 - Added upload limits, document parser validation, private storage keys, document cleanup, and a shared workspace navigation shell.
 - Added authenticated document Q&A with owner-scoped chunk retrieval, lightweight keyword ranking, source excerpts, question rate limiting, and Groq-hosted answer generation with grounded prompts and explicit provider errors.
 - Added the responsive “Ask materials” chat screen, document selection, inline source references, and a no-provider retrieval-only state.
@@ -52,6 +52,9 @@ Estimated completion: 90% of the planned feature implementation. Production read
 - Added a local integration smoke command covering registration, notes/folders, TXT upload, webpage add/refresh, cited chat, saved passages, quiz attempts, flashcards, tasks, assignments, and notification read state. It cleans up its synthetic account and files.
 - Extended the integration smoke to use two temporary accounts and verify cross-user document downloads, source retrieval, and conversation reads are denied.
 - Added role-aware dashboard summaries and quick actions for students, teachers, employees, and business professionals; each keeps personal-data access clear and links only to implemented features.
+- Added an owner-only admin dashboard with account search/pagination, role and status, join/last-login times, active-session and workspace totals, recent sign-ins, broad successful-action events, and database/storage health. The server rechecks the database role for every admin API request; `npm run admin:promote -- owner@example.com` grants access outside public signup.
+- Added privacy-minimized workspace activity events (action type and user only; no prompts, note text, filenames, or document content).
+- Added an S3-compatible private object-store adapter with SigV4 support, local-only development storage, production startup enforcement, private streamed downloads, and `npm run storage:migrate` for document binaries already referenced by the connected MongoDB database.
 
 ## In progress
 
@@ -77,7 +80,7 @@ Estimated completion: 90% of the planned feature implementation. Production read
 ## Known constraints
 
 - Free hosting options may not meet dependable public SaaS requirements; validate persistent storage, availability, quota, and billing requirements before deployment.
-- Local document disk storage is suitable for development only. Production needs a durable private object store and retention/backup policy; ephemeral free hosting may lose uploaded files.
+- Production deployment still requires a hosted MongoDB database and private S3-compatible bucket credentials to be configured in the hosting provider, plus a database and object-store backup/retention plan. Browser profile photos remain local to each browser.
 - AI functionality requires `GROQ_API_KEY`; no local model runtime is used. Missing keys and provider quota errors are surfaced without fabricated responses.
 - Passage retrieval uses keyword ranking. Semantic vector search is not currently included.
 - Deadline reminders refresh when the signed-in user opens Notifications; scheduled background, email, and push delivery are not implemented.

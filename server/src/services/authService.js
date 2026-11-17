@@ -26,6 +26,8 @@ async function createSession(user, res) {
   const refreshToken = jwt.sign({ sid: sessionId, jti: randomUUID() }, env.JWT_REFRESH_SECRET, { subject: String(user._id), expiresIn: REFRESH_TTL_SECONDS, algorithm: 'HS256' });
   const expiresAt = new Date(Date.now() + REFRESH_TTL_SECONDS * 1000);
   await Session.create({ _id: sessionId, userId: user._id, refreshTokenHash: hashToken(refreshToken), expiresAt });
+  user.lastLoginAt = new Date();
+  await user.save();
   res.cookie(cookieName, refreshToken, refreshCookieOptions());
 }
 

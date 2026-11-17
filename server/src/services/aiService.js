@@ -15,7 +15,7 @@ function providerError(message, error) {
   return httpError(502, 'AI_PROVIDER_UNAVAILABLE', timeout ? message : 'Could not reach Groq. Check the API key and your network connection.');
 }
 
-async function groqCompletion({ messages, onToken, temperature, maxTokens, jsonSchema, signal }) {
+async function groqCompletion({ messages, onToken, temperature, maxTokens, jsonSchema, reasoningEffort, signal }) {
   const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
     headers: { Authorization: `Bearer ${env.GROQ_API_KEY}`, 'Content-Type': 'application/json' },
@@ -26,12 +26,23 @@ async function groqCompletion({ messages, onToken, temperature, maxTokens, jsonS
       temperature,
       max_completion_tokens: maxTokens,
       stream: Boolean(onToken),
+      ...(reasoningEffort ? { reasoning_effort: reasoningEffort } : {}),
       ...(jsonSchema ? { response_format: { type: 'json_object' } } : {}),
     }),
   });
   if (!response.ok) {
-    if (response.status === 429) throw httpError(429, 'AI_RATE_LIMIT', 'Groq usage limit reached. Please wait a little and try again.');
-    throw httpError(502, 'AI_PROVIDER_ERROR', `Groq could not generate a response (HTTP ${response.status}). Check the model and API key settings.`);
+    const providerErrorBody = await response.json().catch(() => ({}));
+    const providerCode = providerErrorBody?.error?.code || providerErrorBody?.error?.type || '';
+    if (response.status === 429) {
+      const quotaReached = /quota|billing|insufficient/i.test(String(providerCode));
+      throw httpError(429, quotaReached ? 'AI_QUOTA_REACHED' : 'AI_RATE_LIMIT', quotaReached
+        ? 'Groq account quota is exhausted. Check your Groq usage and billing limits before trying again.'
+        : 'Groq rate limit reached. Wait for the limit to reset, then try again.');
+    }
+    if (response.status === 401 || response.status === 403) throw httpError(502, 'AI_CREDENTIALS_REJECTED', 'Groq rejected the configured API key or account access. Check GROQ_API_KEY and the Groq project permissions.');
+    if (response.status === 404) throw httpError(502, 'AI_MODEL_UNAVAILABLE', 'The configured Groq model is unavailable. Check GROQ_MODEL against Groq’s active model list.');
+    if (response.status === 400 || response.status === 413) throw httpError(502, 'AI_REQUEST_REJECTED', `Groq rejected this generation request (HTTP ${response.status}). Try fewer questions or check the model configuration.`);
+    throw httpError(502, 'AI_PROVIDER_ERROR', `Groq is temporarily unavailable (HTTP ${response.status}). Please try again shortly.`);
   }
   if (!onToken) {
     const result = await response.json();

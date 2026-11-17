@@ -15,6 +15,7 @@ import SavedItemsPage from './features/saved/SavedItemsPage.jsx';
 import NotificationsPage from './features/notifications/NotificationsPage.jsx';
 import EmailActionPage from './features/auth/EmailActionPage.jsx';
 import FlashcardsPage from './features/flashcards/FlashcardsPage.jsx';
+import AdminPage from './features/admin/AdminPage.jsx';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -26,6 +27,12 @@ function GuestRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return <div className="auth-loading"><span className="loading-orbit" />Checking your session…</div>;
   return user ? <Navigate to="/app" replace /> : children;
+}
+
+function AdminRoute() {
+  const { user, loading } = useAuth();
+  if (loading) return <div className="auth-loading"><span className="loading-orbit" />Checking your session…</div>;
+  return user?.role === 'admin' ? <AdminPage /> : <Navigate to="/app" replace />;
 }
 
 export default function RouterApp() {
@@ -49,6 +56,7 @@ export default function RouterApp() {
     <Route path="/app/assignments" element={<ProtectedRoute><AssignmentsPage /></ProtectedRoute>} />
     <Route path="/app/saved" element={<ProtectedRoute><SavedItemsPage /></ProtectedRoute>} />
     <Route path="/app/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+    <Route path="/app/admin" element={<ProtectedRoute><AdminRoute /></ProtectedRoute>} />
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>;
 }

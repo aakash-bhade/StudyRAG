@@ -1,4 +1,3 @@
-import { createReadStream } from 'node:fs';
 import { getOwnedDocumentFile, listOwnedDocuments, renameOwnedDocument, deleteOwnedDocument, uploadOwnedDocument } from '../services/documentService.js';
 
 export async function listDocumentsAction(req, res, next) {
@@ -19,13 +18,12 @@ export async function deleteDocumentAction(req, res, next) {
 
 export async function downloadDocumentAction(req, res, next) {
   try {
-    const { document, filePath } = await getOwnedDocumentFile(req.user._id, req.params.id);
+    const { document, stream, size } = await getOwnedDocumentFile(req.user._id, req.params.id);
     const safeFilename = document.displayName.replace(/[^A-Za-z0-9._ -]/g, '_').replace(/\s+/g, ' ').slice(0, 150) || 'document';
     res.setHeader('Content-Type', document.mimeType);
-    res.setHeader('Content-Length', document.byteSize);
+    res.setHeader('Content-Length', size || document.byteSize);
     res.setHeader('Content-Disposition', `attachment; filename="${safeFilename}"`);
     res.setHeader('X-Content-Type-Options', 'nosniff');
-    const stream = createReadStream(filePath);
     stream.on('error', next);
     stream.pipe(res);
   } catch (error) { next(error); }

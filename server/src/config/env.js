@@ -11,6 +11,12 @@ const schema = z.object({
   COOKIE_SECURE: z.enum(['true', 'false']).default('false'),
   COOKIE_SAME_SITE: z.enum(['lax', 'strict', 'none']).default('lax'),
   DOCUMENT_STORAGE_DIR: z.string().optional(),
+  STORAGE_PROVIDER: z.enum(['local', 's3']).default('local'),
+  S3_ENDPOINT: z.preprocess(value => value === '' ? undefined : value, z.string().url().optional()),
+  S3_REGION: z.string().trim().min(1).default('auto'),
+  S3_BUCKET: z.preprocess(value => value === '' ? undefined : value, z.string().trim().min(1).optional()),
+  S3_ACCESS_KEY_ID: z.preprocess(value => value === '' ? undefined : value, z.string().trim().min(1).optional()),
+  S3_SECRET_ACCESS_KEY: z.preprocess(value => value === '' ? undefined : value, z.string().min(1).optional()),
   GROQ_API_KEY: z.preprocess(value => value === '' ? undefined : value, z.string().trim().min(1).optional()),
   GROQ_MODEL: z.preprocess(value => value === '' ? undefined : value, z.string().trim().min(1).default('openai/gpt-oss-20b')),
   SMTP_HOST: z.preprocess(value => value === '' ? undefined : value, z.string().trim().min(1).optional()),
@@ -31,7 +37,17 @@ export const env = {
   cookieSecure: parsed.data.COOKIE_SECURE === 'true' || parsed.data.NODE_ENV === 'production',
   cookieSameSite: parsed.data.COOKIE_SAME_SITE,
   smtpConfigured: Boolean(parsed.data.SMTP_HOST && parsed.data.SMTP_PORT && parsed.data.SMTP_FROM),
+  s3Configured: Boolean(parsed.data.S3_BUCKET && parsed.data.S3_ACCESS_KEY_ID && parsed.data.S3_SECRET_ACCESS_KEY),
 };
+
+if (env.STORAGE_PROVIDER === 's3' && (!env.s3Configured || !env.S3_ENDPOINT)) {
+  console.error('STORAGE_PROVIDER=s3 requires S3_ENDPOINT, S3_BUCKET, S3_ACCESS_KEY_ID, and S3_SECRET_ACCESS_KEY.');
+  process.exit(1);
+}
+if (env.NODE_ENV === 'production' && env.STORAGE_PROVIDER !== 's3') {
+  console.error('Production requires STORAGE_PROVIDER=s3 with durable private object storage. Local disk is development-only.');
+  process.exit(1);
+}
 
 const smtpFields = ['SMTP_HOST', 'SMTP_PORT', 'SMTP_FROM'];
 if ((smtpFields.some(field => parsed.data[field] !== undefined) || parsed.data.SMTP_USER !== undefined || parsed.data.SMTP_PASS !== undefined)

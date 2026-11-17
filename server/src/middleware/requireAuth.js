@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import { env } from '../config/env.js';
 import { User } from '../models/User.js';
 import { httpError } from './errors.js';
+import { trackActivity } from './trackActivity.js';
 
 export async function requireAuth(req, _res, next) {
   try {
@@ -11,6 +12,7 @@ export async function requireAuth(req, _res, next) {
     const user = await User.findOne({ _id: payload.sub, status: 'active' }).select('_id email displayName role');
     if (!user) throw httpError(401, 'AUTH_REQUIRED', 'Please sign in to continue.');
     req.user = user;
+    trackActivity(req, _res, () => {});
     next();
   } catch (error) {
     next(error.status ? error : httpError(401, 'AUTH_REQUIRED', 'Your session has expired. Please sign in again.'));

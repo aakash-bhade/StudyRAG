@@ -1,9 +1,9 @@
-import { Bell, BookOpen, CalendarDays, ClipboardCheck, FileText, GraduationCap, Layers2, LogOut, MessageCircle, Search, Settings, Sparkles, UserRound } from 'lucide-react';
+import { Bell, BookOpen, CalendarDays, ClipboardCheck, FileText, GraduationCap, Layers2, LogOut, MessageCircle, Search, Settings, ShieldCheck, Sparkles, UserRound } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
 
-const roleLabels = { student: 'Student', teacher: 'Teacher / educator', employee: 'Employee', business: 'Business professional' };
+const roleLabels = { student: 'Student', teacher: 'Teacher / educator', employee: 'Employee', business: 'Business professional', admin: 'Administrator' };
 const workspacePages = [
   { label: 'Overview', path: '/app', keywords: 'home dashboard workspace' },
   { label: 'AI Chatbot', path: '/app/chat', keywords: 'ask chat materials assistant' },
@@ -17,6 +17,7 @@ const workspacePages = [
   { label: 'Saved items', path: '/app/saved', keywords: 'bookmarks saved' },
   { label: 'Notifications', path: '/app/notifications', keywords: 'alerts updates' },
   { label: 'Settings', path: '/app/settings', keywords: 'profile account preferences' },
+  { label: 'Admin panel', path: '/app/admin', keywords: 'users activity admin owner' },
 ];
 
 export default function WorkspaceShell({ active, children }) {
@@ -27,7 +28,7 @@ export default function WorkspaceShell({ active, children }) {
   const [moreOpen, setMoreOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
-  const searchResults = searchQuery.trim() ? workspacePages.filter(item => `${item.label} ${item.keywords}`.toLowerCase().includes(searchQuery.trim().toLowerCase())).slice(0, 5) : [];
+  const searchResults = searchQuery.trim() ? workspacePages.filter(item => (item.path !== '/app/admin' || user?.role === 'admin') && `${item.label} ${item.keywords}`.toLowerCase().includes(searchQuery.trim().toLowerCase())).slice(0, 5) : [];
 
   function submitWorkspaceSearch(event) {
     event.preventDefault();
@@ -68,6 +69,7 @@ export default function WorkspaceShell({ active, children }) {
         <Link className={`dash-nav ${active === 'quizzes' ? 'active' : ''}`} to="/app/quizzes"><Sparkles size={17} /> MCQ Generator</Link>
         <Link className={`dash-nav ${active === 'tasks' ? 'active' : ''}`} to="/app/tasks"><CalendarDays size={17} /> Study Planner</Link>
         <Link className={`dash-nav ${active === 'settings' ? 'active' : ''}`} to="/app/settings"><Settings size={17} /> Settings</Link>
+        {user?.role === 'admin' && <Link className={`dash-nav ${active === 'admin' ? 'active' : ''}`} to="/app/admin"><ShieldCheck size={17} /> Admin panel</Link>}
       </nav>
       <div className="sidebar-bottom"><div className="sidebar-user"><span className="user-avatar">{profileImage ? <img src={profileImage} alt="" /> : user?.displayName?.slice(0, 1)?.toUpperCase() || <UserRound size={17} />}</span><span><b>{user?.displayName}</b><small>{roleLabels[user?.role] || 'Member'}</small></span></div><button className="sign-out-button" onClick={handleLogout} disabled={loggingOut}><LogOut size={16} /> {loggingOut ? 'Signing out…' : 'Sign out'}</button></div>
     </aside>
@@ -76,14 +78,14 @@ export default function WorkspaceShell({ active, children }) {
       <Link className={active === 'chat' ? 'active' : ''} to="/app/chat"><Sparkles size={18} /><span>Ask</span></Link>
       <Link className={active === 'documents' ? 'active' : ''} to="/app/documents"><FileText size={18} /><span>Docs</span></Link>
       <Link className={active === 'notes' ? 'active' : ''} to="/app/notes"><BookOpen size={18} /><span>Notes</span></Link>
-      <button className={moreOpen || ['quizzes', 'tasks', 'assignments', 'settings'].includes(active) ? 'active' : ''} onClick={() => setMoreOpen(value => !value)} aria-expanded={moreOpen}><Layers2 size={18} /><span>More</span></button>
+      <button className={moreOpen || ['quizzes', 'tasks', 'assignments', 'settings', 'admin'].includes(active) ? 'active' : ''} onClick={() => setMoreOpen(value => !value)} aria-expanded={moreOpen}><Layers2 size={18} /><span>More</span></button>
       {moreOpen && <div className="mobile-more-menu"><div className="mobile-more-user"><span className="user-avatar"><UserRound size={16} /></span><span><b>{user?.displayName}</b><small>{roleLabels[user?.role] || 'Member'}</small></span></div>
-        <Link to="/app/assignments" onClick={() => setMoreOpen(false)}><ClipboardCheck size={16} /> Assignments</Link><Link to="/app/quizzes" onClick={() => setMoreOpen(false)}><Sparkles size={16} /> MCQ Generator</Link><Link to="/app/tasks" onClick={() => setMoreOpen(false)}><CalendarDays size={16} /> Study Planner</Link><Link to="/app/settings" onClick={() => setMoreOpen(false)}><Settings size={16} /> Settings</Link><button className="mobile-more-signout" onClick={handleLogout} disabled={loggingOut}><LogOut size={16} /> {loggingOut ? 'Signing out…' : 'Sign out'}</button>
+        <Link to="/app/assignments" onClick={() => setMoreOpen(false)}><ClipboardCheck size={16} /> Assignments</Link><Link to="/app/quizzes" onClick={() => setMoreOpen(false)}><Sparkles size={16} /> MCQ Generator</Link><Link to="/app/tasks" onClick={() => setMoreOpen(false)}><CalendarDays size={16} /> Study Planner</Link>{user?.role === 'admin' && <Link to="/app/admin" onClick={() => setMoreOpen(false)}><ShieldCheck size={16} /> Admin panel</Link>}<Link to="/app/settings" onClick={() => setMoreOpen(false)}><Settings size={16} /> Settings</Link><button className="mobile-more-signout" onClick={handleLogout} disabled={loggingOut}><LogOut size={16} /> {loggingOut ? 'Signing out…' : 'Sign out'}</button>
       </div>}
     </nav>
     <section className="dashboard-main">
       <header className="dashboard-topbar">
-        <span className="breadcrumb">My workspace <span>/</span> {active === 'documents' ? 'Documents' : active === 'chat' ? 'AI Chatbot' : active === 'notes' ? 'My Notes' : active === 'sources' ? 'Websites' : active === 'quizzes' ? 'MCQ Generator' : active === 'flashcards' ? 'Flashcards' : active === 'tasks' ? 'Study Planner' : active === 'assignments' ? 'Assignments' : active === 'saved' ? 'Saved items' : active === 'notifications' ? 'Notifications' : active === 'settings' ? 'Settings' : 'Overview'}</span>
+        <span className="breadcrumb">My workspace <span>/</span> {active === 'admin' ? 'Admin panel' : active === 'documents' ? 'Documents' : active === 'chat' ? 'AI Chatbot' : active === 'notes' ? 'My Notes' : active === 'sources' ? 'Websites' : active === 'quizzes' ? 'MCQ Generator' : active === 'flashcards' ? 'Flashcards' : active === 'tasks' ? 'Study Planner' : active === 'assignments' ? 'Assignments' : active === 'saved' ? 'Saved items' : active === 'notifications' ? 'Notifications' : active === 'settings' ? 'Settings' : 'Overview'}</span>
         <div className="workspace-search-wrap">
           <form className="workspace-search" role="search" onSubmit={submitWorkspaceSearch}>
             <Search size={16} aria-hidden="true" />

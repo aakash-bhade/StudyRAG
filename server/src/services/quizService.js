@@ -42,7 +42,8 @@ async function generateQuizContent({ passages, questionCount, difficulty, correc
   };
   return generateCompletion({
     temperature: 0.2,
-    maxTokens: questionCount * 240,
+    maxTokens: Math.max(1800, questionCount * 520),
+    reasoningEffort: 'low',
     timeoutMs: 90_000,
     timeoutMessage: 'Quiz generation took too long. Try fewer questions.',
     jsonSchema,
