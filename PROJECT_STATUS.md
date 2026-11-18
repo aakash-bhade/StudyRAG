@@ -17,7 +17,7 @@ Estimated completion: 90% of the planned feature implementation. Production read
 - Added React Router routes and responsive registration, login, and authenticated dashboard screens.
 - Added Express/Mongoose API foundation with validated registration/login, bcrypt password hashing, short-lived access JWTs, rotating HTTP-only refresh-cookie sessions, logout revocation, auth rate limiting, CORS, Helmet, request validation, and ownership-ready auth middleware.
 - Added server environment template and Vite `/api` development proxy.
-- Added authenticated, owner-scoped PDF, DOCX, and UTF-8 TXT upload, listing/search, rename, download/preview, and delete flows. Development uses private local disk; deployment supports private S3-compatible object storage (including R2 endpoints), with startup checks that reject local disk in production.
+- Added authenticated, owner-scoped PDF, DOCX, and UTF-8 TXT upload, listing/search, rename, download/preview, and delete flows. Document binaries are stored in MongoDB GridFS in the `study_files` bucket in development and production.
 - Added upload limits, document parser validation, private storage keys, document cleanup, and a shared workspace navigation shell.
 - Added authenticated document Q&A with owner-scoped chunk retrieval, lightweight keyword ranking, source excerpts, question rate limiting, and Groq-hosted answer generation with grounded prompts and explicit provider errors.
 - Added the responsive “Ask materials” chat screen, document selection, inline source references, and a no-provider retrieval-only state.
@@ -54,7 +54,7 @@ Estimated completion: 90% of the planned feature implementation. Production read
 - Added role-aware dashboard summaries and quick actions for students, teachers, employees, and business professionals; each keeps personal-data access clear and links only to implemented features.
 - Added an owner-only admin dashboard with account search/pagination, role and status, join/last-login times, active-session and workspace totals, recent sign-ins, broad successful-action events, and database/storage health. The server rechecks the database role for every admin API request; `npm run admin:promote -- owner@example.com` grants access outside public signup.
 - Added privacy-minimized workspace activity events (action type and user only; no prompts, note text, filenames, or document content).
-- Added an S3-compatible private object-store adapter with SigV4 support, local-only development storage, production startup enforcement, private streamed downloads, and `npm run storage:migrate` for document binaries already referenced by the connected MongoDB database.
+- Replaced external object storage with MongoDB GridFS for private document binaries, removing S3 credentials and production object-store startup requirements.
 
 ## In progress
 

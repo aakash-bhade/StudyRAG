@@ -33,12 +33,12 @@ docs/                    Architecture and operational documentation
 - The React client calls a versioned Express REST API. It never connects directly to MongoDB or an AI provider.
 - Controllers validate and normalize HTTP input, call domain services, and return consistent responses.
 - Services enforce ownership and membership constraints. Authorization is not delegated to UI route guards.
-- File parsing, chunking, and keyword retrieval run in the Express API; chat and study generation call Groq from the server.
+- File parsing, chunking, and keyword retrieval run in the Express API; uploaded binaries are stored in MongoDB GridFS. Chat and study generation call Groq from the server.
 - The project has no local model runtime. Production storage choices still require a verified free-tier review and deployment smoke tests.
 
 ## RAG request flow
 
-1. Accept only permitted formats and bounded upload sizes; store binaries outside MongoDB.
+1. Accept only permitted formats and bounded upload sizes; store binaries in the MongoDB `study_files` GridFS bucket.
 2. Extract text with parser-specific adapters, preserving page/source metadata when possible.
 3. Normalize text and split it into bounded, overlapping chunks.
 4. At query time, derive the authenticated user and workspace from the session, never from caller-supplied ownership fields.
@@ -60,4 +60,4 @@ The supplied screenshot is the landing page reference: pale sky-blue background,
 
 ## Deployment boundary
 
-Free tiers are suitable for a prototype or constrained personal project, not automatically a reliable public SaaS. Render documents free-service spin-down and ephemeral filesystems; therefore uploads cannot persist on its local disk. Hosting, AI, and object-storage decisions stay provisional until limits, signup requirements, data persistence, and no-billing conditions are checked together.
+Free tiers are suitable for a prototype or constrained personal project, not automatically a reliable public SaaS. Render's ephemeral filesystem is not used for persistent data: application records and uploaded binaries are stored in MongoDB, with files managed through GridFS. Hosting, AI, and database limits still apply.

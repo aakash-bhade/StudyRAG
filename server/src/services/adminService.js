@@ -7,7 +7,6 @@ import { Quiz } from '../models/Quiz.js';
 import { Assignment } from '../models/Assignment.js';
 import { Task } from '../models/Task.js';
 import { FlashcardDeck } from '../models/FlashcardDeck.js';
-import { storageProvider } from '../config/storage.js';
 import { databaseState } from '../config/database.js';
 import { AdminActivity } from '../models/AdminActivity.js';
 
@@ -34,7 +33,7 @@ export async function getAdminOverview({ page = 1, limit = 25, query = '' } = {}
   const latestLoginByUser = new Map(loginTimes.map(item => [String(item._id), item.lastLoginAt]));
   return {
     stats: { users: allUsers, activeSessions, documents, notes, websites, quizzes, assignments, tasks, flashcardDecks },
-    system: { database: databaseState(), fileStorage: storageProvider() },
+    system: { database: databaseState(), fileStorage: 'MongoDB GridFS' },
     users: users.map(user => ({ id: String(user._id), displayName: user.displayName, email: user.email, role: user.role, status: user.status, joinedAt: user.createdAt, lastLoginAt: user.lastLoginAt || latestLoginByUser.get(String(user._id)) || null })),
     recentSignIns: recentSignIns.filter(session => session.userId).map(session => ({ id: String(session._id), user: { name: session.userId.displayName, email: session.userId.email }, signedInAt: session.createdAt })),
     recentActions: recentActions.filter(activity => activity.userId).map(activity => ({ id: String(activity._id), user: { name: activity.userId.displayName, email: activity.userId.email }, action: activity.action, happenedAt: activity.createdAt })),

@@ -21,7 +21,7 @@ This document records the baseline controls planned for StudyRAG. A control is n
 ## Files and external URLs
 
 - Bound file sizes, allow only implemented formats, verify MIME/signature when practical, and generate opaque storage names.
-- Keep binaries outside MongoDB and private from public static paths; authorize every preview/download.
+- Store binaries in the private MongoDB GridFS bucket, outside public static paths; authorize every preview/download.
 - For URL ingestion, reject credentials and non-HTTP(S) schemes, resolve and block loopback/private/link-local/reserved addresses, pin the validated IPv4 address for each request, revalidate every redirect and DNS resolution, cap redirects/timeouts/response bytes, and restrict content types. The current fetcher accepts public HTML only, caps pages at 2 MiB, and does not execute webpage scripts.
 - Do not fetch or index content in violation of applicable site policies; URL ingestion must not expose server-side network access.
 

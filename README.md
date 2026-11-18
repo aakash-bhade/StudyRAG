@@ -2,7 +2,7 @@
 
 **StudyRAG is a private AI study workspace for learning from your own documents, notes, and saved web pages.** Upload course materials, ask questions in English or Hinglish, get source-grounded explanations, and turn what you learn into quizzes and flashcards.
 
-> Current state: the core personal-workspace features are implemented. The production Docker setup is in the repository, but a public deployment still needs a hosting service, hosted MongoDB, private object storage, and production secrets. See [Deployment](#deployment) and [Known limitations](#known-limitations).
+> Current state: the core personal-workspace features are implemented. The production Docker setup is in the repository; deployment needs a hosting service, hosted MongoDB, and production secrets. See [Deployment](#deployment) and [Known limitations](#known-limitations).
 
 ## What it does
 
@@ -24,7 +24,7 @@
 flowchart LR
     Browser[React web app] -->|Same-origin REST requests| API[Express API]
     API -->|Accounts, notes, chats, quizzes, metadata| DB[(MongoDB)]
-    API -->|Private document files| Storage[(Private S3-compatible storage)]
+    API -->|Private document binaries via GridFS| DB
     API -->|Answer, quiz, and flashcard generation| Groq[Groq API]
     API -->|Extract, chunk, and rank source text| Retrieval[StudyRAG retrieval]
 ```
@@ -39,7 +39,7 @@ For document-grounded questions, answers are based on retrieved passages and may
 - **API:** Node.js, Express 5, Mongoose, Zod
 - **Database:** MongoDB
 - **AI generation:** Groq API; the key stays on the server
-- **File storage:** private local disk for development; private S3-compatible storage (including Cloudflare R2) for production
+- **File storage:** MongoDB GridFS for uploaded document binaries in all environments
 - **Deployment:** Docker image builds the client and serves it with the API from one service
 
 ## Repository map
@@ -113,7 +113,7 @@ Dockerfile               Production web and API container
 
 8. Open the Vite address shown in the terminal, usually `http://localhost:5173`. Vite forwards `/api` requests to the local API at `http://localhost:4000`.
 
-The complete variable list and development defaults are in [`server/.env.example`](server/.env.example). Local development uses `STORAGE_PROVIDER=local`; uploaded files are kept in the ignored `server/storage/` directory.
+The complete variable list and development defaults are in [`server/.env.example`](server/.env.example). Uploaded files are stored in the MongoDB `study_files` GridFS bucket in both development and production.
 
 ## Environment settings
 
@@ -127,9 +127,6 @@ The complete variable list and development defaults are in [`server/.env.example
 | `FRONTEND_ORIGIN` | Yes in production | Exact public site origin, such as `https://studyrag.example.com`. The production container serves client and API from the same origin. |
 | `GROQ_API_KEY` | AI features | Server-only Groq credential. Never use a `VITE_` variable for this key. |
 | `GROQ_MODEL` | Optional | Groq model name; defaults to `openai/gpt-oss-20b`. Check Groq's current model list and limits before launch. |
-| `STORAGE_PROVIDER` | Production | Use `s3` in production. Production startup rejects local disk storage. |
-| `S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET` | Production | Private S3-compatible object store endpoint, region, and bucket. |
-| `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | Production | Bucket-scoped storage credentials with object read/write/delete access. |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_FROM` | Optional | Enables email verification and password recovery; configure together. `SMTP_USER` and `SMTP_PASS` are optional together. |
 | `COOKIE_SAME_SITE` | Optional | Defaults to `lax`. Use `none` only for a cross-site frontend/API setup and only with secure cookies/HTTPS. |
 
@@ -164,15 +161,15 @@ The root [`Dockerfile`](Dockerfile) builds the React app and runs the website an
 
 The root [`render.yaml`](render.yaml) defines a Render Docker web service using the free compute plan. Render can build the container directly from this GitHub repository; Docker Desktop is not needed for the hosted build.
 
-Render's free web services are for demos and small prototypes. They receive up to 750 included instance hours per workspace per month, use 512 MB RAM, spin down after 15 minutes without traffic, and can take about a minute to wake. Their filesystem is temporary, and Render may restart a free instance. The project therefore stores persistent records in hosted MongoDB and uploaded files in S3-compatible object storage. Render can bill for usage beyond the included outbound bandwidth/build limits, so monitor usage and each provider's current free limits. See [Render's free service limits](https://render.com/docs/free) and [service pricing](https://render.com/pricing).
+Render's free web services are for demos and small prototypes. They receive limited compute, spin down after inactivity, and use temporary filesystems. StudyRAG stores records and uploaded documents in hosted MongoDB; GridFS files count toward the same database storage allowance. Render can bill for usage beyond included limits, so monitor current provider limits. See [Render's free service limits](https://render.com/docs/free) and [service pricing](https://render.com/pricing).
 
 1. Push this repository to GitHub and create/sign in to a Render account.
 2. In Render, choose **New → Blueprint**, connect this GitHub repository, and select `render.yaml`. The blueprint uses the service name `aakash-bhade-studyrag`; if Render requires a different name, use the URL Render assigns in the next step.
-3. Create a free MongoDB Atlas cluster and a private Cloudflare R2 bucket. Add the required secret values when Render prompts for them: `MONGODB_URI`, `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, and `S3_SECRET_ACCESS_KEY`. In Atlas Network Access, allow the outbound IP ranges shown for this Render service; avoid opening the database to every IP. The blueprint creates separate random JWT secrets. Add `GROQ_API_KEY` in the service's Environment settings to enable AI generation. See [Render's outbound IP guidance](https://render.com/docs/outbound-ip-addresses).
+3. Create a MongoDB Atlas cluster and provide `MONGODB_URI` when Render prompts for it. In Atlas Network Access, allow the outbound IP ranges shown for this Render service; avoid opening the database to every IP. GridFS stores uploaded files in the same MongoDB deployment. The blueprint creates separate random JWT secrets. Add `GROQ_API_KEY` in the service's Environment settings to enable AI generation. See [Render's outbound IP guidance](https://render.com/docs/outbound-ip-addresses).
 4. After Render shows the service URL, set `FRONTEND_ORIGIN` to that exact `https://...onrender.com` origin (no trailing slash). Save the change and redeploy. The app requires this exact origin for secure browser mutations.
 5. Confirm `/api/v1/health` is healthy, then check signup, login, page refresh, file upload/download, chat, and quiz generation. The service may sleep when idle on the free plan.
 
-MongoDB Atlas and Cloudflare R2 publish free tiers with limited capacity/operations; usage beyond their allowances can be billed or restricted. Review [Atlas free-cluster limits](https://www.mongodb.com/docs/atlas/reference/free-shared-limitations/) and [R2 free-tier pricing](https://developers.cloudflare.com/r2/pricing/) before storing user data. Hugging Face Docker Spaces is another Docker option, but currently requires a PRO plan to create; see the [official Spaces overview](https://huggingface.co/docs/hub/en/spaces-overview).
+MongoDB Atlas free clusters have limited storage and resources; uploaded files stored through GridFS count toward the same database storage allowance. Review [Atlas free-cluster limits](https://www.mongodb.com/docs/atlas/reference/free-shared-limitations/) before storing user data. Hugging Face Docker Spaces is another Docker option; see the [official Spaces overview](https://huggingface.co/docs/hub/en/spaces-overview).
 
 Build the image locally with:
 
@@ -180,7 +177,7 @@ Build the image locally with:
 docker build -t studyrag .
 ```
 
-The app intentionally stops in production if MongoDB or durable object storage is missing. This prevents uploads from silently being saved to an app host's temporary disk.
+The app requires MongoDB in every environment. Document uploads use GridFS and therefore share the MongoDB deployment's storage and capacity limits.
 
 ### Make your account an admin
 
@@ -197,8 +194,7 @@ Render Free does not provide shell access or one-off jobs. Run the promotion com
 Deployment does not automatically copy data from your laptop. MongoDB records and uploaded document files are separate:
 
 - To keep existing accounts, notes, conversations, quizzes, and other records, migrate or restore the **MongoDB database** into the hosted MongoDB instance.
-- To move existing uploaded files referenced by that same MongoDB database, configure the private bucket and local `DOCUMENT_STORAGE_DIR`, then run `npm run storage:migrate` from `server/` with `STORAGE_PROVIDER=s3` and the correct bucket/database settings.
-- The file migration command copies document binaries only; it does not migrate MongoDB data. Confirm files open from the deployed app before deleting local copies.
+- Existing uploaded files stored on local disk or in an R2 bucket are not automatically copied into GridFS. Keep those copies until manually migrated and verified; existing document metadata alone does not contain the binary contents.
 
 Profile photos are currently stored in the browser's local storage. They remain on that browser but do not sync across devices or get included in server backups.
 
