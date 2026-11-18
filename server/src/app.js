@@ -1,4 +1,6 @@
 import express from 'express';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -22,6 +24,8 @@ import { originGuard } from './middleware/originGuard.js';
 import { isAllowedOrigin } from './middleware/isAllowedOrigin.js';
 
 export const app = express();
+const clientDistDirectory = fileURLToPath(new URL('../../client/dist/', import.meta.url));
+const clientIndexFile = path.join(clientDistDirectory, 'index.html');
 app.disable('x-powered-by');
 app.set('trust proxy', env.NODE_ENV === 'production' ? 1 : false);
 app.use(requestId);
@@ -48,5 +52,13 @@ app.use('/api/v1/assignments', assignmentRoutes);
 app.use('/api/v1/saved-items', savedItemRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/admin', adminRoutes);
+if (env.NODE_ENV === 'production') {
+  app.use(express.static(clientDistDirectory, { index: false, maxAge: '1h' }));
+  // Keep unknown API routes as JSON 404s instead of returning the SPA shell.
+  app.use('/api', notFound);
+  app.get(/^(?!\/api(?:\/|$)).*/, (_req, res, next) => {
+    res.sendFile(clientIndexFile, error => { if (error) next(error); });
+  });
+}
 app.use(notFound);
 app.use(errorHandler);
