@@ -1,13 +1,3 @@
----
-title: StudyRAG
-emoji: 📚
-colorFrom: blue
-colorTo: indigo
-sdk: docker
-app_port: 4000
-short_description: A private AI study workspace for your documents and notes
----
-
 # StudyRAG
 
 **StudyRAG is a private AI study workspace for learning from your own documents, notes, and saved web pages.** Upload course materials, ask questions in English or Hinglish, get source-grounded explanations, and turn what you learn into quizzes and flashcards.
@@ -168,16 +158,21 @@ Do not run the integration command against a production database. GitHub Actions
 
 ## Deployment
 
-The root [`Dockerfile`](Dockerfile) builds the React app and runs the website and Express API together. The same-origin setup avoids separate frontend/API cookie and CORS configuration. The image exposes port `4000`, respects the hosting platform's `PORT`, and provides `/api/v1/health` as its health check. This README includes Hugging Face Spaces Docker metadata (`sdk: docker`, `app_port: 4000`) and can be used as the Space repository README.
+The root [`Dockerfile`](Dockerfile) builds the React app and runs the website and Express API together. The same-origin setup avoids separate frontend/API cookie and CORS configuration. The container listens on `PORT` (Render's default is `10000`) and provides `/api/v1/health` as its health check.
 
-Hugging Face currently requires a **PRO plan to create or duplicate a Docker Space**. Its CPU Basic hardware has no hourly compute charge, but creating a Docker Space still requires the paid plan. Verify current account requirements before proceeding; the free Static Space option cannot run this Express backend by itself. See the [official Spaces overview](https://huggingface.co/docs/hub/en/spaces-overview) and [Docker Spaces guide](https://huggingface.co/docs/hub/en/spaces-sdks-docker).
+### Free Docker deployment on Render
 
-1. Create a Hugging Face Space with the **Docker** SDK, or another Docker-capable web service from the repository root. For Hugging Face, set Space secrets/environment variables in its Settings; secrets are runtime environment variables and should never be placed in the Dockerfile or source code.
-2. Create a hosted MongoDB database and a **private** S3-compatible bucket. Give the bucket key only the object permissions the app needs.
-3. Add the required environment values in the host's secret manager: `NODE_ENV=production`, `MONGODB_URI`, two separate JWT secrets, `FRONTEND_ORIGIN`, `STORAGE_PROVIDER=s3`, and all five S3 settings. Add `GROQ_API_KEY` to enable AI generation. Add SMTP settings if email verification and password recovery are needed.
-4. Set `FRONTEND_ORIGIN` to the deployed site origin exactly, including `https://` and excluding a trailing slash. Use HTTPS for the public site. Production automatically enables secure cookies.
-5. Deploy and confirm the health check is healthy. Check logs and test signup, login, file upload/download, chat, and a page refresh on a nested route.
-6. Create your account, promote it to admin using the command below against the **same hosted MongoDB**, then sign out and sign in again.
+The root [`render.yaml`](render.yaml) defines a Render Docker web service using the free compute plan. Render can build the container directly from this GitHub repository; Docker Desktop is not needed for the hosted build.
+
+Render's free web services are for demos and small prototypes. They receive up to 750 included instance hours per workspace per month, use 512 MB RAM, spin down after 15 minutes without traffic, and can take about a minute to wake. Their filesystem is temporary, and Render may restart a free instance. The project therefore stores persistent records in hosted MongoDB and uploaded files in S3-compatible object storage. Render can bill for usage beyond the included outbound bandwidth/build limits, so monitor usage and each provider's current free limits. See [Render's free service limits](https://render.com/docs/free) and [service pricing](https://render.com/pricing).
+
+1. Push this repository to GitHub and create/sign in to a Render account.
+2. In Render, choose **New → Blueprint**, connect this GitHub repository, and select `render.yaml`. The blueprint uses the service name `aakash-bhade-studyrag`; if Render requires a different name, use the URL Render assigns in the next step.
+3. Create a free MongoDB Atlas cluster and a private Cloudflare R2 bucket. Add the required secret values when Render prompts for them: `MONGODB_URI`, `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, and `S3_SECRET_ACCESS_KEY`. In Atlas Network Access, allow the outbound IP ranges shown for this Render service; avoid opening the database to every IP. The blueprint creates separate random JWT secrets. Add `GROQ_API_KEY` in the service's Environment settings to enable AI generation. See [Render's outbound IP guidance](https://render.com/docs/outbound-ip-addresses).
+4. After Render shows the service URL, set `FRONTEND_ORIGIN` to that exact `https://...onrender.com` origin (no trailing slash). Save the change and redeploy. The app requires this exact origin for secure browser mutations.
+5. Confirm `/api/v1/health` is healthy, then check signup, login, page refresh, file upload/download, chat, and quiz generation. The service may sleep when idle on the free plan.
+
+MongoDB Atlas and Cloudflare R2 publish free tiers with limited capacity/operations; usage beyond their allowances can be billed or restricted. Review [Atlas free-cluster limits](https://www.mongodb.com/docs/atlas/reference/free-shared-limitations/) and [R2 free-tier pricing](https://developers.cloudflare.com/r2/pricing/) before storing user data. Hugging Face Docker Spaces is another Docker option, but currently requires a PRO plan to create; see the [official Spaces overview](https://huggingface.co/docs/hub/en/spaces-overview).
 
 Build the image locally with:
 
@@ -195,7 +190,7 @@ Create an account through the site first, then run this from the `server/` direc
 npm run admin:promote -- owner@example.com
 ```
 
-For hosted deployment, use the provider's one-off command/console with the same production environment. Admin privileges cannot be granted through public signup. Admin APIs verify the account role on the server for each request.
+Render Free does not provide shell access or one-off jobs. Run the promotion command from a trusted local machine with the same hosted `MONGODB_URI` set in the private `server/.env`; restore the local URI afterward. Admin privileges cannot be granted through public signup. Admin APIs verify the account role on the server for each request.
 
 ### Move existing data
 
