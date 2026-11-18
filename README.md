@@ -1,3 +1,13 @@
+---
+title: StudyRAG
+emoji: 📚
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 4000
+short_description: A private AI study workspace for your documents and notes
+---
+
 # StudyRAG
 
 **StudyRAG is a private AI study workspace for learning from your own documents, notes, and saved web pages.** Upload course materials, ask questions in English or Hinglish, get source-grounded explanations, and turn what you learn into quizzes and flashcards.
@@ -158,9 +168,11 @@ Do not run the integration command against a production database. GitHub Actions
 
 ## Deployment
 
-The root [`Dockerfile`](Dockerfile) builds the React app and runs the website and Express API together. The same-origin setup avoids separate frontend/API cookie and CORS configuration. The image exposes port `4000`, respects the hosting platform's `PORT`, and provides `/api/v1/health` as its health check.
+The root [`Dockerfile`](Dockerfile) builds the React app and runs the website and Express API together. The same-origin setup avoids separate frontend/API cookie and CORS configuration. The image exposes port `4000`, respects the hosting platform's `PORT`, and provides `/api/v1/health` as its health check. This README includes Hugging Face Spaces Docker metadata (`sdk: docker`, `app_port: 4000`) and can be used as the Space repository README.
 
-1. Create a Docker-capable web service from the repository root.
+Hugging Face currently requires a **PRO plan to create or duplicate a Docker Space**. Its CPU Basic hardware has no hourly compute charge, but creating a Docker Space still requires the paid plan. Verify current account requirements before proceeding; the free Static Space option cannot run this Express backend by itself. See the [official Spaces overview](https://huggingface.co/docs/hub/en/spaces-overview) and [Docker Spaces guide](https://huggingface.co/docs/hub/en/spaces-sdks-docker).
+
+1. Create a Hugging Face Space with the **Docker** SDK, or another Docker-capable web service from the repository root. For Hugging Face, set Space secrets/environment variables in its Settings; secrets are runtime environment variables and should never be placed in the Dockerfile or source code.
 2. Create a hosted MongoDB database and a **private** S3-compatible bucket. Give the bucket key only the object permissions the app needs.
 3. Add the required environment values in the host's secret manager: `NODE_ENV=production`, `MONGODB_URI`, two separate JWT secrets, `FRONTEND_ORIGIN`, `STORAGE_PROVIDER=s3`, and all five S3 settings. Add `GROQ_API_KEY` to enable AI generation. Add SMTP settings if email verification and password recovery are needed.
 4. Set `FRONTEND_ORIGIN` to the deployed site origin exactly, including `https://` and excluding a trailing slash. Use HTTPS for the public site. Production automatically enables secure cookies.
