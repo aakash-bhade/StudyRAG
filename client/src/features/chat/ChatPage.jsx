@@ -234,6 +234,12 @@ export default function ChatPage() {
     } finally { setSending(false); }
   }
 
+  function handleComposerKeyDown(event) {
+    if (event.key !== 'Enter' || event.shiftKey || event.isComposing || event.nativeEvent.isComposing) return;
+    event.preventDefault();
+    if (question.trim().length >= 3 && !sending) event.currentTarget.form?.requestSubmit();
+  }
+
   async function savePassage(source) {
     const sourceId = source.sourceType === 'website' ? source.websiteSourceId : source.documentId;
     const key = `${source.sourceType}-${sourceId}-${source.ordinal}`;
@@ -260,7 +266,7 @@ export default function ChatPage() {
         </div>
         {error && <p className="chat-error" role="alert">{error}</p>}
         <button className="chat-new-button chat-new-inline" onClick={startNewConversation}><Plus size={14} /> New conversation</button>
-        <form className="chat-composer" onSubmit={submit}><textarea aria-label="Ask a question" value={question} onChange={event => setQuestion(event.target.value)} placeholder="Ask something about your study materials…" maxLength={1200} rows={2} /><button type="submit" disabled={sending || question.trim().length < 3} aria-label="Send question" title="Send question"><Send size={18} /></button></form>
+        <form className="chat-composer" onSubmit={submit}><textarea aria-label="Ask a question" value={question} onChange={event => setQuestion(event.target.value)} onKeyDown={handleComposerKeyDown} placeholder="Ask something about your study materials…" maxLength={1200} rows={2} /><button type="submit" disabled={sending || question.trim().length < 3} aria-label="Send question" title="Send question"><Send size={18} /></button></form>
       </section>
       <aside className="chat-source-panel" aria-label="Study material sources">
         <div className="chat-source-heading"><h2><FileText size={16} /> Search sources</h2>{(loading || totalSourceCount > 0) && <span>{loading ? 'Loading…' : selectedSourceCount ? `${selectedSourceCount} selected` : 'All materials'}</span>}</div>
