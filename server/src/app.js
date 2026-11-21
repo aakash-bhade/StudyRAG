@@ -31,7 +31,15 @@ const hasClientBuild = existsSync(clientIndexFile);
 app.disable('x-powered-by');
 app.set('trust proxy', env.NODE_ENV === 'production' ? 1 : false);
 app.use(requestId);
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      // Document previews are created as authenticated Blob URLs in the browser.
+      // Allow those URLs in the iframe while keeping all other frames same-origin.
+      frameSrc: ["'self'", 'blob:'],
+    },
+  },
+}));
 app.use(cors({ origin: (origin, callback) => callback(null, Boolean(origin && isAllowedOrigin(origin))), credentials: true, methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], allowedHeaders: ['Content-Type', 'Authorization'] }));
 app.use(express.json({ limit: '48kb', type: 'application/json' }));
 app.use(cookieParser());
